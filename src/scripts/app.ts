@@ -4,6 +4,7 @@ import { reactive, unref, shallowRef } from 'vue'
 
 import { partnerRunGateBlocksAutoQueue } from '@/composables/billing/usePartnerNodesRunGate'
 import { useCanvasPositionConversion } from '@/composables/element/useCanvasPositionConversion'
+import { ServerFeatureFlag } from '@/composables/useFeatureFlags'
 
 import { promotedInputSource } from '@/core/graph/subgraph/promotedInputWidget'
 import { resolveConcretePromotedWidget } from '@/core/graph/subgraph/resolveConcretePromotedWidget'
@@ -87,6 +88,7 @@ import { useCommandStore } from '@/stores/commandStore'
 import { createCanvasInteractionMode } from '@/renderer/core/canvas/interaction/canvasInteractionMode'
 import { useDomWidgetStore } from '@/stores/domWidgetStore'
 import { useExecutionStore } from '@/stores/executionStore'
+import { useQueueSettingsStore } from '@/stores/queueSettingsStore'
 import { useExecutionErrorStore } from '@/stores/executionErrorStore'
 import { useExtensionStore } from '@/stores/extensionStore'
 import { useAuthStore } from '@/stores/authStore'
@@ -1929,6 +1931,13 @@ export class ComfyApp {
             api.apiKey = comfyOrgApiKey ?? undefined
             const res = await api.queuePrompt(number, p, {
               partialExecutionTargets: queueNodeIds,
+              nodeFailurePolicy:
+                useQueueSettingsStore().continueIndependentBranches &&
+                api.serverSupportsFeature(
+                  ServerFeatureFlag.SUPPORTS_NODE_FAILURE_POLICY
+                )
+                  ? 'continue_independent'
+                  : undefined,
               previewMethod
             })
             const responseReceivedAt = performance.now()
