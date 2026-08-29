@@ -24,10 +24,6 @@ vi.mock<unknown>(import('../composables/useSecretForm'), () => ({
   })
 }))
 
-vi.mock<unknown>(import('primevue/password'), () => ({
-  default: { name: 'Password', template: '<input type="password" />' }
-}))
-
 vi.mock<unknown>(import('@/components/ui/select/Select.vue'), () => ({
   default: { name: 'Select', template: '<div><slot /></div>' }
 }))
