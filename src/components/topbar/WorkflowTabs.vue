@@ -45,11 +45,13 @@
                 tabStateVariants({
                   active: option.value === selectedWorkflow?.value
                 }),
-                'workflow-tab-button h-full flex-none p-0'
+                'workflow-tab-button group h-full flex-none p-0 font-[inherit] leading-[normal] font-medium'
               )
             "
           >
-            <span class="workflow-tab-content">
+            <span
+              class="relative inline-flex items-center justify-center gap-2 group-data-[state=off]:translate-y-[-0.5px]"
+            >
               <WorkflowTab
                 :workflow-option="option"
                 :is-first="index === 0"
@@ -395,21 +397,10 @@ onUpdated(checkOverflow)
   border: 0;
   padding: 0;
   min-width: 90px;
-  font-family: inherit;
-  font-weight: 500;
-  line-height: normal;
 }
 
 :deep(.workflow-tab) {
   max-width: 100%;
-}
-
-:deep(.workflow-tab-content) {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: calc(var(--spacing) * 2);
 }
 
 .workflow-tabs-container-desktop {
