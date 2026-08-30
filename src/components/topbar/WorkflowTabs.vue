@@ -3,8 +3,8 @@
     ref="containerRef"
     :class="
       cn(
-        'workflow-tabs-container flex h-full max-w-full flex-auto flex-row gap-1 overflow-hidden px-1',
-        isDesktop && 'workflow-tabs-container-desktop'
+        'workflow-tabs-container flex h-full flex-auto flex-row gap-1 overflow-hidden bg-comfy-menu-bg px-1',
+        isDesktop ? 'max-w-[env(titlebar-area-width,100vw)]' : 'max-w-full'
       )
     "
   >
@@ -28,7 +28,7 @@
         <ToggleGroup
           :class="
             cn(
-              'workflow-tabs flex items-center gap-1 bg-transparent',
+              'workflow-tabs flex h-full items-center gap-1 bg-transparent',
               props.class
             )
           "
@@ -45,14 +45,15 @@
                 tabStateVariants({
                   active: option.value === selectedWorkflow?.value
                 }),
-                'workflow-tab-button group h-full flex-none p-0 font-[inherit] leading-[normal] font-medium'
+                'workflow-tab-button group/tab relative h-full min-w-[90px] flex-[0_1_auto] p-0 font-[inherit] leading-[normal] font-medium'
               )
             "
           >
             <span
-              class="relative inline-flex items-center justify-center gap-2 group-data-[state=off]:-top-px sm:group-data-[state=off]:top-0"
+              class="relative inline-flex max-w-full items-center justify-center gap-2 group-data-[state=off]/tab:-top-px sm:group-data-[state=off]/tab:top-0"
             >
               <WorkflowTab
+                class="max-w-full"
                 :workflow-option="option"
                 :is-first="index === 0"
                 :is-last="index === options.length - 1"
@@ -143,7 +144,10 @@
       <TopbarBadges />
       <TopbarSubscribeButton />
     </div>
-    <div v-if="isDesktop" class="window-actions-spacer app-drag shrink-0" />
+    <div
+      v-if="isDesktop"
+      class="window-actions-spacer app-drag min-w-[min(75px,env(titlebar-area-width,0)*9999)] flex-auto shrink-0"
+    />
   </div>
 </template>
 
@@ -385,32 +389,3 @@ whenever(showOverflowArrows, () => {
 
 onUpdated(checkOverflow)
 </script>
-
-<style scoped>
-.workflow-tabs-container {
-  background-color: var(--comfy-menu-bg);
-}
-
-:deep(.workflow-tab-button) {
-  position: relative;
-  flex: 0 1 auto;
-  border: 0;
-  padding: 0;
-  min-width: 90px;
-}
-
-:deep(.workflow-tab) {
-  max-width: 100%;
-}
-
-.workflow-tabs-container-desktop {
-  max-width: env(titlebar-area-width, 100vw);
-}
-
-.window-actions-spacer {
-  flex: auto;
-  /* If we are using custom titlebar, then we need to add a gap for the user to drag the window */
-  --window-actions-spacer-width: min(75px, env(titlebar-area-width, 0) * 9999);
-  min-width: var(--window-actions-spacer-width);
-}
-</style>
