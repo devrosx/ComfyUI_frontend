@@ -389,7 +389,7 @@ onUpdated(checkOverflow)
 
 :deep(.workflow-tab-button) {
   position: relative;
-  flex-shrink: 1;
+  flex: 0 1 auto;
   border: 0;
   padding: 0;
   min-width: 90px;
