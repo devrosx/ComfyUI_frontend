@@ -50,7 +50,7 @@
             "
           >
             <span
-              class="relative inline-flex items-center justify-center gap-2 group-data-[state=off]:translate-y-[-0.5px]"
+              class="relative inline-flex items-center justify-center gap-2"
             >
               <WorkflowTab
                 :workflow-option="option"
