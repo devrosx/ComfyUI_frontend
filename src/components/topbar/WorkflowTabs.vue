@@ -384,6 +384,7 @@ onUpdated(checkOverflow)
   padding: 0;
   border-right-color: var(--border-color);
   min-width: 90px;
+  font-family: inherit;
   font-weight: 500;
 }
 
