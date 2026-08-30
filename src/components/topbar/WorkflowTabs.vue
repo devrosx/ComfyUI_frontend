@@ -431,6 +431,7 @@ onUpdated(checkOverflow)
 }
 
 :deep(.workflow-tab-button[data-state='off']) {
+  color: var(--p-text-muted-color);
   opacity: 0.75;
 }
 
