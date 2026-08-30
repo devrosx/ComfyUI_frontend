@@ -43,7 +43,7 @@ import type {
   WorkflowOpenSource,
   WorkflowQueueIntent
 } from '@/platform/telemetry/types'
-import { useToastStore } from '@/platform/updates/common/toastStore'
+import { useToast } from '@/components/ui/toast'
 import { MIME_ASSET_INFO } from '@/platform/assets/schemas/mediaAssetSchema'
 import { reportError } from '@/platform/telemetry/reportError'
 import { updatePendingWarnings } from '@/platform/workflow/core/utils/pendingWarnings'

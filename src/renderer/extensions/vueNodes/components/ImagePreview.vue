@@ -217,7 +217,7 @@ import { IMAGE_PREVIEW_CONTENT_MIN_HEIGHT } from '@/renderer/extensions/vueNodes
 import Skeleton from '@/components/ui/skeleton/Skeleton.vue'
 import { useMaskEditor } from '@/composables/maskeditor/useMaskEditor'
 import { useTelemetry } from '@/platform/telemetry'
-import { useToastStore } from '@/platform/updates/common/toastStore'
+import { useToast } from '@/components/ui/toast'
 import { openHdrViewer } from '@/services/hdrViewerService'
 import { useNodeOutputStore } from '@/stores/nodeOutputStore'
 import type { NodeId } from '@/types/nodeId'
@@ -238,7 +238,7 @@ const { imageUrls, nodeId } = defineProps<ImagePreviewProps>()
 const { t } = useI18n()
 const maskEditor = useMaskEditor()
 const nodeOutputStore = useNodeOutputStore()
-const toastStore = useToastStore()
+const toastStore = useToast()
 
 const actionButtonClass =
   'flex h-8 min-h-8 cursor-pointer items-center justify-center rounded-lg border-0 bg-base-foreground p-2 text-base-background shadow-interface transition-colors duration-200 hover:bg-base-foreground/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-base-foreground focus-visible:ring-offset-2'
@@ -362,10 +362,8 @@ function handleDownload() {
   try {
     downloadFile(currentImageUrl.value)
   } catch {
-    toastStore.add({
-      severity: 'error',
-      summary: t('g.error'),
-      detail: t('g.failedToDownloadImage')
+    toastStore.error(t('g.error'), {
+      description: t('g.failedToDownloadImage')
     })
   }
 }

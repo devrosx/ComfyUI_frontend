@@ -34,7 +34,7 @@ import type {
   INumericWidget,
   IStringWidget
 } from '@/lib/litegraph/src/types/widgets'
-import { useToastStore } from '@/platform/updates/common/toastStore'
+import { useToast } from '@/components/ui/toast'
 import type {
   NodeExecutionOutput,
   NodeOutputWith
@@ -94,7 +94,7 @@ async function handleModelUpload(files: FileList, node: LGraphNode) {
     const uploadPath = await Load3dUtils.uploadFile(files[0], subfolder)
 
     if (!uploadPath) {
-      useToastStore().addAlert(t('toastMessages.fileUploadFailed'))
+      useToast().warning('Alert', { description: t('toastMessages.fileUploadFailed') })
       return
     }
 
@@ -109,7 +109,7 @@ async function handleModelUpload(files: FileList, node: LGraphNode) {
       try {
         await load3d.loadModel(modelUrl)
       } catch (error) {
-        useToastStore().addAlert(t('toastMessages.failedToLoadModel'))
+        useToast().warning('Alert', { description: t('toastMessages.failedToLoadModel') })
       }
     })
 
@@ -124,7 +124,7 @@ async function handleModelUpload(files: FileList, node: LGraphNode) {
     markLoad3dSceneDirty(node)
   } catch (error) {
     console.error('Model upload failed:', error)
-    useToastStore().addAlert(t('toastMessages.fileUploadFailed'))
+    useToast().warning('Alert', { description: t('toastMessages.fileUploadFailed') })
   }
 }
 
@@ -142,7 +142,7 @@ async function handleResourcesUpload(files: FileList, node: LGraphNode) {
     markLoad3dSceneDirty(node)
   } catch (error) {
     console.error('Extra resources upload failed:', error)
-    useToastStore().addAlert(t('toastMessages.extraResourcesUploadFailed'))
+    useToast().warning('Alert', { description: t('toastMessages.extraResourcesUploadFailed') })
   }
 }
 
@@ -664,7 +664,7 @@ useExtensionService().registerExtension({
           if (!filePath) {
             const msg = t('toastMessages.unableToGetModelFilePath')
             console.error(msg)
-            useToastStore().addAlert(msg)
+            useToast().warning('Alert', { description: msg })
           }
 
           const cameraState = result?.[1]
@@ -897,7 +897,7 @@ function createPreview3DAdvancedExtension(
           if (!result?.[0]) {
             const msg = t('toastMessages.unableToGetModelFilePath')
             console.error(msg)
-            useToastStore().addAlert(msg)
+            useToast().warning('Alert', { description: msg })
             return
           }
 

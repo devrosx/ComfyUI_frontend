@@ -1,5 +1,5 @@
 import { uniqBy } from 'es-toolkit'
-import { useToast } from 'primevue/usetoast'
+import { useToast } from '@/components/ui/toast'
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 

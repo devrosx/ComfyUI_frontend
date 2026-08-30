@@ -30,7 +30,7 @@ import type {
 import { isCloud } from '@/platform/distribution/types'
 import { addBreadcrumb } from '@sentry/vue'
 import { useTelemetry } from '@/platform/telemetry'
-import { useToastStore } from '@/platform/updates/common/toastStore'
+import { useToast } from '@/components/ui/toast'
 import type { components as ManagerComponents } from '@/workbench/extensions/manager/types/generatedManagerTypes'
 import type {
   AssetDownloadWsMessage,
