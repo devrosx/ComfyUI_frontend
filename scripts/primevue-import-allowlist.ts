@@ -38,7 +38,6 @@ export const primeVueImportAllowlist = [
   'src/components/helpcenter/HelpCenterMenuContent.test.ts',
   'src/components/helpcenter/HelpCenterMenuContent.vue',
   'src/components/node/NodePreview.test.ts',
-  'src/components/primevueOverride/AutoCompletePlus.vue',
   'src/components/rightSidePanel/errors/ErrorGroupList.test.ts',
   'src/components/rightSidePanel/errors/ErrorNodeCard.test.ts',
   'src/components/rightSidePanel/errors/MissingPackGroupRow.test.ts',
