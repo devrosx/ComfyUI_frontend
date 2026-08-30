@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/vue'
+import userEvent from '@testing-library/user-event'
 import { fromPartial } from '@total-typescript/shoehorn'
 import { defineComponent, markRaw } from 'vue'
 import { assert, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -55,6 +56,12 @@ const WidgetStub = markRaw(
     props: { invalid: Boolean },
     template:
       '<div data-testid="widget-wrapper"><input data-testid="widget-control" :aria-invalid="invalid || undefined" /></div>'
+  })
+)
+
+const FragmentWidgetStub = markRaw(
+  defineComponent({
+    template: '<button>Widget control</button><span>Widget status</span>'
   })
 )
 
@@ -211,7 +218,6 @@ describe('WidgetGrid', () => {
         ]
       },
       global: {
-        directives: { tooltip: {} },
         stubs: {
           AppInput: AppInputStub,
           InputSlot: InputSlotStub
@@ -236,6 +242,33 @@ describe('WidgetGrid', () => {
     expect(screen.getAllByTestId('widget-control')).toHaveLength(2)
   })
 
+  it('shows tooltips for widgets with fragment roots', async () => {
+    const user = userEvent.setup()
+    render(WidgetGrid, {
+      props: {
+        nodeId: toNodeId(1),
+        nodeType: 'TestNode',
+        processedWidgets: [
+          {
+            ...widget('seed', 'number', 0),
+            vueComponent: FragmentWidgetStub,
+            tooltipConfig: { value: 'Widget value', showDelay: 0 }
+          }
+        ]
+      },
+      global: {
+        stubs: {
+          AppInput: AppInputStub,
+          InputSlot: InputSlotStub
+        }
+      }
+    })
+
+    await user.hover(screen.getByRole('button'))
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent('Widget value')
+  })
+
   it('passes execution errors to the widget control API', () => {
     render(WidgetGrid, {
       props: {
@@ -244,7 +277,6 @@ describe('WidgetGrid', () => {
         processedWidgets: [{ ...widget('seed', 'string', 0), hasError: true }]
       },
       global: {
-        directives: { tooltip: {} },
         stubs: { AppInput: AppInputStub, InputSlot: InputSlotStub }
       }
     })
