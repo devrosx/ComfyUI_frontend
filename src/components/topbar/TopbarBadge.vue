@@ -1,29 +1,40 @@
 <template>
   <!-- Icon-only mode with Popover -->
-  <div
+  <PopoverRoot
     v-if="displayMode === 'icon-only'"
-    class="relative inline-flex h-full shrink-0 items-center justify-center px-2"
-    :class="clickableClasses"
-    :style="menuBackgroundStyle"
-    @click="togglePopover"
+    v-model:open="iconPopoverOpen"
   >
-    <i v-if="iconClass" data-testid="badge-icon" :class="badgeIconClass" />
-    <div v-else-if="badge.label" :class="labelClasses">
-      {{ badge.label }}
-    </div>
-    <div v-else class="size-2 shrink-0 rounded-full" :class="dotClasses" />
-    <Popover
-      ref="popover"
-      append-to="body"
-      :auto-z-index="true"
-      :base-z-index="1000"
-      :dismissable="true"
-      :close-on-escape="true"
-      unstyled
-      :pt="popoverPt"
+    <PopoverTrigger as-child>
+      <button
+        type="button"
+        class="relative inline-flex h-full shrink-0 cursor-pointer items-center justify-center border-0 px-2 transition-opacity hover:opacity-80"
+        :style="menuBackgroundStyle"
+      >
+        <i
+          v-if="iconClass"
+          data-testid="badge-icon"
+          :class="['shrink-0 text-base', iconClass, iconColorClass]"
+        />
+        <div
+          v-else-if="badge.label"
+          class="shrink-0 rounded-full px-1.5 py-0.5 text-3xs font-semibold"
+          :class="labelClasses"
+        >
+          {{ badge.label }}
+        </div>
+        <div v-else class="size-2 shrink-0 rounded-full" :class="dotClasses" />
+      </button>
+    </PopoverTrigger>
+    <PopoverContent
+      align="start"
+      class="w-auto max-w-xs min-w-40 border-border-default bg-base-background p-3"
     >
-      <div class="flex max-w-xs min-w-40 flex-col gap-2 p-3">
-        <div v-if="showLabel" :class="cn(labelClasses, 'w-fit')">
+      <div class="flex flex-col gap-2">
+        <div
+          v-if="badge.label"
+          class="w-fit rounded-full px-1.5 py-0.5 text-3xs font-semibold"
+          :class="labelClasses"
+        >
           {{ badge.label }}
         </div>
         <div class="font-inter text-sm">{{ badge.text }}</div>
@@ -31,8 +42,8 @@
           {{ badge.tooltip }}
         </div>
       </div>
-    </Popover>
-  </div>
+    </PopoverContent>
+  </PopoverRoot>
 
   <!-- Compact mode: Icon + Label only with Popover -->
   <div
@@ -40,72 +51,83 @@
     class="relative inline-flex h-full"
     :style="menuBackgroundStyle"
   >
-    <div
-      :class="
-        cn(
-          'flex h-full shrink-0 items-center gap-2 whitespace-nowrap',
-          reverseOrder && 'flex-row-reverse',
-          !noPadding && 'px-3',
-          clickableClasses
-        )
-      "
-      @click="togglePopover"
-    >
-      <i v-if="iconClass" data-testid="badge-icon" :class="badgeIconClass" />
-      <div v-if="badge.label" :class="labelClasses">
-        {{ badge.label }}
-      </div>
-    </div>
-    <Popover
-      ref="popover"
-      append-to="body"
-      :auto-z-index="true"
-      :base-z-index="1000"
-      :dismissable="true"
-      :close-on-escape="true"
-      unstyled
-      :pt="popoverPt"
-    >
-      <div class="flex max-w-xs min-w-40 flex-col gap-2 p-3">
-        <div v-if="showLabel" :class="cn(labelClasses, 'w-fit')">
-          {{ badge.label }}
+    <PopoverRoot v-model:open="compactPopoverOpen">
+      <PopoverTrigger as-child>
+        <button
+          type="button"
+          class="flex h-full shrink-0 items-center gap-2 whitespace-nowrap"
+          :class="[
+            { 'flex-row-reverse': reverseOrder },
+            noPadding ? '' : 'px-3',
+            clickableClasses
+          ]"
+        >
+          <i
+            v-if="iconClass"
+            data-testid="badge-icon"
+            :class="['shrink-0 text-base', iconClass, iconColorClass]"
+          />
+          <div
+            v-if="badge.label"
+            class="shrink-0 rounded-full px-1.5 py-0.5 text-3xs font-semibold"
+            :class="labelClasses"
+          >
+            {{ badge.label }}
+          </div>
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        class="w-auto max-w-xs min-w-40 border-border-default bg-base-background p-3"
+      >
+        <div class="flex flex-col gap-2">
+          <div
+            v-if="badge.label"
+            class="w-fit rounded-full px-1.5 py-0.5 text-3xs font-semibold"
+            :class="labelClasses"
+          >
+            {{ badge.label }}
+          </div>
+          <div class="font-inter text-sm">{{ badge.text }}</div>
+          <div v-if="badge.tooltip" class="text-xs">
+            {{ badge.tooltip }}
+          </div>
         </div>
-        <div class="font-inter text-sm">{{ badge.text }}</div>
-        <div v-if="badge.tooltip" class="text-xs">
-          {{ badge.tooltip }}
-        </div>
-      </div>
-    </Popover>
+      </PopoverContent>
+    </PopoverRoot>
   </div>
 
   <!-- Full mode: Icon + Label + Text -->
   <div
     v-else
     v-tooltip="badge.tooltip"
-    :class="
-      cn(
-        'flex h-full shrink-0 items-center gap-1 whitespace-nowrap',
-        reverseOrder && 'flex-row-reverse',
-        !noPadding && 'px-2'
-      )
-    "
+    class="flex h-full shrink-0 items-center gap-2 whitespace-nowrap"
+    :class="[{ 'flex-row-reverse': reverseOrder }, noPadding ? '' : 'px-3']"
     :style="menuBackgroundStyle"
   >
-    <i v-if="iconClass" data-testid="badge-icon" :class="badgeIconClass" />
-    <div class="font-inter text-xs font-medium" :class="textClasses">
-      {{ badge.text }}
-    </div>
-    <div v-if="showLabel" :class="labelClasses">
+    <i
+      v-if="iconClass"
+      data-testid="badge-icon"
+      :class="['shrink-0 text-base', iconClass, iconColorClass]"
+    />
+    <div
+      v-if="badge.label"
+      class="shrink-0 rounded-full px-1.5 py-0.5 text-3xs font-semibold"
+      :class="labelClasses"
+    >
       {{ badge.label }}
+    </div>
+    <div class="font-inter text-sm" :class="textClasses">
+      {{ badge.text }}
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import Popover from 'primevue/popover'
+import { PopoverRoot, PopoverTrigger } from 'reka-ui'
 import { computed, ref } from 'vue'
 
+import PopoverContent from '@/components/ui/popover/PopoverContent.vue'
 import type { TopbarBadge } from '@/types/comfy'
-import { cn } from '@comfyorg/tailwind-utils'
 
 const {
   badge,
@@ -121,11 +143,8 @@ const {
   backgroundColor?: string
 }>()
 
-const popover = ref<InstanceType<typeof Popover>>()
-
-const togglePopover = (event: Event) => {
-  popover.value?.toggle(event)
-}
+const iconPopoverOpen = ref(false)
+const compactPopoverOpen = ref(false)
 
 const variant = computed(() => badge.variant ?? 'info')
 
@@ -133,24 +152,17 @@ const menuBackgroundStyle = computed(() => ({
   backgroundColor: backgroundColor
 }))
 
-/**
- * A badge the text already carries is dropped, so "Warning Message" is not
- * followed by "WARN". Matched on word prefix, and only where the text is
- * shown beside it.
- */
-const showLabel = computed(() => {
-  if (!badge.label) return false
-  const needle = badge.label.toLowerCase()
-  return !badge.text
-    .toLowerCase()
-    .split(/\s+/)
-    .some((word) =>
-      word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '').startsWith(needle)
-    )
+const labelClasses = computed(() => {
+  switch (variant.value) {
+    case 'error':
+      return 'bg-danger-100 text-white'
+    case 'warning':
+      return 'bg-gold-600 text-black'
+    case 'info':
+    default:
+      return 'bg-white text-black'
+  }
 })
-
-const labelClasses =
-  'shrink-0 rounded-full border border-border-default px-2 py-0.5 text-xs text-muted-foreground'
 
 const textClasses = computed(() => {
   switch (variant.value) {
@@ -163,6 +175,8 @@ const textClasses = computed(() => {
       return 'text-text-primary'
   }
 })
+
+const iconColorClass = computed(() => textClasses.value)
 
 const iconClass = computed(() => {
   if (badge.icon) {
@@ -179,10 +193,6 @@ const iconClass = computed(() => {
   }
 })
 
-const badgeIconClass = computed(() =>
-  cn('size-4 shrink-0 text-base', iconClass.value, textClasses.value)
-)
-
 const clickableClasses = 'cursor-pointer transition-opacity hover:opacity-80'
 
 const dotClasses = computed(() => {
@@ -196,19 +206,4 @@ const dotClasses = computed(() => {
       return 'bg-text-secondary'
   }
 })
-
-const popoverPt = computed(() => ({
-  root: {
-    class: cn('absolute z-50')
-  },
-  content: {
-    class: cn(
-      'mt-1 rounded-lg',
-      'bg-base-background',
-      'text-base-foreground',
-      'shadow-lg',
-      'border border-border-default'
-    )
-  }
-}))
 </script>
