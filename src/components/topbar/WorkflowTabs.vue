@@ -50,7 +50,7 @@
             "
           >
             <span
-              class="relative inline-flex max-w-full items-center justify-center gap-2 group-data-[state=off]/tab:-top-px sm:group-data-[state=off]/tab:top-0"
+              class="relative inline-flex max-w-full items-center justify-center gap-2 group-data-[state=off]/tab:-top-px"
             >
               <WorkflowTab
                 class="max-w-full"
