@@ -45,7 +45,9 @@
                 tabStateVariants({
                   active: option.value === selectedWorkflow?.value
                 }),
-                'workflow-tab-button group/tab relative h-full min-w-[90px] flex-[0_1_auto] p-0 font-[inherit] leading-[normal] font-medium'
+                'workflow-tab-button group/tab relative h-full min-w-[90px] flex-[0_1_auto] p-0 font-[inherit] leading-[normal] font-medium',
+                workflowStore.activeSubgraph &&
+                  'sm:data-[state=on]:border-b sm:data-[state=on]:border-b-workflow-tab-active-indicator'
               )
             "
           >
