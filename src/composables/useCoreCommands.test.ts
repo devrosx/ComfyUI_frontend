@@ -14,7 +14,7 @@ import { api } from '@/scripts/api'
 import { app } from '@/scripts/app'
 import { useModelStore } from '@/stores/modelStore'
 import { useMissingModelStore } from '@/platform/missingModel/missingModelStore'
-import { useToastStore } from '@/platform/updates/common/toastStore'
+import { useToast } from '@/components/ui/toast'
 import { useCanvasStore } from '@/renderer/core/canvas/canvasStore'
 import { useSettingsDialog } from '@/platform/settings/composables/useSettingsDialog'
 import { useLitegraphService } from '@/services/litegraphService'
@@ -647,9 +647,7 @@ describe('useCoreCommands', () => {
       await findCmd('Comfy.QueueSelectedOutputNodes').function()
 
       expect(mockBillingState.showSubscriptionDialog).not.toHaveBeenCalled()
-      expect(useToastStore().add).toHaveBeenCalledWith(
-        expect.objectContaining({ severity: 'error' })
-      )
+      expect(useToast().error).toHaveBeenCalled()
     })
 
     it.for([
@@ -682,9 +680,7 @@ describe('useCoreCommands', () => {
 
         expect(app.queuePrompt).not.toHaveBeenCalled()
         expect(mockBillingState.showSubscriptionDialog).not.toHaveBeenCalled()
-        expect(useToastStore().add).toHaveBeenCalledWith(
-          expect.objectContaining({ severity: 'warn' })
-        )
+        expect(useToast().warning).toHaveBeenCalled()
       }
     )
 
@@ -768,7 +764,7 @@ describe('useCoreCommands', () => {
         asset,
         'asset_browser'
       )
-      expect(useToastStore().add).not.toHaveBeenCalled()
+      expect(useToast().add).not.toHaveBeenCalled()
     })
 
     it('shows an error toast when the asset cannot start a drag', async () => {
@@ -781,9 +777,7 @@ describe('useCoreCommands', () => {
 
       await selectAssetFromBrowser()
 
-      expect(useToastStore().add).toHaveBeenCalledWith(
-        expect.objectContaining({ severity: 'error' })
-      )
+      expect(useToast().error).toHaveBeenCalled()
     })
   })
 })

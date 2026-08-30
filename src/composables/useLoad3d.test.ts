@@ -20,7 +20,7 @@ import type { LGraph } from '@/lib/litegraph/src/LGraph'
 import type { LGraphNode } from '@/lib/litegraph/src/LGraphNode'
 import type { IWidget } from '@/lib/litegraph/src/types/widgets'
 import { useCanvasStore } from '@/renderer/core/canvas/canvasStore'
-import { useToastStore } from '@/platform/updates/common/toastStore'
+import { useToast } from '@/components/ui/toast'
 import { api } from '@/scripts/api'
 import {
   createMockCanvasPointerEvent,
@@ -53,6 +53,10 @@ vi.mock<unknown>(import('@/extensions/core/load3d/Load3dUtils'), () => ({
   }
 }))
 
+vi.mock<unknown>(import('@/components/ui/toast'), () => ({
+  useToast: vi.fn()
+}))
+
 vi.mock<unknown>(import('@/scripts/api'), () => ({
   api: {
     apiURL: vi.fn(),
@@ -79,7 +83,7 @@ describe('useLoad3d', () => {
   afterEach(() => scope.stop())
   let mockLoad3d: Partial<Load3d>
   let mockNode: LGraphNode
-  let mockToastStore: ReturnType<typeof useToastStore>
+  let mockToastStore: ReturnType<typeof useToast>
 
   beforeEach(() => {
     scope = effectScope()
@@ -202,7 +206,10 @@ describe('useLoad3d', () => {
     })
     vi.mocked(createLoad3d).mockImplementation(() => mockLoad3d as Load3d)
 
-    mockToastStore = useToastStore()
+    mockToastStore = {
+      warning: vi.fn()
+    } as Partial<ReturnType<typeof useToast>> as ReturnType<typeof useToast>
+    vi.mocked(useToast).mockReturnValue(mockToastStore)
   })
 
   describe('initialization', () => {
@@ -358,9 +365,9 @@ describe('useLoad3d', () => {
 
       await composable.initializeLoad3d(containerRef)
 
-      expect(mockToastStore.addAlert).toHaveBeenCalledWith(
-        'toastMessages.failedToInitializeLoad3dViewer'
-      )
+      expect(mockToastStore.warning).toHaveBeenCalledWith('Alert', {
+        description: 'toastMessages.failedToInitializeLoad3dViewer'
+      })
     })
 
     it('should handle missing container or node', async () => {
@@ -835,9 +842,9 @@ describe('useLoad3d', () => {
 
       await composable.handleExportModel('glb')
 
-      expect(mockToastStore.addAlert).toHaveBeenCalledWith(
-        'toastMessages.no3dSceneToExport'
-      )
+      expect(mockToastStore.warning).toHaveBeenCalledWith('Alert', {
+        description: 'toastMessages.no3dSceneToExport'
+      })
     })
 
     it('should handle export errors', async () => {
@@ -852,9 +859,9 @@ describe('useLoad3d', () => {
 
       await composable.handleExportModel('glb')
 
-      expect(mockToastStore.addAlert).toHaveBeenCalledWith(
-        'toastMessages.failedToExportModel'
-      )
+      expect(mockToastStore.warning).toHaveBeenCalledWith('Alert', {
+        description: 'toastMessages.failedToExportModel'
+      })
     })
   })
 
@@ -1079,9 +1086,9 @@ describe('useLoad3d', () => {
       await composable.handleModelDrop(file)
 
       expect(mockLoad3d.loadModel).not.toHaveBeenCalled()
-      expect(mockToastStore.addAlert).toHaveBeenCalledWith(
-        'toastMessages.no3dScene'
-      )
+      expect(mockToastStore.warning).toHaveBeenCalledWith('Alert', {
+        description: 'toastMessages.no3dScene'
+      })
     })
   })
 
@@ -1776,7 +1783,7 @@ describe('useLoad3d', () => {
       expect(throwing).toHaveBeenCalledTimes(1)
       expect(after).toHaveBeenCalledTimes(1)
       expect(mockLoad3d.addEventListener).toHaveBeenCalled()
-      expect(mockToastStore.addAlert).not.toHaveBeenCalled()
+      expect(mockToastStore.warning).not.toHaveBeenCalled()
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Load3d ready callback failed:',
         expect.any(Error)
