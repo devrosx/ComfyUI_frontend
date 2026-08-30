@@ -45,7 +45,7 @@
                 tabStateVariants({
                   active: option.value === selectedWorkflow?.value
                 }),
-                'h-full flex-none p-0'
+                'workflow-tab-button h-full flex-none p-0'
               )
             "
           >
@@ -339,7 +339,7 @@ const ensureActiveTabVisible = async (
   if (!containerElement) return
 
   const activeTabElement = containerElement.querySelector(
-    '.p-togglebutton-checked'
+    '.workflow-tab-button[data-state="on"]'
   )
   if (!activeTabElement) return
 
@@ -387,7 +387,7 @@ onUpdated(checkOverflow)
   background-color: var(--comfy-menu-bg);
 }
 
-:deep(.p-togglebutton) {
+:deep(.workflow-tab-button) {
   position: relative;
   flex-shrink: 1;
   border: 0;
@@ -395,21 +395,8 @@ onUpdated(checkOverflow)
   min-width: 90px;
 }
 
-:deep(.p-togglebutton > .p-togglebutton-content) {
-  max-width: 100%;
-}
-
 :deep(.workflow-tab) {
   max-width: 100%;
-}
-
-:deep(.p-togglebutton::before) {
-  display: none;
-}
-
-:deep(.p-selectbutton) {
-  height: 100%;
-  border-radius: 0;
 }
 
 .workflow-tabs-container-desktop {
