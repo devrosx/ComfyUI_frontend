@@ -45,14 +45,12 @@
                 tabStateVariants({
                   active: option.value === selectedWorkflow?.value
                 }),
-                'workflow-tab-button group/tab relative h-full min-w-[90px] flex-[0_1_auto] p-0 font-[inherit] leading-[normal] font-medium',
-                workflowStore.activeSubgraph &&
-                  'sm:data-[state=on]:border-b sm:data-[state=on]:border-b-workflow-tab-active-indicator'
+                'workflow-tab-button group/tab relative h-full min-w-[90px] flex-[0_1_auto] p-0 font-[inherit] leading-[normal] font-medium'
               )
             "
           >
             <span
-              class="relative inline-flex max-w-full items-center justify-center gap-2 group-data-[state=off]/tab:-top-px"
+              class="relative inline-flex max-w-full items-center justify-center gap-2"
             >
               <WorkflowTab
                 class="max-w-full"
