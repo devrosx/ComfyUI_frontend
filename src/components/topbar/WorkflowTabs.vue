@@ -50,7 +50,7 @@
             "
           >
             <span
-              class="relative inline-flex items-center justify-center gap-2 group-data-[state=off]:-top-px"
+              class="relative inline-flex items-center justify-center gap-2 group-data-[state=off]:-top-px sm:group-data-[state=off]:top-0"
             >
               <WorkflowTab
                 :workflow-option="option"
