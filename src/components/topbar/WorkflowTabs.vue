@@ -393,6 +393,7 @@ onUpdated(checkOverflow)
   border: 0;
   padding: 0;
   min-width: 90px;
+  font-weight: 500;
 }
 
 :deep(.workflow-tab) {
