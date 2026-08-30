@@ -49,21 +49,23 @@
               )
             "
           >
-            <WorkflowTab
-              :workflow-option="option"
-              :is-first="index === 0"
-              :is-last="index === options.length - 1"
-              :data-workflow-path="option.value"
-              @click.middle="onCloseWorkflow(option)"
-              @close-to-left="closeWorkflows(options.slice(0, index))"
-              @close-to-right="closeWorkflows(options.slice(index + 1))"
-              @close-others="
-                closeWorkflows([
-                  ...options.slice(index + 1),
-                  ...options.slice(0, index)
-                ])
-              "
-            />
+            <span class="workflow-tab-content">
+              <WorkflowTab
+                :workflow-option="option"
+                :is-first="index === 0"
+                :is-last="index === options.length - 1"
+                :data-workflow-path="option.value"
+                @click.middle="onCloseWorkflow(option)"
+                @close-to-left="closeWorkflows(options.slice(0, index))"
+                @close-to-right="closeWorkflows(options.slice(index + 1))"
+                @close-others="
+                  closeWorkflows([
+                    ...options.slice(index + 1),
+                    ...options.slice(0, index)
+                  ])
+                "
+              />
+            </span>
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
@@ -395,10 +397,19 @@ onUpdated(checkOverflow)
   min-width: 90px;
   font-family: inherit;
   font-weight: 500;
+  line-height: normal;
 }
 
 :deep(.workflow-tab) {
   max-width: 100%;
+}
+
+:deep(.workflow-tab-content) {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--spacing) * 2);
 }
 
 .workflow-tabs-container-desktop {
