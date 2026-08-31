@@ -1,8 +1,6 @@
 // We should consider moving to https://primevue.org/dynamicdialog/ once everything is in Vue.
 // Currently we need to bridge between legacy app code and Vue app with a Pinia store.
-import { merge } from 'es-toolkit/compat'
 import { defineStore } from 'pinia'
-import type { DialogPassThroughOptions } from 'primevue/dialog'
 import { markRaw, ref } from 'vue'
 import type { Component, HTMLAttributes, Ref } from 'vue'
 
@@ -19,14 +17,6 @@ type DialogPosition =
   | 'topright'
   | 'bottomleft'
   | 'bottomright'
-
-/**
- * Selects the dialog renderer used by `GlobalDialog`. `'reka'` (the default)
- * renders the Reka-UI primitive set under `src/components/ui/dialog/`.
- * `'primevue'` is the legacy PrimeVue `Dialog` escape hatch, kept only until
- * the branch is deleted in the Phase 6 cleanup (FE-578).
- */
-type DialogRenderer = 'primevue' | 'reka'
 
 interface CustomDialogComponentProps {
   maximizable?: boolean
@@ -48,7 +38,6 @@ interface CustomDialogComponentProps {
   showCloseButton?: boolean
   modal?: boolean
   position?: DialogPosition
-  pt?: DialogPassThroughOptions
   closeOnEscape?: boolean
   dismissableMask?: boolean
   /**
@@ -61,7 +50,6 @@ interface CustomDialogComponentProps {
   dismissOnFocusOutside?: boolean
   unstyled?: boolean
   headless?: boolean
-  renderer?: DialogRenderer
   useAutomaticLabeling?: boolean
   size?: DialogContentSize
   /**
@@ -236,7 +224,6 @@ export const useDialogStore = defineStore('dialog', () => {
         closable: true,
         closeOnEscape: true,
         dismissableMask: true,
-        renderer: 'reka' as DialogRenderer,
         ...options.dialogComponentProps,
         maximized: options.dialogComponentProps?.maximized ?? false,
         onMaximize: () => {
@@ -247,14 +234,7 @@ export const useDialogStore = defineStore('dialog', () => {
         },
         onAfterHide: () => {
           closeDialog(dialog)
-        },
-        pt: merge(options.dialogComponentProps?.pt || {}, {
-          root: {
-            onMousedown: () => {
-              riseDialog(dialog)
-            }
-          }
-        })
+        }
       }
     }
 
