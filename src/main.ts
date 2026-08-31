@@ -1,5 +1,3 @@
-import { definePreset } from '@primevue/themes'
-import Aura from '@primevue/themes/aura'
 import {
   browserApiErrorsIntegration,
   captureMessage,
@@ -7,7 +5,6 @@ import {
 } from '@sentry/vue'
 import { createPinia } from 'pinia'
 import 'primeicons/primeicons.css'
-import PrimeVue from 'primevue/config'
 import { createApp } from 'vue'
 
 import { setAssertReporter } from '@/base/assert'
@@ -73,13 +70,6 @@ if (hasHostTelemetryBridge) {
     await import('@/platform/telemetry/initHostTelemetry')
   initHostTelemetry()
 }
-
-const ComfyUIPreset = definePreset(Aura, {
-  semantic: {
-    // @ts-expect-error fixme ts strict error
-    primary: Aura['primitive'].blue
-  }
-})
 
 const phaseFirebase = bootstrapTracer.startPhase('startup/firebase-init')
 // Throws unless remote config has settled; the awaited remote-config phase above guarantees it has.
@@ -152,29 +142,6 @@ setAssertReporter(
 
 app
   .use(router)
-  .use(PrimeVue, {
-    zIndex: {
-      modal: 1800,
-      overlay: 1800,
-      menu: 1800,
-      // Tooltips sit above modals/menus so a menu-item tooltip isn't hidden
-      // behind a body-portaled dropdown that lifts itself to modal + 1.
-      tooltip: 2000
-    },
-    theme: {
-      preset: ComfyUIPreset,
-      options: {
-        prefix: 'p',
-        cssLayer: {
-          name: 'primevue',
-          order: 'theme, base, primevue'
-        },
-        // This is a workaround for the issue with the dark mode selector
-        // https://github.com/primefaces/primevue/issues/5515
-        darkModeSelector: '.dark-theme, :root:has(.dark-theme)'
-      }
-    }
-  })
   .use(pinia)
   .use(i18n)
 
