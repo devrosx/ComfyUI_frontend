@@ -8,7 +8,6 @@ import { render, screen, waitFor, within } from '@testing-library/vue'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick, ref } from 'vue'
-import type { DirectiveBinding } from 'vue'
 import type { ComponentProps } from 'vue-component-type-helpers'
 
 import { i18n } from '@/i18n'
@@ -18,16 +17,6 @@ import Composer from './Composer.vue'
 import { setupInlinePromptEditorDom } from './composer/inlinePromptEditorTestSetup'
 
 setupInlinePromptEditorDom()
-
-const tooltipBindings = new WeakMap<Element, unknown>()
-const tooltipDirectiveStub = {
-  mounted(element: Element, binding: DirectiveBinding<unknown>) {
-    tooltipBindings.set(element, binding.value)
-  },
-  updated(element: Element, binding: DirectiveBinding<unknown>) {
-    tooltipBindings.set(element, binding.value)
-  }
-}
 
 const fetchApi = vi.hoisted(() =>
   vi.fn<(route: string, init?: RequestInit) => Promise<Response>>()
@@ -64,8 +53,7 @@ function mount(
     props: { hasWorkflowTarget: true, selectWorkflowReference, ...props },
     attrs,
     global: {
-      plugins: [i18n],
-      directives: { tooltip: tooltipDirectiveStub }
+      plugins: [i18n]
     }
   })
   return { ...view, selectWorkflowReference }
@@ -678,10 +666,12 @@ describe('Composer', () => {
         )
         mount()
 
-        const trigger = screen.getByRole('button', { name: triggerName })
-        expect(tooltipBindings.get(trigger)).toMatchObject({
-          value: tooltipCopy
-        })
+        await userEvent.hover(screen.getByRole('button', { name: triggerName }))
+        expect(
+          await screen.findByText(tooltipCopy, {
+            selector: '[data-slot="tooltip-content"]'
+          })
+        ).toBeVisible()
       }
     )
 
@@ -1484,6 +1474,26 @@ describe('Composer', () => {
     expect(screen.queryByText('#5')).not.toBeInTheDocument()
   })
 
+  it('shows the remove tooltip for a selection chip with a duplicate title', async () => {
+    mount({
+      selectionTags: [
+        { id: '5', title: 'KSampler' },
+        { id: '6', title: 'KSampler' }
+      ]
+    })
+
+    await userEvent.hover(
+      screen.getByRole('button', {
+        name: 'Remove KSampler #5 reference'
+      })
+    )
+    expect(
+      await screen.findByText('Remove', {
+        selector: '[data-slot="tooltip-content"]'
+      })
+    ).toBeVisible()
+  })
+
   it('emits removeTag when a selection chip is removed', async () => {
     const { emitted } = mount({
       selectionTags: [{ id: '5', title: 'KSampler' }]
@@ -1496,13 +1506,19 @@ describe('Composer', () => {
     expect(emitted().removeTag).toEqual([['5']])
   })
 
-  it('builds the remove tooltip for a selection chip', () => {
+  it('shows the remove tooltip for a selection chip', async () => {
     mount({ selectionTags: [{ id: '5', title: 'KSampler' }] })
 
-    const removeButton = screen.getByRole('button', {
-      name: 'Remove KSampler #5 reference'
-    })
-    expect(tooltipBindings.get(removeButton)).toMatchObject({ value: 'Remove' })
+    await userEvent.hover(
+      screen.getByRole('button', {
+        name: 'Remove KSampler #5 reference'
+      })
+    )
+    expect(
+      await screen.findByText('Remove', {
+        selector: '[data-slot="tooltip-content"]'
+      })
+    ).toBeVisible()
   })
 
   it('renders a selection chip label as non-interactive context', () => {
