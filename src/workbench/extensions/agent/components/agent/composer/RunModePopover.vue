@@ -13,16 +13,17 @@ import { useI18n } from 'vue-i18n'
 import { cn } from '@comfyorg/tailwind-utils'
 
 import Button from '@/components/ui/button/Button.vue'
+import { useToast } from '@/components/ui/toast'
 import { buildTooltipConfig } from '@/composables/useTooltipConfig'
 import { reportError } from '@/platform/telemetry/reportError'
-import { useToastStore } from '@/platform/updates/common/toastStore'
+
 
 import type { AgentRunModeValue } from '../../../stores/agent/agentRunModeStore'
 import { useAgentRunModeStore } from '../../../stores/agent/agentRunModeStore'
 
 const { t } = useI18n()
 const store = useAgentRunModeStore()
-const toast = useToastStore()
+const toast = useToast()
 
 const open = ref(false)
 const savingMode = ref<AgentRunModeValue | null>(null)
@@ -45,7 +46,7 @@ async function onSelectMode(value: string): Promise<void> {
     if (openedAs === openCount) open.value = false
   } catch (error) {
     reportError(error, { errorType: 'agent_run_mode_save_failure' })
-    toast.add({ severity: 'error', detail: t('agent.runModeSaveFailed') })
+    toast.error(t('agent.runModeSaveFailed'))
   } finally {
     savingMode.value = null
   }
