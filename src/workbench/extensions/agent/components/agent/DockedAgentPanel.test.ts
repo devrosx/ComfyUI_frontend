@@ -115,6 +115,31 @@ describe('DockedAgentPanel', () => {
     )
   })
 
+  it('publishes its width for portaled overlays only while docked', async () => {
+    const store = openPanel()
+    renderPanel()
+
+    expect(
+      document.documentElement.style.getPropertyValue(WORKSPACE_INSET_RIGHT)
+    ).toBe(`${store.width}px`)
+
+    store.isOpen = false
+    await nextTick()
+
+    expect(
+      document.documentElement.style.getPropertyValue(WORKSPACE_INSET_RIGHT)
+    ).toBe('0px')
+  })
+
+  it('fills the panel shell and draws the canvas seam border', () => {
+    openPanel()
+    renderPanel()
+
+    const shell = screen.getByTestId('docked-agent-panel-shell')
+
+    expect(shell).toHaveClass('border-l', 'border-interface-stroke')
+  })
+
   it('renders nothing while the panel is closed', () => {
     const store = openPanel()
     store.isOpen = false
