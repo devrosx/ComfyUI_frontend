@@ -23,12 +23,15 @@ import {
 import { useLayoutMutations } from '@/renderer/core/layout/operations/layoutMutations'
 import { layoutStore } from '@/renderer/core/layout/store/layoutStore'
 import { LayoutSource } from '@/renderer/core/layout/types'
+import type { SelectableKey } from '@/core/selection/selectionState'
 import {
   applyCanvasSelection,
   ownsSelectable,
+  resolveSelectable,
   selectableKeyOf,
   setCanvasItemSelected
 } from '@/renderer/core/canvas/litegraph/selectionAdapter'
+import { useSelectionStore } from '@/renderer/core/canvas/selectionStore'
 import { useLinkPresentationStore } from '@/stores/linkPresentationStore'
 import { useLinkStore } from '@/stores/linkStore'
 import { graphScopeOf } from '@/types/graphScopeId'
@@ -280,6 +283,19 @@ interface ClipboardPasteResult {
   reroutes: Map<RerouteId, Reroute>
   /** Map: original subgraph IDs to newly created subgraphs */
   subgraphs: Map<SubgraphId, Subgraph>
+}
+
+/** Legacy selection views derived from the selection store. */
+interface SelectionView {
+  selectedNodes: Dictionary<LGraphNode>
+  highlightedLinks: Dictionary<boolean>
+}
+
+interface SelectionViewCache {
+  graph: LGraph
+  keys: readonly SelectableKey[]
+  graphVersion: number
+  view: SelectionView
 }
 
 /** Options for {@link LGraphCanvas.pasteFromClipboard}. */
@@ -718,7 +734,15 @@ export class LGraphCanvas implements CustomEventDispatcher<LGraphCanvasEventMap>
   render_time = 0
   fps = 0
   /** @deprecated See {@link LGraphCanvas.selectedItems} */
-  selected_nodes: Dictionary<LGraphNode> = {}
+  get selected_nodes(): Dictionary<LGraphNode> {
+    return this.selectionView.selectedNodes
+  }
+
+  /** @deprecated Replaces the selection with the given nodes. Use {@link selectItems}. */
+  set selected_nodes(nodes: Dictionary<LGraphNode>) {
+    this.selectItems(Object.values(nodes))
+  }
+
   /** All selected nodes, groups, and reroutes */
   selectedItems: Set<Positionable> = new Set()
   /** The group currently being resized. */
@@ -734,7 +758,42 @@ export class LGraphCanvas implements CustomEventDispatcher<LGraphCanvasEventMap>
   private _visible_node_ids: Set<SerializedNodeId> = new Set()
   node_over?: LGraphNode
   node_capturing_input?: LGraphNode | null
-  highlighted_links: Dictionary<boolean> = {}
+
+  /** Links attached to a selected node. Derived from the selection store. */
+  get highlighted_links(): Dictionary<boolean> {
+    return this.selectionView.highlightedLinks
+  }
+
+  private selectionViewCache?: SelectionViewCache
+
+  private get selectionView(): SelectionView {
+    const { graph } = this
+    if (!graph) return { selectedNodes: {}, highlightedLinks: {} }
+
+    const keys = useSelectionStore().selectedKeys(graphScopeOf(graph))
+    const graphVersion = graph._version
+    const cached = this.selectionViewCache
+    if (
+      cached?.graph === graph &&
+      cached.graphVersion === graphVersion &&
+      cached.keys.length === keys.length &&
+      cached.keys.every((key, i) => key === keys[i])
+    ) {
+      return cached.view
+    }
+
+    const nodes = keys.flatMap((key) => {
+      const item = resolveSelectable(graph, key)
+      return item instanceof LGraphNode ? [item] : []
+    })
+    const linkIds = nodes.flatMap((node) => nodeLinkIds(graph, node))
+    const view: SelectionView = {
+      selectedNodes: Object.fromEntries(nodes.map((node) => [node.id, node])),
+      highlightedLinks: Object.fromEntries(linkIds.map((id) => [id, true]))
+    }
+    this.selectionViewCache = { graph, keys, graphVersion, view }
+    return view
+  }
 
   readonly _visibleReroutes: Set<Reroute> = new Set()
   private _autoPan: AutoPanController | null = null
@@ -1856,7 +1915,6 @@ export class LGraphCanvas implements CustomEventDispatcher<LGraphCanvasEventMap>
     this.dragging_rectangle = null
 
     for (const item of this.selectedItems.keys()) item.selected = undefined
-    this.selected_nodes = {}
     this.selected_group = null
     this.selectedItems.clear()
     applyCanvasSelection(this, { type: 'selection.clear' })
@@ -1867,7 +1925,6 @@ export class LGraphCanvas implements CustomEventDispatcher<LGraphCanvasEventMap>
     this.node_over = undefined
     this.node_capturing_input = null
     this.connecting_links = null
-    this.highlighted_links = {}
 
     this.dragging_canvas = false
 
@@ -4615,13 +4672,8 @@ export class LGraphCanvas implements CustomEventDispatcher<LGraphCanvasEventMap>
 
     if (!(item instanceof LGraphNode)) return
 
-    // Node-specific handling
     item.onSelected?.()
-    this.selected_nodes[item.id] = item
-
     this.onNodeSelected?.(item)
-
-    this.#highlightLinksOf(item)
   }
 
   /**
@@ -4655,30 +4707,8 @@ export class LGraphCanvas implements CustomEventDispatcher<LGraphCanvasEventMap>
 
     if (!(item instanceof LGraphNode)) return
 
-    // Node-specific handling
     item.onDeselected?.()
-    delete this.selected_nodes[item.id]
-
     this.onNodeDeselected?.(item)
-
-    const { graph } = this
-    if (!graph) return
-
-    for (const linkId of nodeLinkIds(graph, item)) {
-      const origin = LLink.getOriginNode(graph, linkId)
-      const target = LLink.getTargetNode(graph, linkId)
-      if (origin && this.selectedItems.has(origin)) continue
-      if (target && this.selectedItems.has(target)) continue
-      delete this.highlighted_links[linkId]
-    }
-  }
-
-  #highlightLinksOf(node: LGraphNode): void {
-    const { graph } = this
-    if (!graph) return
-    for (const linkId of nodeLinkIds(graph, node)) {
-      this.highlighted_links[linkId] = true
-    }
   }
 
   /**
@@ -4796,17 +4826,7 @@ export class LGraphCanvas implements CustomEventDispatcher<LGraphCanvasEventMap>
     if (kept) selected.add(kept)
 
     this.setDirty(true)
-
-    // Legacy code
-    const oldNode = kept?.id == null ? null : this.selected_nodes[kept.id]
-    this.selected_nodes = {}
     this.current_node = null
-    this.highlighted_links = {}
-
-    if (kept instanceof LGraphNode) {
-      if (oldNode) this.selected_nodes[oldNode.id] = oldNode
-      this.#highlightLinksOf(kept)
-    }
 
     // Only set selectionChanged if selection actually changed
     const finalSelectionSize = selected.size
@@ -4849,11 +4869,9 @@ export class LGraphCanvas implements CustomEventDispatcher<LGraphCanvasEventMap>
       }
     }
 
-    this.selected_nodes = {}
     this.selectedItems.clear()
     applyCanvasSelection(this, { type: 'selection.clear' })
     this.current_node = null
-    this.highlighted_links = {}
 
     this.state.selectionChanged = true
     this.onSelectionChange?.(this.selected_nodes)
