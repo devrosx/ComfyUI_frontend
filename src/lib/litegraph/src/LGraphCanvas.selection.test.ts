@@ -333,7 +333,7 @@ describe('LGraphCanvas selection', () => {
 
       canvas.deselectAll()
 
-      expect(canvas.selectedItems).toEqual(new Set([b]))
+      expect([...canvas.selectedItems]).toEqual([b])
       expect(a.selected).toBe(false)
       expect(b.selected).toBe(true)
       expect(canvas.selected_nodes).toEqual({ [b.id]: b })
@@ -450,7 +450,7 @@ describe('LGraphCanvas selection', () => {
         assert.exists(replacement)
         expect(replacement).not.toBe(target.item)
         expect(replacement.selected).toBeFalsy()
-        expect(canvas.selectedItems).toEqual(new Set([a]))
+        expect([...canvas.selectedItems]).toEqual([a])
         expect(target.item.selected).toBe(false)
         expect(
           useSelectionStore().isSelected(
@@ -576,7 +576,8 @@ describe('LGraphCanvas selection', () => {
       canvas.deselect(foreignNode)
       canvas.selectItems([foreignNode])
 
-      expect(canvas.selectedItems).toEqual(new Set([a]))
+      expect(canvas.selectedItems.size).toBe(1)
+      expect(canvas.selectedItems.has(a)).toBe(true)
       expect(foreignNode.selected).toBeFalsy()
       expect(a.selected).toBe(true)
     })
@@ -599,6 +600,65 @@ describe('LGraphCanvas selection', () => {
       canvas.deselectAll()
       expect(onSelectionChange).toHaveBeenCalledTimes(1)
       expect(a.selected).toBe(false)
+    })
+
+    it('deselectAll(keepSelected) keeps only that item', () => {
+      canvas.select(a)
+      canvas.select(b)
+
+      canvas.deselectAll(b)
+
+      expect(selectedTitles(canvas)).toEqual(['B'])
+      expect(a.selected).toBe(false)
+      expect(onSelectionChange).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('legacy selectedItems Set', () => {
+    it('add() selects through the store', () => {
+      canvas.selectedItems.add(a)
+
+      expect(selectedTitles(canvas)).toEqual(['A'])
+      expect(Object.keys(canvas.selected_nodes)).toEqual([String(a.id)])
+    })
+
+    it('delete() deselects and reports whether the item was selected', () => {
+      canvas.select(a)
+      canvas.select(b)
+
+      expect(canvas.selectedItems.delete(a)).toBe(true)
+      expect(canvas.selectedItems.delete(a)).toBe(false)
+      expect(selectedTitles(canvas)).toEqual(['B'])
+    })
+
+    it('clear() empties the selection', () => {
+      canvas.select(a)
+      canvas.select(b)
+
+      canvas.selectedItems.clear()
+
+      expect(canvas.selectedItems.size).toBe(0)
+      expect(Object.keys(canvas.selected_nodes)).toEqual([])
+    })
+
+    it('assignment replaces the selection', () => {
+      canvas.select(a)
+
+      canvas.selectedItems = new Set([b])
+
+      expect(selectedTitles(canvas)).toEqual(['B'])
+      expect(a.selected).toBe(false)
+      expect(b.selected).toBe(true)
+    })
+
+    it('a held snapshot stays stable while the property reflects the store', () => {
+      canvas.select(a)
+      const snapshot = canvas.selectedItems
+
+      canvas.select(b)
+
+      expect([...snapshot]).toEqual([a])
+      expect([...canvas.selectedItems]).toEqual([a, b])
     })
   })
 

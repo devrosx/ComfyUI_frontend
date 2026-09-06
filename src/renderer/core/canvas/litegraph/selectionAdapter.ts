@@ -67,8 +67,6 @@ export function setCanvasItemSelected(
   const key = selectableKeyOf(item)
   if (!key) return
   item.selected = selected
-  if (selected) canvas.selectedItems.add(item)
-  else canvas.selectedItems.delete(item)
   canvas.state.selectionChanged = true
   applyCanvasSelection(canvas, {
     type: selected ? 'selection.add' : 'selection.remove',
@@ -83,6 +81,17 @@ export function applyCanvasSelection(
   const { graph } = canvas
   if (!graph) return
   useSelectionStore().apply(graphScopeOf(graph), command)
+}
+
+export function isCanvasItemSelected(
+  canvas: LGraphCanvas,
+  item: Positionable
+): boolean {
+  const { graph } = canvas
+  const key = selectableKeyOf(item)
+  return (
+    !!graph && !!key && useSelectionStore().isSelected(graphScopeOf(graph), key)
+  )
 }
 
 export function ownsSelectable(
