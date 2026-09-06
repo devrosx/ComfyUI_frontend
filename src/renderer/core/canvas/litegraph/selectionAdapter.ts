@@ -72,6 +72,92 @@ export function setCanvasItemSelected(
   })
 }
 
+/**
+ * Adds or removes {@link items} (and, with {@link LGraphCanvas.groupSelectChildren},
+ * the children of any groups among them) as one command, then fires the node
+ * hooks for every node whose state changed.
+ * @returns Whether the selection changed.
+ */
+export function changeCanvasSelection(
+  canvas: LGraphCanvas,
+  items: Iterable<Positionable>,
+  selected: boolean
+): boolean {
+  const { graph } = canvas
+  if (!graph) return false
+
+  const scope = graphScopeOf(graph)
+  const store = useSelectionStore()
+  const planned = new Set(store.selectedKeys(scope))
+  const before = planned.size
+  const nodes: LGraphNode[] = []
+
+  const plan = (item: Positionable): boolean => {
+    const key = selectableKeyOf(item)
+    if (!key || planned.has(key) === selected) return false
+    if (selected) planned.add(key)
+    else planned.delete(key)
+    return true
+  }
+
+  const canDeselect = (item: Positionable): boolean =>
+    ownsSelectable(canvas, item) ||
+    (item instanceof LGraphNode && graph.nodes.includes(item))
+
+  const visit = (item: Positionable): void => {
+    if (selected) {
+      if (!ownsSelectable(canvas, item)) return
+      if (canvas.selectOnly && !(item instanceof LGraphNode)) return
+    } else if (!canDeselect(item)) return
+    if (!plan(item)) return
+
+    if (item instanceof LGraphGroup) {
+      if (selected) item.recomputeInsideNodes()
+      if (canvas.groupSelectChildren) traverseGroupChildren(item, plan, visit)
+      return
+    }
+
+    if (item instanceof LGraphNode) nodes.push(item)
+  }
+
+  for (const item of items) visit(item)
+  if (planned.size === before) return false
+
+  store.apply(scope, { type: 'selection.replace', keys: [...planned] })
+  for (const node of nodes) {
+    if (selected) {
+      node.onSelected?.()
+      canvas.onNodeSelected?.(node)
+    } else {
+      node.onDeselected?.()
+      canvas.onNodeDeselected?.(node)
+    }
+  }
+  return true
+}
+
+/**
+ * Iterative traversal of a group's descendants. Calls {@link groupAction} on
+ * nested groups and {@link leafAction} on non-group children, always recursing
+ * into nested groups regardless of their selection state.
+ */
+function traverseGroupChildren(
+  group: LGraphGroup,
+  groupAction: (child: LGraphGroup) => void,
+  leafAction: (child: Positionable) => void
+): void {
+  const stack: Positionable[] = [...group._children]
+  while (stack.length > 0) {
+    const child = stack.pop()!
+    if (child instanceof LGraphGroup) {
+      groupAction(child)
+      for (const nested of child._children) stack.push(nested)
+    } else {
+      leafAction(child)
+    }
+  }
+}
+
 export function applyCanvasSelection(
   canvas: LGraphCanvas,
   command: SelectionCommand

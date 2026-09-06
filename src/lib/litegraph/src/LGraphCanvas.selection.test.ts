@@ -266,7 +266,8 @@ describe('LGraphCanvas selection', () => {
       a.onSelected = () => selections.push([...store.selectedKeys(scope)])
       b.onSelected = () => selections.push([...store.selectedKeys(scope)])
 
-      canvas.selectItems([a, b])
+      canvas.select(a)
+      canvas.select(b)
 
       expect(selections).toEqual([
         [`node:${a.id}`],
@@ -482,6 +483,17 @@ describe('LGraphCanvas selection', () => {
 
       expect(canvas.selectedItems.size).toBe(0)
       expect(graph.nodes).toHaveLength(0)
+    })
+
+    it('selectItems() commits the whole batch before any node hook runs', () => {
+      const sizesSeenByHooks: number[] = []
+      canvas.onNodeSelected = () =>
+        sizesSeenByHooks.push(canvas.selectedItems.size)
+
+      canvas.selectItems([a, b])
+
+      expect(sizesSeenByHooks).toEqual([2, 2])
+      expect(onSelectionChange).toHaveBeenCalledTimes(1)
     })
 
     it('highlights a link connected after the node was selected', () => {
