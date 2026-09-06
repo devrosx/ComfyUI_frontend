@@ -66,7 +66,6 @@ export function setCanvasItemSelected(
 ): void {
   const key = selectableKeyOf(item)
   if (!key) return
-  item.selected = selected
   applyCanvasSelection(canvas, {
     type: selected ? 'selection.add' : 'selection.remove',
     key
