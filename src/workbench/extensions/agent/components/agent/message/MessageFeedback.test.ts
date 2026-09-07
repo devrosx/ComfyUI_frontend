@@ -6,6 +6,14 @@ import { ref } from 'vue'
 import { i18n } from '@/i18n'
 import { useToastStore } from '@/platform/updates/common/toastStore'
 
+vi.hoisted(() => {
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+})
+
 import type { ReplyAsset } from '../../../utils/replyAssets'
 import MessageFeedback from './MessageFeedback.vue'
 
@@ -19,7 +27,8 @@ const fetchApi = vi.hoisted(() => vi.fn())
 vi.mock<unknown>(import('@/scripts/api'), () => ({
   api: {
     apiURL: (route: string) => '/api' + route,
-    fetchApi
+    fetchApi,
+    addEventListener: vi.fn()
   }
 }))
 
@@ -28,7 +37,8 @@ vi.mock(import('@/platform/assets/utils/assetPreviewUtil'), () => ({
   findOutputAsset: async () => undefined
 }))
 
-vi.mock<unknown>(import('@vueuse/core'), () => ({
+vi.mock<unknown>(import('@vueuse/core'), async (importOriginal) => ({
+  ...(await importOriginal<object>()),
   useClipboard: () => ({
     copy: clipboard.copy,
     copied: ref(false),
