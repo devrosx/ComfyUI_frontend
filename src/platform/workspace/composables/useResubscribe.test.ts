@@ -1,3 +1,4 @@
+import { useToast } from '@/components/ui/toast'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { computed, createApp, defineComponent, ref } from 'vue'
 import type { App } from 'vue'
@@ -55,18 +56,14 @@ vi.mock<unknown>(
 
 vi.mock(import('@/platform/telemetry'))
 
-
-
-vi.mock<unknown>(import('@/components/ui/toast'), () => ({
-  useToast: () => ({
-    success: state.toastAdd,
-    error: state.toastAdd,
-    info: state.toastAdd,
-    warning: state.toastAdd,
-    loading: state.toastAdd,
-    custom: state.toastAdd
-  })
-}))
+beforeEach(() => {
+  vi.mocked(useToast().success).mockImplementation(state.toastAdd)
+  vi.mocked(useToast().error).mockImplementation(state.toastAdd)
+  vi.mocked(useToast().info).mockImplementation(state.toastAdd)
+  vi.mocked(useToast().warning).mockImplementation(state.toastAdd)
+  vi.mocked(useToast().loading).mockImplementation(state.toastAdd)
+  vi.mocked(useToast().custom).mockImplementation(state.toastAdd)
+})
 
 const apps: App<Element>[] = []
 

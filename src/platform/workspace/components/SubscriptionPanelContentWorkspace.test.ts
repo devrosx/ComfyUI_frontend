@@ -1,6 +1,7 @@
 import { useBillingCapabilities } from '@/platform/workspace/composables/useBillingCapabilities'
 import { useDialogService } from '@/services/dialogService'
 import { useBillingContext } from '@/composables/billing/useBillingContext'
+import { useToast } from '@/components/ui/toast'
 import { getActivePinia } from 'pinia'
 import { computed, ref, toRef } from 'vue'
 import { useBillingOperationStore } from '@/platform/workspace/stores/billingOperationStore'
@@ -228,16 +229,14 @@ vi.mock<unknown>(
   })
 )
 
-vi.mock<unknown>(import('@/components/ui/toast'), () => ({
-  useToast: () => ({
-    success: vi.fn(),
-    error: vi.fn(),
-    info: vi.fn(),
-    warning: vi.fn(),
-    loading: vi.fn(),
-    custom: vi.fn()
-  })
-}))
+beforeEach(() => {
+  vi.mocked(useToast().success).mockImplementation(vi.fn())
+  vi.mocked(useToast().error).mockImplementation(vi.fn())
+  vi.mocked(useToast().info).mockImplementation(vi.fn())
+  vi.mocked(useToast().warning).mockImplementation(vi.fn())
+  vi.mocked(useToast().loading).mockImplementation(vi.fn())
+  vi.mocked(useToast().custom).mockImplementation(vi.fn())
+})
 
 const i18n = createI18n({
   legacy: false,
