@@ -67,8 +67,6 @@ import { workspaceApi } from '@/platform/workspace/api/workspaceApi'
 import { useBillingOperationStore } from './billingOperationStore'
 
 beforeEach(() => {
-  vi.mocked(useToast().add).mockImplementation(() => {})
-  vi.mocked(useToast().remove).mockImplementation(() => {})
   vi.mocked(useDialogStore().closeDialog).mockImplementation(() => {})
   sessionStorage.clear()
   clearCheckoutJourney()
@@ -829,7 +827,7 @@ describe('billingOperationStore', () => {
 
       await vi.advanceTimersByTimeAsync(0)
 
-      expect(useToast().remove).toHaveBeenCalledWith(receivedToast)
+      expect(useToast().dismiss).toHaveBeenCalledWith(receivedToast)
     })
 
     it('resolves the terminal promise even if a success side effect throws', async () => {
@@ -839,8 +837,8 @@ describe('billingOperationStore', () => {
         started_at: new Date().toISOString()
       })
       const error = new Error('toast rendering failed')
-      vi.mocked(useToast().add).mockImplementation((toast) => {
-        if (toast.severity === 'success') throw error
+      vi.mocked(useToast().success).mockImplementation(() => {
+        throw error
       })
 
       const store = useBillingOperationStore()
@@ -862,7 +860,7 @@ describe('billingOperationStore', () => {
         started_at: new Date().toISOString()
       })
       const error = new Error('toast cleanup failed')
-      vi.mocked(useToast().remove).mockImplementationOnce(() => {
+      vi.mocked(useToast().dismiss).mockImplementationOnce(() => {
         throw error
       })
 
@@ -2459,9 +2457,11 @@ describe('billingOperationStore', () => {
       await vi.advanceTimersByTimeAsync(0)
 
       const actionRequiredAdds = () =>
-        vi.mocked(useToast().warning).mock.calls.filter(
-          ([title]) => title === 'billingOperation.subscriptionActionRequired'
-        ).length
+        vi
+          .mocked(useToast().warning)
+          .mock.calls.filter(
+            ([title]) => title === 'billingOperation.subscriptionActionRequired'
+          ).length
 
       expect(actionRequiredAdds()).toBe(1)
 
