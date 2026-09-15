@@ -31,22 +31,18 @@
           class="flex cursor-pointer items-center justify-between rounded-md px-3 py-2 outline-none data-disabled:cursor-not-allowed data-disabled:opacity-50 data-highlighted:bg-secondary-background-hover"
         >
           <div class="flex items-center gap-2">
-            <template v-if="option.value === 'nightly'">
-              <div class="w-4"></div>
-            </template>
-            <template v-else>
-              <i
-                v-if="option.hasConflict"
-                v-tooltip="{
-                  value: option.conflictMessage,
-                  showDelay: 300
-                }"
-                class="icon-[lucide--triangle-alert] text-warning-background"
-                role="img"
-                :aria-label="option.conflictMessage"
-              />
-              <VerifiedIcon v-else :size="20" class="relative right-0.5" />
-            </template>
+            <div v-if="option.value === 'nightly'" class="w-4"></div>
+            <i
+              v-else-if="option.hasConflict"
+              v-tooltip="{
+                value: option.conflictMessage,
+                showDelay: 300
+              }"
+              class="icon-[lucide--triangle-alert] text-warning-background"
+              role="img"
+              :aria-label="option.conflictMessage"
+            />
+            <VerifiedIcon v-else :size="20" class="relative right-0.5" />
             <span>{{ option.label }}</span>
             <PackStatusMessage
               v-if="option.isFlagged"
@@ -54,7 +50,7 @@
               class="shrink-0"
             />
           </div>
-          <ListboxItemIndicator v-if="option.isSelected" as-child>
+          <ListboxItemIndicator as-child>
             <i class="icon-[lucide--check] text-highlight" />
           </ListboxItemIndicator>
         </ListboxItem>
@@ -327,19 +323,6 @@ const getVersionCompatibility = (version: string) => {
     conflictMessage
   }
 }
-// Helper to determine if an option is selected.
-const isOptionSelected = (optionValue: string) => {
-  if (selectedVersion.value === optionValue) {
-    return true
-  }
-  if (
-    optionValue === 'latest' &&
-    selectedVersion.value === latestActiveVersion.value?.version
-  ) {
-    return true
-  }
-  return false
-}
 const isVersionInstalled = (version: string) => {
   const installed = nodePack.id
     ? managerStore.getInstalledPackVersion(nodePack.id)
@@ -361,7 +344,6 @@ const processedVersionOptions = computed(() => {
         getVersionData(option.value).status === 'NodeVersionStatusFlagged',
       hasConflict: compatibility.hasConflict,
       conflictMessage: compatibility.conflictMessage,
-      isSelected: isOptionSelected(option.value),
       isDisabled:
         isVersionInstalled(option.value) ||
         (option.value === SelectedVersionValues.LATEST &&
