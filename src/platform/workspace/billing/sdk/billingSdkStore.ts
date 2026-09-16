@@ -31,7 +31,7 @@ import { t } from '@/i18n'
 import { isCloud } from '@/platform/distribution/types'
 import { useSettingsDialog } from '@/platform/settings/composables/useSettingsDialog'
 import { useTelemetry } from '@/platform/telemetry'
-import { useToastStore } from '@/platform/updates/common/toastStore'
+import { useToast } from '@/components/ui/toast'
 import type {
   BillingBalanceResponse,
   BillingCapabilitiesResponse,
@@ -88,7 +88,7 @@ async function loadChallengePort(): Promise<EmbeddedChallengePort | undefined> {
 export const useBillingSdkStore = defineStore('billingSdk', () => {
   const workspaceAuthStore = useWorkspaceAuthStore()
   const workspaceStore = useTeamWorkspaceStore()
-  const toastStore = useToastStore()
+  const toast = useToast()
   const { flags } = useFeatureFlags()
 
   const operations = shallowRef<readonly BillingOperationState[]>([])
@@ -219,7 +219,7 @@ export const useBillingSdkStore = defineStore('billingSdk', () => {
       [...dismissed.value].filter((id) => id !== state.id)
     )
     if (state.phase === 'timed_out') {
-      toastStore.add({
+      toast.error({
         severity: 'error',
         summary: t('billingOperation.topupTimeout')
       })
@@ -243,7 +243,7 @@ export const useBillingSdkStore = defineStore('billingSdk', () => {
       group: 'billing-operation'
     }
     progressToasts.set(state.id, { kind, message })
-    toastStore.add(message)
+    toast.error(message)
   }
 
   function clearProgressToast(operationId: string) {
@@ -279,7 +279,7 @@ export const useBillingSdkStore = defineStore('billingSdk', () => {
     if (offered.has(actionUrl)) return
     offeredActions.set(state.id, offered.add(actionUrl))
     if (window.open(actionUrl, '_blank')) return
-    toastStore.add({
+    toast.error({
       severity: 'warn',
       summary: t('g.warning'),
       detail: t('subscription.preview.paymentPopupBlocked')
@@ -305,7 +305,7 @@ export const useBillingSdkStore = defineStore('billingSdk', () => {
       ])
       useDialogStore().closeDialog({ key: 'top-up-credits' })
       useSettingsDialog().show(isCloud ? 'workspace' : 'credits')
-      toastStore.add({
+      toast.error({
         severity: 'success',
         summary: t('billingOperation.topupSuccess'),
         life: 5000
@@ -313,7 +313,7 @@ export const useBillingSdkStore = defineStore('billingSdk', () => {
       return
     }
     if (state.phase === 'failed') {
-      toastStore.add({
+      toast.error({
         severity: 'error',
         summary: t('billingOperation.topupFailed'),
         detail: declineDetail(state.declineReason),
