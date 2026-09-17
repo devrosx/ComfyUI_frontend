@@ -102,9 +102,7 @@ describe('MessageFeedback', () => {
 
       await user.hover(action)
 
-      expect(
-        await screen.findByRole('tooltip', { hidden: true })
-      ).toHaveTextContent(label)
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(label)
     }
   )
 
