@@ -112,6 +112,20 @@ describe('SingleSelect', () => {
     unmount()
   })
 
+  it('selects a filtered option with the keyboard', async () => {
+    const user = userEvent.setup()
+    const { unmount } = renderInParent(undefined, { searchable: true })
+
+    await openSelect(screen.getByRole('combobox'))
+    const searchInput = screen.getByRole('textbox', { name: 'Search' })
+    await user.type(searchInput, 'C')
+    await user.keyboard('{ArrowDown}{Enter}')
+
+    expect(screen.getByRole('combobox')).toHaveTextContent('Option C')
+
+    unmount()
+  })
+
   it('opens above a dialog registered with the modal z-index counter', async () => {
     openModal = document.createElement('div')
     ZIndex.set('modal', openModal, 3702)
