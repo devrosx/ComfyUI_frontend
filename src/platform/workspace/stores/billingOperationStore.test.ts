@@ -1121,12 +1121,13 @@ describe('billingOperationStore', () => {
         errorMessage: 'billingOperation.authenticatePaymentDetail',
         actionUrl: null
       })
-      expect(useToastStore().add).toHaveBeenCalledWith({
-        severity: 'error',
-        summary: 'billingOperation.topupFailed',
-        detail: 'billingOperation.authenticatePaymentDetail',
-        life: 7000
-      })
+      expect(useToast().error).toHaveBeenCalledWith(
+        'billingOperation.topupFailed',
+        {
+          description: 'billingOperation.authenticatePaymentDetail',
+          duration: 7000
+        }
+      )
     })
 
     it.for([
