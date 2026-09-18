@@ -180,7 +180,9 @@ watch(isOpen, async (open) => {
 })
 
 function onSearchKeydown(event: KeyboardEvent) {
-  if (event.key !== 'Escape') event.stopPropagation()
+  if (!['ArrowDown', 'ArrowUp', 'Escape'].includes(event.key)) {
+    event.stopPropagation()
+  }
 }
 
 function onContentKeydown(event: KeyboardEvent) {
