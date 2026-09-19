@@ -365,7 +365,7 @@
   );
   --color-interface-panel-job-progress-border: var(--base-foreground);
 
-  --text-muted: #a1a1aa;
+  --text-muted: var(--color-zinc-400);
   --text-secondary: var(--color-smoke-700);
   --text-primary: var(--color-white);
 

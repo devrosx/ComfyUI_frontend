@@ -3,7 +3,7 @@
     <ComboboxAnchor
       :class="
         cn(
-          searchInputVariants({ size }),
+          searchInputVariants({ size, invalid }),
           disabled && 'pointer-events-none opacity-50'
         )
       "
