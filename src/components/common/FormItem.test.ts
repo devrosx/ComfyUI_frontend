@@ -26,7 +26,9 @@ describe('FormItem', () => {
       }
     })
 
-    expect(screen.getByRole('spinbutton')).toHaveValue('0')
+    expect(screen.getByRole('spinbutton', { name: 'CUDA device' })).toHaveValue(
+      '0'
+    )
   })
 
   it('renders radio option labels', () => {

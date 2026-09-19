@@ -9,6 +9,9 @@ export const searchInputVariants = cva({
       md: 'h-8 px-2 py-1.5',
       lg: 'h-10 p-2',
       xl: 'h-12 p-2'
+    },
+    invalid: {
+      true: 'ring-1 ring-destructive-background'
     }
   },
   defaultVariants: { size: 'md' }

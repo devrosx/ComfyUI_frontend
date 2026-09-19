@@ -29,6 +29,7 @@
         role="spinbutton"
         inputmode="decimal"
         :aria-label="ariaLabel"
+        :aria-labelledby="ariaLabelledby"
         :aria-valuenow="modelValue"
         :aria-valuemin="Number.isFinite(min) ? min : undefined"
         :aria-valuemax="Number.isFinite(max) ? max : undefined"
@@ -70,6 +71,7 @@ const {
   formatOptions = { useGrouping: true },
   suffix,
   ariaLabel,
+  ariaLabelledby,
   clampOnInput = true,
   disabled = false
 } = defineProps<{
@@ -79,6 +81,7 @@ const {
   formatOptions?: Intl.NumberFormatOptions
   suffix?: string
   ariaLabel?: string
+  ariaLabelledby?: string
   clampOnInput?: boolean
   disabled?: boolean
 }>()
