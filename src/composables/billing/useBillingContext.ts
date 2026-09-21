@@ -1,3 +1,4 @@
+import { isAuthenticatedConfigLoaded } from '@/platform/remoteConfig/remoteConfig'
 import { computed, ref, shallowRef, toValue, watch } from 'vue'
 import { createSharedComposable } from '@vueuse/core'
 
@@ -157,6 +158,7 @@ function useBillingContextInternal(): BillingContext {
       canAccessSubscriptionFeatures.value &&
       (!isFreeTier.value ||
         !isCloud ||
+        !isAuthenticatedConfigLoaded.value ||
         freeTierQuota.freeTierExecutionPermitted.value)
   )
 
