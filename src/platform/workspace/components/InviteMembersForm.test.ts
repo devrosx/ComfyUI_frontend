@@ -18,14 +18,11 @@ const { mockToastAdd } = vi.hoisted(() => ({
 
 vi.mock(import('@/composables/billing/useBillingContext'))
 
-vi.mock<unknown>(
-  import('primevue/usetoast'), // eslint-disable-line primevue-removal/no-imports
-  () => ({
-    useToast: () => ({
-      add: mockToastAdd
-    })
+vi.mock<unknown>(import('primevue/usetoast'), () => ({
+  useToast: () => ({
+    add: mockToastAdd
   })
-)
+}))
 
 vi.mock(import('@/platform/telemetry'))
 

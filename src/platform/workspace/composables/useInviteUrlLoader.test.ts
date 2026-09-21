@@ -44,14 +44,11 @@ vi.mock<unknown>(import('vue-router'), () => ({
 }))
 
 const mockToastAdd = vi.hoisted(() => vi.fn())
-vi.mock<unknown>(
-  import('primevue/usetoast'), // eslint-disable-line primevue-removal/no-imports
-  () => ({
-    useToast: () => ({
-      add: mockToastAdd
-    })
+vi.mock<unknown>(import('primevue/usetoast'), () => ({
+  useToast: () => ({
+    add: mockToastAdd
   })
-)
+}))
 
 const apps: App<Element>[] = []
 

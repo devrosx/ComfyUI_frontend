@@ -11,12 +11,9 @@ import type { ComfyHubPublishFormData } from '@/platform/workflow/sharing/types/
 
 const mockToastAdd = vi.hoisted(() => vi.fn())
 
-vi.mock<unknown>(
-  import('primevue/usetoast'), // eslint-disable-line primevue-removal/no-imports
-  () => ({
-    useToast: () => ({ add: mockToastAdd })
-  })
-)
+vi.mock<unknown>(import('primevue/usetoast'), () => ({
+  useToast: () => ({ add: mockToastAdd })
+}))
 
 import ComfyHubPublishDialog from '@/platform/workflow/sharing/components/publish/ComfyHubPublishDialog.vue'
 
