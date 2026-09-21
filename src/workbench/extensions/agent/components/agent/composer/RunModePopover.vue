@@ -17,7 +17,6 @@ import { useToast } from '@/components/ui/toast'
 import { buildTooltipConfig } from '@/composables/useTooltipConfig'
 import { reportError } from '@/platform/telemetry/reportError'
 
-
 import type { AgentRunModeValue } from '../../../stores/agent/agentRunModeStore'
 import { useAgentRunModeStore } from '../../../stores/agent/agentRunModeStore'
 
