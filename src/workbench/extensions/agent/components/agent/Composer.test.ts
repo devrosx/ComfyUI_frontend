@@ -32,7 +32,9 @@ const tooltipDirectiveStub = {
 const fetchApi = vi.hoisted(() =>
   vi.fn<(route: string, init?: RequestInit) => Promise<Response>>()
 )
-vi.mock<unknown>(import('@/scripts/api'), () => ({ api: { fetchApi } }))
+vi.mock<unknown>(import('@/scripts/api'), () => ({
+  api: { fetchApi, addEventListener: vi.fn() }
+}))
 
 function jsonResponse(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {

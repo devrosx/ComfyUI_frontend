@@ -2,6 +2,9 @@ import { useEventListener, useResizeObserver } from '@vueuse/core'
 import _ from 'es-toolkit/compat'
 import { reactive, unref, shallowRef } from 'vue'
 
+import RerouteMigrationToast from '@/components/toast/RerouteMigrationToast.vue'
+import { useToast } from '@/components/ui/toast'
+import type { ToastId } from '@/components/ui/toast'
 import { partnerRunGateBlocksAutoQueue } from '@/composables/billing/usePartnerNodesRunGate'
 import { useCanvasPositionConversion } from '@/composables/element/useCanvasPositionConversion'
 
@@ -43,7 +46,6 @@ import type {
   WorkflowOpenSource,
   WorkflowQueueIntent
 } from '@/platform/telemetry/types'
-import { useToast } from '@/components/ui/toast'
 import { MIME_ASSET_INFO } from '@/platform/assets/schemas/mediaAssetSchema'
 import { reportError } from '@/platform/telemetry/reportError'
 import { updatePendingWarnings } from '@/platform/workflow/core/utils/pendingWarnings'
@@ -760,7 +762,9 @@ export class ComfyApp {
             reportError(new Error('Dropped asset card yielded no file'), {
               errorType: 'asset_drop_load_failure'
             })
-            useToastStore().addAlert(t('toastMessages.assetDropFailed'))
+            useToast().warning('Alert', {
+              description: t('toastMessages.assetDropFailed')
+            })
           }
           return
         }
@@ -806,7 +810,9 @@ export class ComfyApp {
         }
         useWorkflowService().showPendingWarnings()
       } catch (error: unknown) {
-        useToastStore().addAlert(t('toastMessages.dropFileError', { error }))
+        useToast().warning('Alert', {
+          description: t('toastMessages.dropFileError', { error })
+        })
       }
     })
 
@@ -1015,10 +1021,8 @@ export class ComfyApp {
         useSubgraphService().registerNewSubgraph(subgraph, data)
       } catch (err) {
         console.error('Failed to register subgraph', err)
-        useToastStore().add({
-          severity: 'error',
-          summary: 'Failed to register subgraph',
-          detail: err instanceof Error ? err.message : String(err)
+        useToast().error('Failed to register subgraph', {
+          description: err instanceof Error ? err.message : String(err)
         })
       }
     })
@@ -2095,9 +2099,9 @@ export class ComfyApp {
   }
 
   showErrorOnFileLoad(file: File) {
-    useToastStore().addAlert(
-      t('toastMessages.fileLoadError', { fileName: file.name })
-    )
+    useToast().warning('Alert', {
+      description: t('toastMessages.fileLoadError', { fileName: file.name })
+    })
   }
 
   /**
@@ -2223,16 +2227,16 @@ export class ComfyApp {
       )
       switch (outcome) {
         case 'core-nodes-unavailable':
-          useToastStore().addAlert(t('toastMessages.a1111CoreNodesUnavailable'))
+          useToast().warning('Alert', {
+            description: t('toastMessages.a1111CoreNodesUnavailable')
+          })
           return
         case 'not-a1111':
           this.showErrorOnFileLoad(file)
           return
         case 'imported-without-embeddings':
-          useToastStore().add({
-            severity: 'warn',
-            summary: t('g.warning'),
-            detail: t('toastMessages.a1111EmbeddingsUnavailable')
+          useToast().warning(t('g.warning'), {
+            description: t('toastMessages.a1111EmbeddingsUnavailable')
           })
           break
         case 'imported':
@@ -2665,38 +2669,32 @@ export class ComfyApp {
    * Refresh combo list on whole nodes
    */
   async refreshComboInNodes() {
-    const requestToastMessage: ToastMessageOptions = {
-      severity: 'info',
-      summary: t('g.update'),
-      detail: t('toastMessages.updateRequested')
-    }
+    let requestToastId: ToastId | undefined
     if (this.vueAppReady) {
-      useToastStore().add(requestToastMessage)
+      requestToastId = useToast().info(t('g.update'), {
+        description: t('toastMessages.updateRequested')
+      })
     }
 
     try {
       await this.reloadNodeDefs()
 
       if (this.vueAppReady) {
-        useToastStore().add({
-          severity: 'success',
-          summary: t('g.updated'),
-          detail: t('toastMessages.nodeDefinitionsUpdated'),
-          life: 1000
+        useToast().success(t('g.updated'), {
+          description: t('toastMessages.nodeDefinitionsUpdated'),
+          duration: 1000
         })
       }
     } catch (error) {
       if (this.vueAppReady) {
-        useToastStore().add({
-          severity: 'error',
-          summary: t('g.error'),
-          detail: t('toastMessages.nodeDefinitionsUpdateFailed')
+        useToast().error(t('g.error'), {
+          description: t('toastMessages.nodeDefinitionsUpdateFailed')
         })
       }
       throw error
     } finally {
-      if (this.vueAppReady) {
-        useToastStore().remove(requestToastMessage)
+      if (requestToastId !== undefined) {
+        useToast().dismiss(requestToastId)
       }
     }
   }

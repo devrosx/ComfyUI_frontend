@@ -1,3 +1,4 @@
+import { useToast } from '@/components/ui/toast'
 import { computed, ref } from 'vue'
 import { useBillingCapabilities } from '@/platform/workspace/composables/useBillingCapabilities'
 import userEvent from '@testing-library/user-event'
@@ -100,22 +101,25 @@ vi.mock<unknown>(
 
 vi.mock(import('@/platform/telemetry'))
 
-
-
-vi.mock<unknown>(import('@/components/ui/toast'), () => ({
-  useToast: vi.fn(() => ({
-    success: (...args: unknown[]) => mockToastAdd('success', ...args),
-    error: (...args: unknown[]) => mockToastAdd('error', ...args),
-    info: (...args: unknown[]) => mockToastAdd('info', ...args),
-    warning: (...args: unknown[]) => mockToastAdd('warning', ...args),
-    loading: (...args: unknown[]) => mockToastAdd('loading', ...args),
-    custom: (...args: unknown[]) => mockToastAdd('custom', ...args)
-  }))
-}))
-
 function renderComponent(
   props: { cancelAt?: string; flowAlreadyOpened?: boolean } = {}
 ) {
+  beforeEach(() => {
+    const toast = useToast()
+    for (const kind of [
+      'success',
+      'error',
+      'info',
+      'warning',
+      'loading'
+    ] as const) {
+      vi.mocked(toast[kind]).mockImplementation((...args) => {
+        mockToastAdd(kind, ...args)
+        return 0
+      })
+    }
+  })
+
   const i18n = createI18n({
     legacy: false,
     locale: 'en',

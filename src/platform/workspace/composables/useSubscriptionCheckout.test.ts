@@ -1,3 +1,4 @@
+import { useToast } from '@/components/ui/toast'
 import { useBillingCapabilities } from '@/platform/workspace/composables/useBillingCapabilities'
 import { render } from '@testing-library/vue'
 import type { Mock } from 'vitest'
@@ -398,18 +399,27 @@ vi.mock(import('@/config/comfyApi'), () => ({
   getComfyPlatformBaseUrl: () => 'https://platform.comfy.org'
 }))
 
-vi.mock<unknown>(
-  import('primevue/usetoast'), // eslint-disable-line primevue-removal/no-imports
-  () => ({
-    useToast: () => ({ add: mockToastAdd })
-  })
-)
-
 vi.mock(import('@/platform/telemetry'))
 
 vi.mock(import('@/platform/telemetry/reportError'), () => ({
   reportError: mockReportError
 }))
+
+beforeEach(() => {
+  const toast = useToast()
+  for (const kind of [
+    'success',
+    'error',
+    'info',
+    'warning',
+    'loading'
+  ] as const) {
+    vi.mocked(toast[kind]).mockImplementation((...args) => {
+      mockToastAdd(kind, ...args)
+      return 0
+    })
+  }
+})
 
 const i18n = createI18n({
   legacy: false,
@@ -1620,8 +1630,10 @@ describe('useSubscriptionCheckout', () => {
           errorType: 'billing_portal_open_failure'
         })
         expect(mockToastAdd).toHaveBeenCalledWith(
+          'error',
+          'Error',
           expect.objectContaining({
-            detail: 'Update your payment method before changing plans'
+            description: 'Update your payment method before changing plans'
           })
         )
       })

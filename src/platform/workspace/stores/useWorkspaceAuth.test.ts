@@ -122,7 +122,7 @@ function expectedExpiresAtMs(expiresAt: string): string {
 beforeEach(() => {
   stubFirebaseAuthHarness()
 
-  vi.mocked(useToast().error).mockImplementation(() => {})
+  vi.mocked(useToast().error).mockImplementation(() => 0)
 })
 
 describe('useWorkspaceAuthStore', () => {

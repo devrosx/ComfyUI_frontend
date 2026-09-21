@@ -4,7 +4,6 @@ import { useAssetExportStore } from '@/stores/assetExportStore'
 import { useNodeOutputStore } from '@/stores/nodeOutputStore'
 import { useNodeDefStore } from '@/stores/nodeDefStore'
 import { useWorkflowStore } from '@/platform/workflow/management/stores/workflowStore'
-import { useToastStore } from '@/platform/updates/common/toastStore'
 import type { CreateAssetExportData } from '@comfyorg/ingest-types'
 import { fromAny, fromPartial } from '@total-typescript/shoehorn'
 import { useToast } from '@/components/ui/toast'
@@ -608,17 +607,15 @@ describe('useMediaAssetActions', () => {
 
       expect(mockDownloadFile).toHaveBeenCalledTimes(2)
       await vi.waitFor(() => {
-        expect(useToastStore().add).toHaveBeenCalledWith(
+        expect(useToast().success).toHaveBeenCalledWith(
+          'Success',
           expect.objectContaining({
-            severity: 'success',
-            detail: 'Started downloading 1 file'
+            description: 'Started downloading 1 file'
           })
         )
-        expect(useToastStore().add).toHaveBeenCalledWith(
-          expect.objectContaining({
-            severity: 'error',
-            detail: '1 download failed'
-          })
+        expect(useToast().error).toHaveBeenCalledWith(
+          'Error',
+          expect.objectContaining({ description: '1 download failed' })
         )
       })
       expect(mockReportError).toHaveBeenCalledWith(failure, {

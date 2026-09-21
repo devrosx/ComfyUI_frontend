@@ -302,6 +302,7 @@ import { useBillingCapabilities } from '@/platform/workspace/composables/useBill
 import { useHasSavedPaymentMethod } from '@/platform/workspace/composables/useHasSavedPaymentMethod'
 import { useTopupOperation } from '@/platform/workspace/composables/useTopupOperation'
 import { useTeamWorkspaceStore } from '@/platform/workspace/stores/teamWorkspaceStore'
+import { useBillingOperationStore } from '@/platform/workspace/stores/billingOperationStore'
 import {
   bindOperationToCheckoutJourney,
   clearCheckoutJourney,
@@ -330,6 +331,7 @@ const { fetchBalance, fetchStatus, manageSubscription } = useBillingContext()
 const { canTopUp } = useBillingCapabilities()
 
 const workspaceStore = useTeamWorkspaceStore()
+const billingOperationStore = useBillingOperationStore()
 
 function emitTopupJourneyPhase(
   record: CheckoutJourneyRecord,
@@ -364,8 +366,7 @@ const {
   topupOperation,
   topup,
   retryPaymentAuthentication,
-  dismissOperation,
-  adoptPendingOperation
+  dismissOperation
 } = useTopupOperation()
 // Start over invalidates the attempt in flight: on the SDK rail the purchase
 // call resolves only at settlement, so a superseded attempt must not unlock

@@ -25,13 +25,14 @@ import { until, useEventListener } from '@vueuse/core'
 import { defineStore } from 'pinia'
 import { computed, shallowRef } from 'vue'
 
+import type { ToastId } from '@/components/ui/toast'
+import { useToast } from '@/components/ui/toast'
 import { useBillingContext } from '@/composables/billing/useBillingContext'
 import { useFeatureFlags } from '@/composables/useFeatureFlags'
 import { t } from '@/i18n'
 import { isCloud } from '@/platform/distribution/types'
 import { useSettingsDialog } from '@/platform/settings/composables/useSettingsDialog'
 import { useTelemetry } from '@/platform/telemetry'
-import { useToast } from '@/components/ui/toast'
 import type {
   BillingBalanceResponse,
   BillingCapabilitiesResponse,
@@ -71,7 +72,6 @@ import {
 } from './topupOperationView'
 
 type ProgressKind = 'processing' | 'action'
-type ToastMessage = Parameters<ReturnType<typeof useToastStore>['add']>[0]
 
 async function loadChallengePort(): Promise<EmbeddedChallengePort | undefined> {
   const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
@@ -96,10 +96,7 @@ export const useBillingSdkStore = defineStore('billingSdk', () => {
   const resumedOperations = new Set<string>()
   const drivenChallenges = new Set<string>()
   const offeredActions = new Map<string, Set<string>>()
-  const progressToasts = new Map<
-    string,
-    { kind: ProgressKind; message: ToastMessage }
-  >()
+  const progressToasts = new Map<string, { kind: ProgressKind; id: ToastId }>()
 
   const sdk = createBillingSdk({
     session: workspaceAuthStore.getUnifiedSessionClient(),
@@ -219,10 +216,7 @@ export const useBillingSdkStore = defineStore('billingSdk', () => {
       [...dismissed.value].filter((id) => id !== state.id)
     )
     if (state.phase === 'timed_out') {
-      toast.error({
-        severity: 'error',
-        summary: t('billingOperation.topupTimeout')
-      })
+      toast.error(t('billingOperation.topupTimeout'))
     }
     if (resumedOperations.delete(state.id)) void settleResumed(state)
   }
@@ -232,24 +226,18 @@ export const useBillingSdkStore = defineStore('billingSdk', () => {
       state.actionUrl === undefined ? 'processing' : 'action'
     const current = progressToasts.get(state.id)
     if (current?.kind === kind) return
-    if (current) toastStore.remove(current.message)
-    const message: ToastMessage = {
-      severity: kind === 'action' ? 'warn' : 'info',
-      summary: t(
-        kind === 'action'
-          ? 'billingOperation.topupActionRequired'
-          : 'billingOperation.topupProcessing'
-      ),
-      group: 'billing-operation'
-    }
-    progressToasts.set(state.id, { kind, message })
-    toast.error(message)
+    if (current) toast.dismiss(current.id)
+    const id =
+      kind === 'action'
+        ? toast.warning(t('billingOperation.topupActionRequired'))
+        : toast.info(t('billingOperation.topupProcessing'))
+    progressToasts.set(state.id, { kind, id })
   }
 
   function clearProgressToast(operationId: string) {
     const current = progressToasts.get(operationId)
     if (!current) return
-    toastStore.remove(current.message)
+    toast.dismiss(current.id)
     progressToasts.delete(operationId)
   }
 
@@ -279,10 +267,8 @@ export const useBillingSdkStore = defineStore('billingSdk', () => {
     if (offered.has(actionUrl)) return
     offeredActions.set(state.id, offered.add(actionUrl))
     if (window.open(actionUrl, '_blank')) return
-    toast.error({
-      severity: 'warn',
-      summary: t('g.warning'),
-      detail: t('subscription.preview.paymentPopupBlocked')
+    toast.warning(t('g.warning'), {
+      description: t('subscription.preview.paymentPopupBlocked')
     })
   }
 
@@ -305,19 +291,15 @@ export const useBillingSdkStore = defineStore('billingSdk', () => {
       ])
       useDialogStore().closeDialog({ key: 'top-up-credits' })
       useSettingsDialog().show(isCloud ? 'workspace' : 'credits')
-      toast.error({
-        severity: 'success',
-        summary: t('billingOperation.topupSuccess'),
-        life: 5000
+      toast.success(t('billingOperation.topupSuccess'), {
+        duration: 5000
       })
       return
     }
     if (state.phase === 'failed') {
-      toast.error({
-        severity: 'error',
-        summary: t('billingOperation.topupFailed'),
-        detail: declineDetail(state.declineReason),
-        life: 7000
+      toast.error(t('billingOperation.topupFailed'), {
+        description: declineDetail(state.declineReason),
+        duration: 7000
       })
     }
   }

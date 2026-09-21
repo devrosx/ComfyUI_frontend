@@ -3167,7 +3167,9 @@ describe('ComfyApp', () => {
         await noFiles
 
         expect(
-          vi.mocked(useToastStore().addAlert).mock.calls.map(([msg]) => msg)
+          vi
+            .mocked(useToast().warning)
+            .mock.calls.map(([, options]) => options?.description)
         ).toEqual(alerts)
         expect(
           vi.mocked(reportError).mock.calls.map(([, opts]) => opts.errorType)

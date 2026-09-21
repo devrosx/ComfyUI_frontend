@@ -1,3 +1,4 @@
+import { useToast } from '@/components/ui/toast'
 import { useBillingOperationStore } from '@/platform/workspace/stores/billingOperationStore'
 import { useTeamWorkspaceStore } from '@/platform/workspace/stores/teamWorkspaceStore'
 import {
@@ -83,21 +84,26 @@ vi.mock<unknown>(import('@/composables/useExternalLink'), () => ({
   })
 }))
 
-vi.mock<unknown>(import('@/components/ui/toast'), () => ({
-  useToast: () => ({
-    success: mockToastAdd,
-    error: mockToastAdd,
-    info: mockToastAdd,
-    warning: mockToastAdd,
-    loading: mockToastAdd,
-    custom: mockToastAdd
-  })
-}))
-
 vi.mock(import('@/base/credits/comfyCredits'), () => ({
   creditsToUsd: (credits: number) => credits,
   usdToCredits: (usd: number) => usd
 }))
+
+beforeEach(() => {
+  const toast = useToast()
+  for (const kind of [
+    'success',
+    'error',
+    'info',
+    'warning',
+    'loading'
+  ] as const) {
+    vi.mocked(toast[kind]).mockImplementation((...args) => {
+      mockToastAdd(...args)
+      return 0
+    })
+  }
+})
 
 const i18n = createI18n({
   legacy: false,
