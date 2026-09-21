@@ -2,7 +2,6 @@
 export const primeVueImportAllowlist = [
   'src/components/actionbar/ComfyRunButton/ComfyQueueButton.test.ts',
   'src/components/breadcrumb/SubgraphBreadcrumb.vue',
-  'src/components/button/MoreButton.test.ts',
   'src/components/common/InputKnob.vue',
   'src/components/common/LazyImage.vue',
   'src/components/common/TreeExplorer.vue',
