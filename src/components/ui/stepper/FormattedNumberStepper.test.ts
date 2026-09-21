@@ -70,6 +70,30 @@ describe('FormattedNumberStepper', () => {
     expect(input).toHaveValue('5')
   })
 
+  it('clamps typed values to both bounds', async () => {
+    const value = ref(5)
+    render(FormattedNumberStepper, {
+      props: {
+        modelValue: value.value,
+        min: 1,
+        max: 10,
+        'onUpdate:modelValue': (nextValue: number) => {
+          value.value = nextValue
+        }
+      },
+      global: { plugins: [i18n] }
+    })
+    const input = screen.getByRole('spinbutton')
+
+    await fireEvent.update(input, '-2')
+    expect(value.value).toBe(1)
+    expect(input).toHaveValue('1')
+
+    await fireEvent.update(input, '12')
+    expect(value.value).toBe(10)
+    expect(input).toHaveValue('10')
+  })
+
   it('does not round the model on focus and blur', async () => {
     const user = userEvent.setup()
     const updates: number[] = []

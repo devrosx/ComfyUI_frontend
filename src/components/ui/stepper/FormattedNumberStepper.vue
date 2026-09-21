@@ -138,10 +138,10 @@ function handleInputChange(e: Event) {
     return
   }
 
-  const clamped = clampOnInput ? Math.min(num, max) : num
-  const wasClamped = num > max
+  const clamped = clampOnInput ? clamp(num, min, max) : num
+  const wasClamped = clamped !== num
 
-  if (wasClamped) {
+  if (num > max) {
     emit('max-reached')
   }
 
