@@ -140,10 +140,7 @@ setAssertReporter(
   { forwardsToRum: isCloud }
 )
 
-app
-  .use(router)
-  .use(pinia)
-  .use(i18n)
+app.use(router).use(pinia).use(i18n)
 
 markStoresReady()
 
