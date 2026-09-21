@@ -355,14 +355,14 @@ test.describe(
 
       await test.step('user switches to a new tab and back', async () => {
         await expect(
-          topbar.workflowTabs.locator('.p-togglebutton')
+          topbar.workflowTabs.locator('.workflow-tab-button')
         ).toHaveCount(1)
         await topbar.newWorkflowButton.click()
         await expect(
-          topbar.workflowTabs.locator('.p-togglebutton')
+          topbar.workflowTabs.locator('.workflow-tab-button')
         ).toHaveCount(2)
         await topbar.getTab(0).click()
-        await expect(topbar.getTab(0)).toHaveClass(/p-togglebutton-checked/)
+        await expect(topbar.getTab(0)).toHaveAttribute('data-state', 'on')
       })
 
       await test.step('the node still shows its API-node color and friendly label', async () => {

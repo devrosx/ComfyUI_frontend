@@ -83,7 +83,7 @@ test.describe(
         const beforeSubscribes = agentConversation.subscribeCount()
         await topbar.newWorkflowButton.click()
         await expect(
-          topbar.workflowTabs.locator('.p-togglebutton')
+          topbar.workflowTabs.locator('.workflow-tab-button')
         ).toHaveCount(2)
         await topbar.getTab(0).click()
         await expect
