@@ -6,7 +6,7 @@
       </span>
     </div>
     <div
-      v-if="isLoadingVersions || isQueueing"
+      v-if="isBusy"
       class="flex flex-col items-center py-4 text-center text-muted"
     >
       <Spinner class="mb-2 size-8" />
@@ -152,6 +152,8 @@ const managerStore = useComfyManagerStore()
 const { checkNodeCompatibility } = useConflictDetection()
 
 const isQueueing = ref(false)
+const isLoadingVersions = ref(false)
+const isBusy = computed(() => isLoadingVersions.value || isQueueing.value)
 const selectedVersion = ref<string>(SelectedVersionValues.LATEST)
 const isInstallDisabled = computed(
   () =>
@@ -200,8 +202,7 @@ const latestInstallableVersion = computed(() =>
 )
 
 const latestUnavailableMessage = computed(() => {
-  if (isLoadingVersions.value || isQueueing.value || latestActiveVersion.value)
-    return ''
+  if (isBusy.value || latestActiveVersion.value) return ''
   if (registryService.error.value) return t('manager.versionLoadFailed')
   return fetchedVersions.value.some(
     (version) =>
@@ -210,8 +211,6 @@ const latestUnavailableMessage = computed(() => {
     ? t('manager.noActiveVersionsFlagged')
     : t('manager.noActiveVersions')
 })
-
-const isLoadingVersions = ref(false)
 
 const onNodePackChange = async () => {
   isLoadingVersions.value = true
