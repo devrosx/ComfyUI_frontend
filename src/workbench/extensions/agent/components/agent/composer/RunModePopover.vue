@@ -18,7 +18,6 @@ import Tooltip from '@/components/ui/tooltip/Tooltip.vue'
 import { buildTooltipConfig } from '@/composables/useTooltipConfig'
 import { reportError } from '@/platform/telemetry/reportError'
 
-
 import type { AgentRunModeValue } from '../../../stores/agent/agentRunModeStore'
 import { useAgentRunModeStore } from '../../../stores/agent/agentRunModeStore'
 

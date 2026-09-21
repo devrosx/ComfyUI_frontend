@@ -21,9 +21,12 @@ function attachmentIconClass(name: string): string {
 }
 
 function attachmentUrl(item: UserAttachment): string | undefined {
-  return item.ref
-    ? api.apiURL(`/view?filename=${encodeURIComponent(item.ref)}&type=input`)
-    : item.previewUrl
+  return (
+    item.previewUrl ??
+    (item.ref
+      ? api.apiURL(`/view?filename=${encodeURIComponent(item.ref)}&type=input`)
+      : undefined)
+  )
 }
 
 function attachmentAsset(item: UserAttachment): ReplyAsset | null {
