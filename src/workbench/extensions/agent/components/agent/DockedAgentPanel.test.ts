@@ -132,12 +132,15 @@ describe('DockedAgentPanel', () => {
     ).toBe('0px')
   })
 
-  it('fills the panel shell and draws the canvas seam border', () => {
+  it('fills the panel shell and draws a seam border only beside an opaque neighbor', async () => {
     openPanel()
-    renderPanel()
+    const view = renderPanel()
 
     const shell = screen.getByTestId('docked-agent-panel-shell')
 
+    expect(shell).toHaveClass('size-full', 'p-2')
+    expect(shell).not.toHaveClass('border-l')
+    await view.rerender({ hasOpaqueNeighbor: true })
     expect(shell).toHaveClass('border-l', 'border-interface-stroke')
   })
 
