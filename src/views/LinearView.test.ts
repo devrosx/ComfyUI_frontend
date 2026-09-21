@@ -38,7 +38,6 @@ vi.mock(
   }
 )
 
-
 function setViewport(width: number) {
   const happyDOM = (window as unknown as { happyDOM?: DetachedWindowAPI })
     .happyDOM

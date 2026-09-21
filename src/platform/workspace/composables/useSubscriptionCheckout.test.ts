@@ -398,12 +398,9 @@ vi.mock(import('@/config/comfyApi'), () => ({
   getComfyPlatformBaseUrl: () => 'https://platform.comfy.org'
 }))
 
-vi.mock<unknown>(
-  import('primevue/usetoast'), // eslint-disable-line primevue-removal/no-imports
-  () => ({
-    useToast: () => ({ add: mockToastAdd })
-  })
-)
+vi.mock<unknown>(import('primevue/usetoast'), () => ({
+  useToast: () => ({ add: mockToastAdd })
+}))
 
 vi.mock(import('@/platform/telemetry'))
 

@@ -15,7 +15,7 @@ vi.mock(import('@/platform/telemetry'))
 const mockToast = vi.hoisted(() => ({ add: vi.fn() }))
 
 vi.mock<unknown>(
-  import('primevue/usetoast'), // eslint-disable-line primevue-removal/no-imports
+  import('primevue/usetoast'),
 
   () => ({
     useToast: () => mockToast

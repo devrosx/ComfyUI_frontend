@@ -375,12 +375,9 @@ function setOriginalOwner(id = 'creator-1') {
   ]
 }
 
-vi.mock<unknown>(
-  import('primevue/usetoast'), // eslint-disable-line primevue-removal/no-imports
-  () => ({
-    useToast: () => ({ add: mockToastAdd })
-  })
-)
+vi.mock<unknown>(import('primevue/usetoast'), () => ({
+  useToast: () => ({ add: mockToastAdd })
+}))
 
 vi.mock<unknown>(
   import('@/platform/workspace/composables/useWorkspaceUI'),

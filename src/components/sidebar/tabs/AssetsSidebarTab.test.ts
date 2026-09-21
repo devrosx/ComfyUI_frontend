@@ -86,12 +86,9 @@ vi.mock<unknown>(
 
 vi.mock(import('@/platform/assets/utils/outputAssetUtil'))
 
-vi.mock<unknown>(
-  import('primevue/usetoast'), // eslint-disable-line primevue-removal/no-imports
-  () => ({
-    useToast: () => ({ add: vi.fn() })
-  })
-)
+vi.mock<unknown>(import('primevue/usetoast'), () => ({
+  useToast: () => ({ add: vi.fn() })
+}))
 
 const i18n = createI18n({
   legacy: false,
