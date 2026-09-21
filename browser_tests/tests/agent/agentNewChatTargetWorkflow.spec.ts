@@ -54,7 +54,7 @@ test.describe(
         .click()
       const tabs = page.getByTestId('workflow-tab')
       await expect(tabs).toHaveCount(2)
-      const activeTab = page.locator('.workflow-tabs .p-togglebutton-checked')
+      const activeTab = page.locator('.workflow-tab-button[data-state="on"]')
       await tabs.first().click()
       await expect(activeTab).toHaveText('Unsaved Workflow')
 
@@ -119,7 +119,7 @@ test.describe(
           exact: true
         })
         .click()
-      const activeTab = page.locator('.workflow-tabs .p-togglebutton-checked')
+      const activeTab = page.locator('.workflow-tab-button[data-state="on"]')
       await expect(activeTab).toHaveText('Unsaved Workflow (2)')
 
       await panel
