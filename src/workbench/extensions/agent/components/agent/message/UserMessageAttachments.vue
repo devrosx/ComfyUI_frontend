@@ -20,22 +20,26 @@ function attachmentIconClass(name: string): string {
   return kind === 'other' ? 'icon-[lucide--file]' : iconForMediaType(kind)
 }
 
+function attachmentUrl(item: UserAttachment): string | undefined {
+  return item.ref
+    ? api.apiURL(`/view?filename=${encodeURIComponent(item.ref)}&type=input`)
+    : item.previewUrl
+}
+
+function attachmentAsset(item: UserAttachment): ReplyAsset | null {
+  const kind = getMediaTypeFromFilename(item.name)
+  const url = attachmentUrl(item)
+  if (!url || kind === 'text' || kind === 'other') return null
+  return { url, filename: item.name, kind }
+}
+
 const splitAttachments = computed(() => {
   const grid: ReplyAsset[] = []
   const plain: UserAttachment[] = []
   for (const item of attachments) {
-    const kind = getMediaTypeFromFilename(item.name)
-    const url = item.ref
-      ? api.apiURL(`/view?filename=${encodeURIComponent(item.ref)}&type=input`)
-      : item.previewUrl
-    if (
-      url &&
-      (kind === 'image' ||
-        kind === 'video' ||
-        kind === 'audio' ||
-        kind === '3D')
-    ) {
-      grid.push({ url, filename: item.name, kind })
+    const asset = attachmentAsset(item)
+    if (asset) {
+      grid.push(asset)
     } else {
       plain.push(item)
     }
