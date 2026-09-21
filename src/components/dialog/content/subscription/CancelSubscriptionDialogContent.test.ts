@@ -104,22 +104,6 @@ vi.mock(import('@/platform/telemetry'))
 function renderComponent(
   props: { cancelAt?: string; flowAlreadyOpened?: boolean } = {}
 ) {
-  beforeEach(() => {
-    const toast = useToast()
-    for (const kind of [
-      'success',
-      'error',
-      'info',
-      'warning',
-      'loading'
-    ] as const) {
-      vi.mocked(toast[kind]).mockImplementation((...args) => {
-        mockToastAdd(kind, ...args)
-        return 0
-      })
-    }
-  })
-
   const i18n = createI18n({
     legacy: false,
     locale: 'en',
@@ -136,6 +120,19 @@ function renderComponent(
 
 describe('CancelSubscriptionDialogContent', () => {
   beforeEach(() => {
+    const toast = useToast()
+    for (const kind of [
+      'success',
+      'error',
+      'info',
+      'warning',
+      'loading'
+    ] as const) {
+      vi.mocked(toast[kind]).mockImplementation((...args) => {
+        mockToastAdd(kind, ...args)
+        return 0
+      })
+    }
     mockTier.value = 'STANDARD'
     mockShouldUseWorkspaceBilling.value = false
     useBillingCapabilities().canCancel = computed(() => true)
