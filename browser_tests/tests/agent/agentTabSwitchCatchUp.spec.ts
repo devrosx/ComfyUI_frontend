@@ -55,13 +55,13 @@ test.describe(
         await topbar.newWorkflowButton.click()
         await expect(tabs).toHaveCount(2)
         await expect(agentConversation.vueNodes.nodes).toHaveCount(0)
-        await expect(topbar.getTab(1)).toHaveAttribute('data-state', 'on')
+        await expect(topbar.getTab(1).and(topbar.getActiveTab())).toBeVisible()
         await expect(panel).toBeVisible()
       })
 
       await test.step('user returns to the edited workflow', async () => {
         await topbar.getTab(0).click()
-        await expect(topbar.getTab(0)).toHaveAttribute('data-state', 'on')
+        await expect(topbar.getTab(0).and(topbar.getActiveTab())).toBeVisible()
         await agentConversation.expectCanvasReplayed(lastTurn)
         await expect
           .poll(() => agentConversation.renderedWidgetRows())
@@ -185,7 +185,7 @@ test.describe(
       const returnToTabA = async () => {
         const before = agentConversation.subscribeCount()
         await topbar.getTab(0).click()
-        await expect(topbar.getTab(0)).toHaveAttribute('data-state', 'on')
+        await expect(topbar.getTab(0).and(topbar.getActiveTab())).toBeVisible()
         await expect
           .poll(() => agentConversation.subscribeCount())
           .toBe(before + 1)

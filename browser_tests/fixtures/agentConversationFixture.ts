@@ -898,7 +898,9 @@ export class AgentConversationHarness {
 
     const subscribes = this.subscribeCount()
     await this.topbar.getTab(0).click()
-    await expect(this.topbar.getTab(0)).toHaveAttribute('data-state', 'on')
+    await expect(
+      this.topbar.getTab(0).and(this.topbar.getActiveTab())
+    ).toBeVisible()
     await expect.poll(() => this.subscribeCount()).toBe(subscribes + 1)
     await this.waitForPendingFrames(
       nodeId,

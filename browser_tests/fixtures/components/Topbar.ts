@@ -75,9 +75,9 @@ export class Topbar {
   }
 
   getActiveTab(): Locator {
-    return this.workflowTabs
-      .locator('[data-state="on"]')
-      .getByTestId(TestIds.topbar.workflowTab)
+    return this.tabs.filter({
+      has: this.page.getByRole('tab', { selected: true })
+    })
   }
 
   async closeWorkflowTab(tabName: string) {

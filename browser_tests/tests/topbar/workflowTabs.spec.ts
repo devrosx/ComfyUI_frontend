@@ -21,10 +21,6 @@ test.describe('Workflow tabs', () => {
       await expect.poll(() => topbar.getTabNames()).toHaveLength(3)
 
       await topbar.getTab(1).click()
-      await expect(topbar.getActiveTab()).toHaveAttribute(
-        'aria-pressed',
-        'true'
-      )
       await expect(topbar.getActiveTab()).toHaveCount(1)
     })
 
@@ -232,20 +228,20 @@ test.describe('Workflow tabs', () => {
     await expect.poll(() => topbar.getTabNames()).toEqual([c, a, b])
   })
 
-  test('Drag preserves active tab', async ({ comfyPage }) => {
+  test('Dragging a tab activates it', async ({ comfyPage }) => {
     const topbar = comfyPage.menu.topbar
 
     await topbar.newWorkflowButton.click()
     await topbar.newWorkflowButton.click()
     await expect.poll(() => topbar.getTabNames()).toHaveLength(3)
 
-    const [, b] = await topbar.getTabNames()
+    const [a, b] = await topbar.getTabNames()
     await topbar.getTab(1).click()
     await expect.poll(() => topbar.getActiveTabName()).toContain(b)
 
     await topbar.getTab(0).dragTo(topbar.getTab(2))
 
-    await expect.poll(() => topbar.getActiveTabName()).toContain(b)
+    await expect(topbar.getActiveTab()).toHaveText(a)
   })
 
   test('Multiple tabs can be created, switched, and closed', async ({

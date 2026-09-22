@@ -25,53 +25,33 @@
         class="workflow-tabs-scroll flex size-full scrollbar-thin scrollbar-thumb-alpha-smoke-500-50 scrollbar-track-transparent overflow-x-auto overflow-y-hidden p-0"
         @wheel="handleWheel"
       >
-        <ToggleGroup
-          :class="
-            cn(
-              'workflow-tabs flex h-full items-center gap-1 bg-transparent',
-              props.class
-            )
-          "
-          :model-value="selectedWorkflow?.value"
-          type="single"
-          required
-          @click="onWorkflowClick"
+        <Tabs
+          class="h-full"
+          :model-value="workflowStore.activeWorkflow?.path ?? ''"
+          activation-mode="manual"
+          @update:model-value="openWorkflowByPath"
         >
-          <ToggleGroupItem
-            v-for="(option, index) in options"
-            :key="option.value"
-            :value="option.value"
-            :class="
-              cn(
-                tabStateVariants({
-                  active: option.value === selectedWorkflow?.value
-                }),
-                'workflow-tab-button group/tab relative h-full min-w-22.5 flex-initial p-0 font-[inherit] leading-[normal] font-medium'
-              )
-            "
+          <TabsList
+            :class="cn('workflow-tabs h-full flex-nowrap gap-1', props.class)"
           >
-            <span
-              class="relative inline-flex max-w-full items-center justify-center gap-2"
-            >
-              <WorkflowTab
-                class="max-w-full"
-                :workflow-option="option"
-                :is-first="index === 0"
-                :is-last="index === options.length - 1"
-                :data-workflow-path="option.value"
-                @click.middle="onCloseWorkflow(option)"
-                @close-to-left="closeWorkflows(options.slice(0, index))"
-                @close-to-right="closeWorkflows(options.slice(index + 1))"
-                @close-others="
-                  closeWorkflows([
-                    ...options.slice(index + 1),
-                    ...options.slice(0, index)
-                  ])
-                "
-              />
-            </span>
-          </ToggleGroupItem>
-        </ToggleGroup>
+            <WorkflowTab
+              v-for="(option, index) in options"
+              :key="option.value"
+              :workflow-option="option"
+              :is-first="index === 0"
+              :is-last="index === options.length - 1"
+              @click.middle="onCloseWorkflow(option)"
+              @close-to-left="closeWorkflows(options.slice(0, index))"
+              @close-to-right="closeWorkflows(options.slice(index + 1))"
+              @close-others="
+                closeWorkflows([
+                  ...options.slice(index + 1),
+                  ...options.slice(0, index)
+                ])
+              "
+            />
+          </TabsList>
+        </Tabs>
       </div>
     </div>
     <Button
@@ -164,9 +144,9 @@ import TopbarBadges from '@/components/topbar/TopbarBadges.vue'
 import TopbarSubscribeButton from '@/components/topbar/TopbarSubscribeButton.vue'
 import WorkflowTab from '@/components/topbar/WorkflowTab.vue'
 
-import { tabStateVariants } from '@/components/tab/tab.variants'
 import Button from '@/components/ui/button/Button.vue'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import Tabs from '@/components/ui/tabs/Tabs.vue'
+import TabsList from '@/components/ui/tabs/TabsList.vue'
 import { useCurrentUser } from '@/composables/auth/useCurrentUser'
 import { useWorkflowStatusDismissal } from '@/composables/useWorkflowStatusDismissal'
 import { useOverflowObserver } from '@/composables/element/useOverflowObserver'
@@ -190,7 +170,6 @@ import WorkflowOverflowMenu from './WorkflowOverflowMenu.vue'
 interface WorkflowOption {
   value: string
   workflow: ComfyWorkflow
-  revision: number
 }
 
 const props = defineProps<{
@@ -252,53 +231,18 @@ function openFeedback() {
 }
 
 const containerRef = ref<HTMLElement | null>(null)
-const selectionRevision = ref(0)
-
-const workflowToOption = (
-  workflow: ComfyWorkflow,
-  revision = 0
-): WorkflowOption => ({
-  value: workflow.path,
-  workflow,
-  revision
-})
 
 const options = computed<WorkflowOption[]>(() =>
-  workflowStore.openWorkflows.map(workflowToOption)
-)
-const selectedWorkflow = computed<WorkflowOption | null>(() =>
-  workflowStore.activeWorkflow
-    ? workflowToOption(
-        workflowStore.activeWorkflow as ComfyWorkflow,
-        selectionRevision.value
-      )
-    : null
+  workflowStore.openWorkflows.map((workflow) => ({
+    value: workflow.path,
+    workflow
+  }))
 )
 
-const onWorkflowClick = async (event: MouseEvent) => {
-  const target = event.target
-  if (!(target instanceof HTMLElement)) return
-
-  const workflowElement =
-    target.closest<HTMLElement>('[data-workflow-path]') ??
-    target
-      .closest<HTMLButtonElement>('button')
-      ?.querySelector<HTMLElement>('[data-workflow-path]')
-  const path = workflowElement?.dataset.workflowPath
+async function openWorkflowByPath(path: string | number) {
   const option = options.value.find(({ value }) => value === path)
   if (!option) return
-
-  try {
-    const opened = await workflowService.openWorkflow(option.workflow)
-    if (opened === false) {
-      selectionRevision.value++
-      await nextTick()
-    }
-  } catch (error) {
-    selectionRevision.value++
-    await nextTick()
-    throw error
-  }
+  await workflowService.openWorkflow(option.workflow)
 }
 
 const closeWorkflows = async (options: WorkflowOption[]) => {
@@ -338,7 +282,7 @@ const scroll = (direction: number) => {
 const ensureActiveTabVisible = async (
   options: { waitForDom?: boolean } = {}
 ) => {
-  if (!selectedWorkflow.value) return
+  if (!workflowStore.activeWorkflow) return
 
   if (options.waitForDom !== false) {
     await nextTick()
@@ -348,7 +292,7 @@ const ensureActiveTabVisible = async (
   if (!containerElement) return
 
   const activeTabElement = containerElement.querySelector(
-    '.workflow-tab-button[data-state="on"]'
+    '[role="tab"][aria-selected="true"]'
   )
   if (!activeTabElement) return
 
