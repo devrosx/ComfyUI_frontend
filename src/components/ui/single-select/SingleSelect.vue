@@ -111,6 +111,7 @@ import {
   selectTriggerVariants,
   stopEscapeToDocument
 } from '@/components/ui/select/select.variants'
+import type { SelectOption } from '@/components/ui/select/types'
 import { useAttrsClass } from '@/composables/useAttrsClass'
 import { useModalLiftedZIndex } from '@/composables/useModalLiftedZIndex'
 import { usePopoverSizing } from '@/composables/usePopoverSizing'
@@ -136,7 +137,7 @@ const {
   contentStyle
 } = defineProps<{
   label?: string
-  options?: { name: string; value: string | number }[]
+  options?: SelectOption<string | number>[]
   /** Trigger size: 'lg' (40px, Interface) or 'md' (32px, Node) */
   size?: 'lg' | 'md'
   /** Show invalid (destructive) border */
