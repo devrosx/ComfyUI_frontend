@@ -72,31 +72,6 @@ describe('FormRadioGroup', () => {
       expect(radios[1]).toHaveAttribute('value', 'Option B')
     })
 
-    it('handles custom object with optionLabel and optionValue', () => {
-      renderComponent({
-        modelValue: 2,
-        options: [
-          { name: 'First Option', id: '1' },
-          { name: 'Second Option', id: '2' },
-          { name: 'Third Option', id: '3' }
-        ],
-        optionLabel: 'name',
-        optionValue: 'id',
-        id: 'test-radio'
-      })
-
-      const radios = screen.getAllByRole('radio')
-      expect(radios).toHaveLength(3)
-
-      expect(radios[0]).toHaveAttribute('value', '1')
-      expect(radios[1]).toHaveAttribute('value', '2')
-      expect(radios[2]).toHaveAttribute('value', '3')
-
-      expect(screen.getByText('First Option')).toBeInTheDocument()
-      expect(screen.getByText('Second Option')).toBeInTheDocument()
-      expect(screen.getByText('Third Option')).toBeInTheDocument()
-    })
-
     it('handles mixed array with strings and SettingOptions', () => {
       renderComponent({
         modelValue: 'complex',
@@ -139,17 +114,6 @@ describe('FormRadioGroup', () => {
 
       expect(screen.queryAllByRole('radio')).toHaveLength(0)
     })
-
-    it('handles object with missing properties gracefully', () => {
-      renderComponent({
-        modelValue: 'opt1',
-        options: [{ label: 'Option 1', val: 'opt1' }],
-        id: 'test-radio'
-      })
-
-      expect(screen.getAllByRole('radio')).toHaveLength(1)
-      expect(screen.getByText('Unknown')).toBeInTheDocument()
-    })
   })
 
   describe('component functionality', () => {
@@ -165,6 +129,23 @@ describe('FormRadioGroup', () => {
 
       await user.click(screen.getByRole('radio', { name: 'B' }))
       expect(emitted()['update:modelValue']).toEqual([['B']])
+    })
+
+    it('keeps numeric option values numeric', async () => {
+      const user = userEvent.setup()
+      const { emitted } = renderComponent({
+        modelValue: 1,
+        options: [
+          { text: 'One', value: 1 },
+          { text: 'Two', value: 2 }
+        ] satisfies SettingOption[],
+        id: 'count'
+      })
+
+      expect(screen.getByRole('radio', { name: 'One' })).toBeChecked()
+
+      await user.click(screen.getByRole('radio', { name: 'Two' }))
+      expect(emitted()['update:modelValue']).toEqual([[2]])
     })
 
     it('sets ids on radio buttons', () => {

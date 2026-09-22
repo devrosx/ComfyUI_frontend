@@ -1,6 +1,6 @@
 <template>
   <RadioGroup
-    v-model="selectedValue"
+    v-model="modelValue"
     :name="id"
     orientation="horizontal"
     class="flex-row gap-4"
@@ -12,7 +12,7 @@
     >
       <RadioGroupItem
         :id="`${id}-${option.value}`"
-        :value="String(option.value)"
+        :value="option.value"
         :aria-describedby="`${option.text}-label`"
       />
       <label
@@ -33,49 +33,18 @@ import RadioGroup from '@/components/ui/radio-group/RadioGroup.vue'
 import RadioGroupItem from '@/components/ui/radio-group/RadioGroupItem.vue'
 import type { SettingOption } from '@/platform/settings/types'
 
-type RadioValue = string | number | null
-
-const props = defineProps<{
-  modelValue: RadioValue
-  options?: (string | SettingOption | Record<string, string>)[]
-  optionLabel?: string
-  optionValue?: string
+const { options = [] } = defineProps<{
+  options?: (string | SettingOption)[]
   id?: string
 }>()
 
-const emit = defineEmits<{
-  'update:modelValue': [value: RadioValue]
-}>()
+const modelValue = defineModel<string | number | null>()
 
-const normalizedOptions = computed<SettingOption[]>(() => {
-  if (!props.options) return []
-
-  return props.options.map((option) => {
-    if (typeof option === 'string') {
-      return { text: option, value: option }
-    }
-
-    if ('text' in option) {
-      return {
-        text: option.text,
-        value: option.value ?? option.text
-      }
-    }
-    // Handle optionLabel/optionValue
-    return {
-      text: option[props.optionLabel || 'text'] || 'Unknown',
-      value: option[props.optionValue || 'value']
-    }
-  })
-})
-
-const selectedValue = computed({
-  get: () => (props.modelValue === null ? undefined : String(props.modelValue)),
-  set: (value: string) => {
-    const option = normalizedOptions.value.find(
-      (option) => String(option.value) === value
-    )
-    if (option) emit('update:modelValue', option.value ?? option.text)
-  }
-})
+const normalizedOptions = computed(() =>
+  options.map((option) =>
+    typeof option === 'string'
+      ? { text: option, value: option }
+      : { text: option.text, value: option.value ?? option.text }
+  )
+)
 </script>
