@@ -29,7 +29,7 @@
         :copy="passwordRulesCopy"
         root-class="text-sm"
         list-class="mt-1 space-y-1"
-        unmet-class="text-red-500"
+        unmet-class="text-destructive-background"
       />
     </div>
   </FormField>
@@ -50,7 +50,7 @@
       :class="fieldClass"
       :aria-invalid="$field.invalid"
     />
-    <small v-if="$field.error" class="text-red-500">{{
+    <small v-if="$field.error" class="text-destructive-background">{{
       $field.error.message
     }}</small>
   </FormField>

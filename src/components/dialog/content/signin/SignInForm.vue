@@ -19,7 +19,7 @@
         :placeholder="t('auth.login.emailPlaceholder')"
         :aria-invalid="$field.invalid"
       />
-      <small v-if="$field.invalid" class="text-red-500">{{
+      <small v-if="$field.invalid" class="text-destructive-background">{{
         $field.error.message
       }}</small>
     </FormField>
@@ -54,7 +54,7 @@
         :aria-invalid="$field.invalid"
         class="h-10"
       />
-      <small v-if="$field.invalid" class="text-red-500">{{
+      <small v-if="$field.invalid" class="text-destructive-background">{{
         $field.error.message
       }}</small>
     </FormField>

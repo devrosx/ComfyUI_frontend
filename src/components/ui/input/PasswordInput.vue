@@ -4,7 +4,7 @@ import { ref } from 'vue'
 
 import { cn } from '@comfyorg/tailwind-utils'
 
-import Button from '../button/Button.vue'
+import Button from '@/components/ui/button/Button.vue'
 import Input from './Input.vue'
 
 const {

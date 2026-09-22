@@ -33,7 +33,7 @@
           autocomplete="email"
           required
         />
-        <small v-if="errorMessage" class="text-red-500">
+        <small v-if="errorMessage" class="text-destructive-background">
           {{ errorMessage }}
         </small>
       </div>

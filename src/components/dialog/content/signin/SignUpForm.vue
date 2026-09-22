@@ -22,7 +22,7 @@
         :placeholder="t('auth.signup.emailPlaceholder')"
         :aria-invalid="$field.invalid"
       />
-      <small v-if="$field.error" class="text-red-500">{{
+      <small v-if="$field.error" class="text-destructive-background">{{
         $field.error.message
       }}</small>
     </FormField>

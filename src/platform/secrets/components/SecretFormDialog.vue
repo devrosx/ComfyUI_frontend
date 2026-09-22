@@ -44,7 +44,7 @@
                 </SelectItem>
               </SelectContent>
             </Select>
-            <small v-if="errors.provider" class="text-red-500">
+            <small v-if="errors.provider" class="text-destructive-background">
               {{ errors.provider }}
             </small>
             <small v-else class="text-muted">
@@ -88,7 +88,7 @@
               :placeholder="$t('secrets.namePlaceholder')"
               :aria-invalid="!!errors.name"
             />
-            <small v-if="errors.name" class="text-red-500">
+            <small v-if="errors.name" class="text-destructive-background">
               {{ errors.name }}
             </small>
           </div>
@@ -137,7 +137,10 @@
               "
               :aria-invalid="!!errors.secretValue"
             />
-            <small v-if="errors.secretValue" class="text-red-500">
+            <small
+              v-if="errors.secretValue"
+              class="text-destructive-background"
+            >
               {{ errors.secretValue }}
             </small>
             <small v-else class="text-muted">
