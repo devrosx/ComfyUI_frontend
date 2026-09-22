@@ -30,7 +30,7 @@ test.describe(
         page.locator('#graph-canvas'),
         page.getByRole('button', { name: 'Reset View' })
       )
-      const tabs = topbar.workflowTabs.locator('.workflow-tab-button')
+      const tabs = topbar.tabs
       const lastTurn = agentConversation.conversation.turns.length - 1
 
       const widgetRows =
@@ -146,7 +146,7 @@ test.describe(
         page.locator('#graph-canvas'),
         page.getByRole('button', { name: 'Reset View' })
       )
-      const tabs = topbar.workflowTabs.locator('.workflow-tab-button')
+      const tabs = topbar.tabs
       const lastTurn = agentConversation.conversation.turns.length - 1
 
       const expectViewport = async (viewport: {

@@ -354,15 +354,11 @@ test.describe(
       })
 
       await test.step('user switches to a new tab and back', async () => {
-        await expect(
-          topbar.workflowTabs.locator('.workflow-tab-button')
-        ).toHaveCount(1)
+        await expect(topbar.tabs).toHaveCount(1)
         await topbar.newWorkflowButton.click()
-        await expect(
-          topbar.workflowTabs.locator('.workflow-tab-button')
-        ).toHaveCount(2)
+        await expect(topbar.tabs).toHaveCount(2)
         await topbar.getTab(0).click()
-        await expect(topbar.getTab(0)).toHaveAttribute('data-state', 'on')
+        await expect(topbar.getTab(0).and(topbar.getActiveTab())).toBeVisible()
       })
 
       await test.step('the node still shows its API-node color and friendly label', async () => {

@@ -22,7 +22,7 @@ test.describe(
     }) => {
       test.setTimeout(90_000)
       const topbar = new Topbar(page)
-      const tabs = topbar.workflowTabs.locator('.workflow-tab-button')
+      const tabs = topbar.tabs
       const lastTurn = agentConversation.conversation.turns.length - 1
 
       // What Run actually submits, independent of what the canvas paints:
