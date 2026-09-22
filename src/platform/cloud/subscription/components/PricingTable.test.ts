@@ -185,9 +185,6 @@ function renderComponent() {
       plugins: [i18n],
       components: {
         Button
-      },
-      stubs: {
-        Popover: { template: '<div><slot /></div>' }
       }
     }
   })

@@ -46,10 +46,7 @@ function renderComponent() {
   return render(PricingTableWorkspace, {
     global: {
       plugins: [i18n],
-      components: { Button },
-      stubs: {
-        Popover: { template: '<div><slot /></div>' }
-      }
+      components: { Button }
     }
   })
 }
