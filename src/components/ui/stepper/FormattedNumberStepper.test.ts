@@ -48,6 +48,24 @@ describe('FormattedNumberStepper', () => {
     expect(screen.getByText('%')).toBeInTheDocument()
   })
 
+  it('keeps a nullable value empty until the user changes it', async () => {
+    const user = userEvent.setup()
+    const value = ref<number | null>(null)
+    const Harness = defineComponent({
+      components: { FormattedNumberStepper },
+      setup: () => ({ value }),
+      template: '<FormattedNumberStepper v-model="value" :min="1" />'
+    })
+    render(Harness, { global: { plugins: [i18n] } })
+
+    const input = screen.getByRole('spinbutton')
+    expect(input).toHaveValue('')
+    expect(input).not.toHaveAttribute('aria-valuenow')
+
+    await user.click(screen.getByRole('button', { name: 'Increment' }))
+    expect(input).toHaveValue('1')
+  })
+
   it('does not emit an invalid value when cleared', async () => {
     const user = userEvent.setup()
     const updates: number[] = []

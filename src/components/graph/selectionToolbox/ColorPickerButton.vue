@@ -33,7 +33,7 @@
           :key="option.name"
           :value="option.name"
           :aria-label="option.localizedName"
-          class="color-picker-option flex-none"
+          class="color-picker-option"
         >
           <i
             v-tooltip.top="option.localizedName"

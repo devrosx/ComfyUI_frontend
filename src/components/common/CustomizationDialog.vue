@@ -25,7 +25,7 @@
                 :key="option.value"
                 :value="option.value"
                 :aria-label="option.name"
-                class="flex-none p-2"
+                class="p-2"
               >
                 <i
                   :class="cn('pi text-lg', option.value)"

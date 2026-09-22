@@ -8,15 +8,17 @@
       )
     "
   >
-    <button
+    <Button
       type="button"
-      class="focus-visible:ring-secondary-foreground flex h-full w-6 shrink-0 cursor-pointer items-center justify-center rounded-l-lg border-none bg-transparent text-muted-foreground transition-colors hover:text-base-foreground focus-visible:ring-1 focus-visible:outline-none focus-visible:ring-inset disabled:opacity-30"
-      :disabled="disabled || modelValue <= min"
+      variant="muted-textonly"
+      size="unset"
+      class="h-full w-6 shrink-0 rounded-l-lg focus-visible:ring-inset disabled:opacity-30"
+      :disabled="disabled || modelValue === null || modelValue <= min"
       :aria-label="$t('g.decrement')"
       @click="handleStep(-1)"
     >
       <i class="icon-[lucide--minus] size-4" />
-    </button>
+    </Button>
     <div
       class="flex flex-1 items-center justify-center gap-0.5 overflow-hidden"
     >
@@ -30,7 +32,7 @@
         inputmode="decimal"
         :aria-label="ariaLabel"
         :aria-labelledby="ariaLabelledby"
-        :aria-valuenow="modelValue"
+        :aria-valuenow="modelValue ?? undefined"
         :aria-valuemin="Number.isFinite(min) ? min : undefined"
         :aria-valuemax="Number.isFinite(max) ? max : undefined"
         :style="{ width: `${inputWidth}ch` }"
@@ -45,15 +47,17 @@
       <span v-if="suffix">{{ suffix }}</span>
       <slot name="suffix" />
     </div>
-    <button
+    <Button
       type="button"
-      class="focus-visible:ring-secondary-foreground flex h-full w-6 shrink-0 cursor-pointer items-center justify-center rounded-r-lg border-none bg-transparent text-muted-foreground transition-colors hover:text-base-foreground focus-visible:ring-1 focus-visible:outline-none focus-visible:ring-inset disabled:opacity-30"
-      :disabled="disabled || modelValue >= max"
+      variant="muted-textonly"
+      size="unset"
+      class="h-full w-6 shrink-0 rounded-r-lg focus-visible:ring-inset disabled:opacity-30"
+      :disabled="disabled || (modelValue !== null && modelValue >= max)"
       :aria-label="$t('g.increment')"
       @click="handleStep(1)"
     >
       <i class="icon-[lucide--plus] size-4" />
-    </button>
+    </Button>
   </label>
 </template>
 
@@ -62,9 +66,12 @@ import { computed, ref, useId, watch } from 'vue'
 
 import { cn } from '@comfyorg/tailwind-utils'
 
+import Button from '@/components/ui/button/Button.vue'
+
 import { formatNumberInput } from './formatNumberInput'
 
 const {
+  modelValue,
   min = 0,
   max = Infinity,
   step = 1,
@@ -75,6 +82,7 @@ const {
   clampOnInput = true,
   disabled = false
 } = defineProps<{
+  modelValue: number | null
   min?: number
   max?: number
   step?: number | ((value: number) => number)
@@ -87,28 +95,30 @@ const {
 }>()
 
 const emit = defineEmits<{
+  'update:modelValue': [value: number]
   'max-reached': []
 }>()
 
-const modelValue = defineModel<number>({ required: true })
-
 const inputId = useId()
 const inputRef = ref<HTMLInputElement | null>(null)
-const inputValue = ref(formatNumber(modelValue.value))
+const inputValue = ref(formatNumber(modelValue))
 const isDirty = ref(false)
 
 const inputWidth = computed(() =>
   Math.min(Math.max(inputValue.value.length, 1) + 0.5, 9)
 )
 
-watch(modelValue, (newValue) => {
-  if (document.activeElement !== inputRef.value) {
-    inputValue.value = formatNumber(newValue)
+watch(
+  () => modelValue,
+  (newValue) => {
+    if (document.activeElement !== inputRef.value) {
+      inputValue.value = formatNumber(newValue)
+    }
   }
-})
+)
 
-function formatNumber(num: number): string {
-  return num.toLocaleString('en-US', formatOptions)
+function formatNumber(num: number | null): string {
+  return num?.toLocaleString('en-US', formatOptions) ?? ''
 }
 
 function parseFormattedNumber(str: string): number | undefined {
@@ -123,7 +133,11 @@ function clamp(value: number, minVal: number, maxVal: number): number {
 }
 
 function getStepAmount(): number {
-  return typeof step === 'function' ? step(modelValue.value) : step
+  return typeof step === 'function' ? step(modelValue ?? min) : step
+}
+
+function updateModelValue(value: number) {
+  if (value !== modelValue) emit('update:modelValue', value)
 }
 
 function handleInputChange(e: Event) {
@@ -145,7 +159,7 @@ function handleInputChange(e: Event) {
     emit('max-reached')
   }
 
-  modelValue.value = clamped
+  updateModelValue(clamped)
 
   if (!wasClamped && (raw.startsWith('-') || raw.includes('.'))) {
     inputValue.value = raw
@@ -169,14 +183,14 @@ function handleInputChange(e: Event) {
 function handleInputBlur() {
   const parsed = isDirty.value
     ? parseFormattedNumber(inputValue.value)
-    : modelValue.value
+    : modelValue
   isDirty.value = false
-  if (parsed === undefined) {
-    inputValue.value = formatNumber(modelValue.value)
+  if (parsed === undefined || parsed === null) {
+    inputValue.value = formatNumber(modelValue)
     return
   }
   const clamped = clamp(parsed, min, max)
-  modelValue.value = clamped
+  updateModelValue(clamped)
   inputValue.value = formatNumber(clamped)
 }
 
@@ -189,8 +203,9 @@ function handleInputFocus(e: FocusEvent) {
 
 function handleStep(direction: 1 | -1) {
   const stepAmount = getStepAmount()
-  const newValue = clamp(modelValue.value + stepAmount * direction, min, max)
-  modelValue.value = newValue
+  const currentValue = modelValue ?? 0
+  const newValue = clamp(currentValue + stepAmount * direction, min, max)
+  updateModelValue(newValue)
   inputValue.value = formatNumber(newValue)
   isDirty.value = false
 }

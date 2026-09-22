@@ -2,16 +2,17 @@
   <SearchInput
     :model-value="internalValue"
     v-bind="$attrs"
-    class="w-full"
     :debounce-time="0"
     :invalid="validationState === ValidationState.INVALID"
     @update:model-value="handleInput"
     @blur="handleBlur"
   >
     <template #trailing="{ iconClass, positionClass }">
-      <button
+      <Button
         v-show="validationState !== ValidationState.IDLE"
         type="button"
+        variant="muted-textonly"
+        size="icon-sm"
         :class="cn('absolute flex', positionClass)"
         :aria-label="$t('g.validate')"
         :disabled="validationState === ValidationState.LOADING"
@@ -19,7 +20,7 @@
         @click="validateUrl(props.modelValue)"
       >
         <i :class="cn(validationIcon, iconClass)" />
-      </button>
+      </Button>
     </template>
   </SearchInput>
 </template>
@@ -29,6 +30,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 
 import { cn } from '@comfyorg/tailwind-utils'
 
+import Button from '@/components/ui/button/Button.vue'
 import SearchInput from '@/components/ui/search-input/SearchInput.vue'
 import { isValidUrl } from '@/utils/formatUtil'
 import { checkUrlReachable } from '@/utils/networkUtil'

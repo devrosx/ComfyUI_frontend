@@ -7,7 +7,7 @@ import enMessages from '@/locales/en/main.json' with { type: 'json' }
 import FormItem from './FormItem.vue'
 
 describe('FormItem', () => {
-  it('normalizes a nullable number value for the stepper', () => {
+  it('passes a nullable number value to the stepper', () => {
     render(FormItem, {
       props: {
         formValue: null,
@@ -27,7 +27,7 @@ describe('FormItem', () => {
     })
 
     expect(screen.getByRole('spinbutton', { name: 'CUDA device' })).toHaveValue(
-      '0'
+      ''
     )
   })
 
@@ -50,4 +50,29 @@ describe('FormItem', () => {
     expect(screen.getByRole('radio', { name: 'Enabled' })).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: 'Disabled' })).toBeInTheDocument()
   })
+
+  it.for(['slider', 'knob'] as const)(
+    'labels both controls in a %s field',
+    (type) => {
+      render(FormItem, {
+        props: {
+          formValue: 5,
+          id: type,
+          item: { name: 'Volume', type }
+        },
+        global: {
+          plugins: [
+            createI18n({
+              legacy: false,
+              locale: 'en',
+              messages: { en: enMessages }
+            })
+          ],
+          directives: { tooltip: {} }
+        }
+      })
+
+      expect(screen.getAllByLabelText('Volume')).toHaveLength(2)
+    }
+  )
 })

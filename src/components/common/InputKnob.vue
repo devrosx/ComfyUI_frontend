@@ -1,24 +1,27 @@
 <template>
   <div class="input-knob flex flex-row items-center gap-2">
     <Knob
-      :model-value="modelValue"
+      :model-value
       :value-template="displayValue"
-      class="knob-part"
-      :class="knobClass"
-      :min="min"
-      :max="max"
-      :step="step"
+      class="knob-part w-32"
+      :min
+      :max
+      :step
+      :aria-label="ariaLabel"
+      :aria-labelledby="ariaLabelledby"
       v-bind="$attrs"
       @update:model-value="updateValue"
     />
     <FormattedNumberStepper
-      :model-value="modelValue"
+      :model-value
       class="input-part"
       :format-options="{ maximumFractionDigits: 3 }"
       :class="inputClass"
-      :min="min"
-      :max="max"
-      :step="step"
+      :min
+      :max
+      :step
+      :aria-label
+      :aria-labelledby="ariaLabelledby"
       @update:model-value="updateValue"
     />
   </div>
@@ -26,61 +29,48 @@
 
 <script setup lang="ts">
 import Knob from 'primevue/knob'
-import { ref, watch } from 'vue'
 
 import FormattedNumberStepper from '@/components/ui/stepper/FormattedNumberStepper.vue'
 
-const props = defineProps<{
-  modelValue: number
-  inputClass?: string
-  knobClass?: string
-  min?: number
-  max?: number
-  step?: number
-  resolution?: number
-}>()
+const { modelValue, min, max, step, resolution, ariaLabel, ariaLabelledby } =
+  defineProps<{
+    modelValue: number
+    inputClass?: string
+    min?: number
+    max?: number
+    step?: number
+    resolution?: number
+    ariaLabel?: string
+    ariaLabelledby?: string
+  }>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: number): void
 }>()
 
-const localValue = ref(props.modelValue)
-
-watch(
-  () => props.modelValue,
-  (newValue) => {
-    localValue.value = newValue
-  }
-)
-
 const updateValue = (newValue: number | null) => {
   if (newValue === null) {
-    // If the input is cleared, reset to the minimum value or 0
-    newValue = Number(props.min) || 0
+    newValue = Number(min) || 0
   }
 
-  const min = Number(props.min ?? Number.NEGATIVE_INFINITY)
-  const max = Number(props.max ?? Number.POSITIVE_INFINITY)
-  const step = Number(props.step) || 1
+  const minimum = Number(min ?? Number.NEGATIVE_INFINITY)
+  const maximum = Number(max ?? Number.POSITIVE_INFINITY)
+  const stepAmount = Number(step) || 1
 
-  // Ensure the value is within the allowed range
-  newValue = Math.max(min, Math.min(max, newValue))
+  newValue = Math.max(minimum, Math.min(maximum, newValue))
 
-  // Round to the nearest step
-  newValue = Math.round(newValue / step) * step
+  newValue = Math.round(newValue / stepAmount) * stepAmount
 
-  // Update local value and emit change
-  localValue.value = newValue
   emit('update:modelValue', newValue)
 }
 
 const displayValue = (value: number): string => {
   updateValue(value)
-  const stepString = (props.step ?? 1).toString()
-  const resolution = stepString.includes('.')
+  const stepString = (step ?? 1).toString()
+  const stepResolution = stepString.includes('.')
     ? stepString.split('.')[1].length
     : 0
-  return value.toFixed(props.resolution ?? resolution)
+  return value.toFixed(resolution ?? stepResolution)
 }
 
 defineOptions({

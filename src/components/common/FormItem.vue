@@ -17,13 +17,11 @@
         <slot name="name-suffix" />
       </span>
     </div>
-    <div
-      class="form-input flex justify-end [&_.input-knob_.knob-part]:w-32 [&_.input-slider_.slider-part]:w-20 [&>input]:w-44"
-    >
+    <div class="form-input flex justify-end">
       <component
         :is="markRaw(getFormComponent(props.item))"
         :id="props.id"
-        v-model:model-value="componentValue"
+        v-model:model-value="formValue"
         :aria-labelledby="`${props.id}-label`"
         v-bind="getFormAttrs(props.item)"
       />
@@ -32,7 +30,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, markRaw } from 'vue'
+import { markRaw } from 'vue'
 import type { Component } from 'vue'
 
 import BackgroundImageUpload from '@/components/common/BackgroundImageUpload.vue'
@@ -55,17 +53,6 @@ const props = defineProps<{
   id?: string
   labelClass?: string | Record<string, boolean>
 }>()
-
-const componentValue = computed({
-  get: () => {
-    if (props.item.type !== 'number' || typeof formValue.value === 'number') {
-      return formValue.value
-    }
-    const min = props.item.attrs?.min
-    return typeof min === 'number' && Number.isFinite(min) ? min : 0
-  },
-  set: (value: unknown) => (formValue.value = value)
-})
 
 function getFormAttrs(item: FormItem) {
   const attrs = { ...(item.attrs || {}) }
@@ -96,6 +83,9 @@ function getFormAttrs(item: FormItem) {
       break
     case 'radio':
       attrs['options'] = item.options
+      attrs['class'] = 'w-44'
+      break
+    case 'text':
       attrs['class'] = 'w-44'
       break
   }

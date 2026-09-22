@@ -53,8 +53,7 @@
     ref="itemInputRef"
     v-model="itemLabel"
     data-testid="subgraph-breadcrumb-rename-input"
-    class="fixed z-10000 p-2 text-[.8rem]"
-    :style="{ width: `${itemInputWidth}px` }"
+    class="fixed z-10000 w-50 p-2 text-[.8rem]"
     @blur="inputBlur(false)"
     @click.stop
     @keydown.enter="inputBlur(true)"
@@ -108,7 +107,6 @@ const workflowStore = useWorkflowStore()
 const workflowService = useWorkflowService()
 const isEditing = ref(false)
 const itemLabel = ref<string>()
-const itemInputWidth = ref(200)
 const itemInputRef = ref<InstanceType<typeof Input>>()
 const wrapperRef = ref<HTMLAnchorElement>()
 
@@ -162,7 +160,6 @@ const startRename = async () => {
 
   isEditing.value = true
   itemLabel.value = item.label as string
-  itemInputWidth.value = Math.max(200, wrapperRef.value?.offsetWidth ?? 0)
   void nextTick(() => {
     itemInputRef.value?.focus()
     itemInputRef.value?.select()

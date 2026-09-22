@@ -8,7 +8,7 @@
           v-for="option in planScopeOptions"
           :key="option.value"
           :value="option.value"
-          class="h-8 flex-none rounded-b-none bg-base-background px-4 text-base-foreground opacity-50 hover:opacity-100 data-[state=on]:opacity-100"
+          class="h-8 rounded-b-none bg-base-background px-4 text-base-foreground opacity-50 hover:opacity-100 data-[state=on]:opacity-100"
         >
           {{ option.label }}
         </ToggleGroupItem>
@@ -71,7 +71,7 @@
             v-for="option in billingCycleOptions"
             :key="option.value"
             :value="option.value"
-            class="h-8 min-w-44 flex-none px-5 text-muted-foreground data-[state=on]:bg-base-foreground data-[state=on]:text-base-background"
+            class="h-8 min-w-44 px-5 text-muted-foreground data-[state=on]:bg-base-foreground data-[state=on]:text-base-background"
           >
             <div class="flex items-center gap-2">
               <span>{{ option.label }}</span>

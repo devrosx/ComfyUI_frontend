@@ -126,38 +126,17 @@
                 :class="{ 'p-invalid': errors.secretValue }"
               />
             </template>
-            <div v-else class="relative">
-              <Input
-                id="secret-value"
-                v-model="form.secretValue"
-                :type="secretVisible ? 'text' : 'password'"
-                :placeholder="
-                  mode === 'edit'
-                    ? $t('secrets.secretValuePlaceholderEdit')
-                    : $t('secrets.secretValuePlaceholder')
-                "
-                class="pr-10"
-                :aria-invalid="!!errors.secretValue"
-              />
-              <button
-                type="button"
-                class="absolute top-1/2 right-3 flex -translate-y-1/2 text-muted-foreground"
-                :aria-label="
-                  $t(secretVisible ? 'auth.hidePassword' : 'auth.showPassword')
-                "
-                :aria-pressed="secretVisible"
-                @click="secretVisible = !secretVisible"
-              >
-                <i
-                  :class="
-                    secretVisible
-                      ? 'icon-[lucide--eye-off]'
-                      : 'icon-[lucide--eye]'
-                  "
-                  class="size-4"
-                />
-              </button>
-            </div>
+            <PasswordInput
+              v-else
+              id="secret-value"
+              v-model="form.secretValue"
+              :placeholder="
+                mode === 'edit'
+                  ? $t('secrets.secretValuePlaceholderEdit')
+                  : $t('secrets.secretValuePlaceholder')
+              "
+              :aria-invalid="!!errors.secretValue"
+            />
             <small v-if="errors.secretValue" class="text-red-500">
               {{ errors.secretValue }}
             </small>
@@ -190,11 +169,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, useId, useTemplateRef } from 'vue'
+import { computed, useId, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import Button from '@/components/ui/button/Button.vue'
-import Input from '@/components/ui/input/Input.vue'
 import Dialog from '@/components/ui/dialog/Dialog.vue'
 import DialogClose from '@/components/ui/dialog/DialogClose.vue'
 import DialogContent from '@/components/ui/dialog/DialogContent.vue'
@@ -203,6 +181,8 @@ import DialogOverlay from '@/components/ui/dialog/DialogOverlay.vue'
 import DialogPortal from '@/components/ui/dialog/DialogPortal.vue'
 import DialogTitle from '@/components/ui/dialog/DialogTitle.vue'
 import { vRekaZIndex } from '@/components/dialog/vRekaZIndex'
+import Input from '@/components/ui/input/Input.vue'
+import PasswordInput from '@/components/ui/input/PasswordInput.vue'
 import Select from '@/components/ui/select/Select.vue'
 import SelectContent from '@/components/ui/select/SelectContent.vue'
 import SelectItem from '@/components/ui/select/SelectItem.vue'
@@ -234,7 +214,6 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const titleId = useId()
 const fileInput = useTemplateRef<HTMLInputElement>('fileInput')
-const secretVisible = ref(false)
 
 const {
   form,

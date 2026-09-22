@@ -14,34 +14,15 @@
         {{ t('auth.signup.passwordLabel') }}
       </label>
     </div>
-    <div class="relative">
-      <Input
-        v-bind="$field.props"
-        id="comfy-org-sign-up-password"
-        autocomplete="new-password"
-        :type="passwordVisible ? 'text' : 'password'"
-        :placeholder="t('auth.signup.passwordPlaceholder')"
-        :class="cn('pr-10', fieldClass)"
-        :aria-invalid="$field.invalid"
-        @input="updatePasswordChecks"
-      />
-      <button
-        type="button"
-        class="absolute top-1/2 right-3 flex -translate-y-1/2 text-muted-foreground"
-        :aria-label="
-          t(passwordVisible ? 'auth.hidePassword' : 'auth.showPassword')
-        "
-        :aria-pressed="passwordVisible"
-        @click="passwordVisible = !passwordVisible"
-      >
-        <i
-          :class="
-            passwordVisible ? 'icon-[lucide--eye-off]' : 'icon-[lucide--eye]'
-          "
-          class="size-4"
-        />
-      </button>
-    </div>
+    <PasswordInput
+      v-bind="$field.props"
+      id="comfy-org-sign-up-password"
+      autocomplete="new-password"
+      :placeholder="t('auth.signup.passwordPlaceholder')"
+      :class="fieldClass"
+      :aria-invalid="$field.invalid"
+      @input="updatePasswordChecks"
+    />
     <div v-if="$field.dirty && isPasswordFocused" class="flex flex-col gap-1">
       <PasswordRules
         :password="password"
@@ -61,35 +42,14 @@
     >
       {{ t('auth.login.confirmPasswordLabel') }}
     </label>
-    <div class="relative">
-      <Input
-        v-bind="$field.props"
-        id="comfy-org-sign-up-confirm-password"
-        autocomplete="new-password"
-        :type="confirmPasswordVisible ? 'text' : 'password'"
-        :placeholder="t('auth.login.confirmPasswordPlaceholder')"
-        :class="cn('pr-10', fieldClass)"
-        :aria-invalid="$field.invalid"
-      />
-      <button
-        type="button"
-        class="absolute top-1/2 right-3 flex -translate-y-1/2 text-muted-foreground"
-        :aria-label="
-          t(confirmPasswordVisible ? 'auth.hidePassword' : 'auth.showPassword')
-        "
-        :aria-pressed="confirmPasswordVisible"
-        @click="confirmPasswordVisible = !confirmPasswordVisible"
-      >
-        <i
-          :class="
-            confirmPasswordVisible
-              ? 'icon-[lucide--eye-off]'
-              : 'icon-[lucide--eye]'
-          "
-          class="size-4"
-        />
-      </button>
-    </div>
+    <PasswordInput
+      v-bind="$field.props"
+      id="comfy-org-sign-up-confirm-password"
+      autocomplete="new-password"
+      :placeholder="t('auth.login.confirmPasswordPlaceholder')"
+      :class="fieldClass"
+      :aria-invalid="$field.invalid"
+    />
     <small v-if="$field.error" class="text-red-500">{{
       $field.error.message
     }}</small>
@@ -104,9 +64,7 @@ import type { ComponentPublicInstance, HTMLAttributes } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import PasswordRules from '@comfyorg/account-ui/auth/PasswordRules'
-import { cn } from '@comfyorg/tailwind-utils'
-
-import Input from '@/components/ui/input/Input.vue'
+import PasswordInput from '@/components/ui/input/PasswordInput.vue'
 
 const { fieldClass = 'h-10' } = defineProps<{
   fieldClass?: HTMLAttributes['class']
@@ -114,8 +72,6 @@ const { fieldClass = 'h-10' } = defineProps<{
 
 const { t } = useI18n()
 const password = ref('')
-const passwordVisible = ref(false)
-const confirmPasswordVisible = ref(false)
 const passwordField = useTemplateRef<ComponentPublicInstance>('passwordField')
 const { focused: isPasswordFocused } = useFocusWithin(passwordField)
 

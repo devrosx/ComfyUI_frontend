@@ -46,33 +46,14 @@
           {{ t('auth.login.forgotPassword') }}
         </span>
       </div>
-      <div class="relative">
-        <Input
-          v-bind="$field.props"
-          id="comfy-org-sign-in-password"
-          autocomplete="current-password"
-          :type="passwordVisible ? 'text' : 'password'"
-          :placeholder="t('auth.login.passwordPlaceholder')"
-          :aria-invalid="$field.invalid"
-          class="h-10 pr-10"
-        />
-        <button
-          type="button"
-          class="absolute top-1/2 right-3 flex -translate-y-1/2 text-muted-foreground"
-          :aria-label="
-            t(passwordVisible ? 'auth.hidePassword' : 'auth.showPassword')
-          "
-          :aria-pressed="passwordVisible"
-          @click="passwordVisible = !passwordVisible"
-        >
-          <i
-            :class="
-              passwordVisible ? 'icon-[lucide--eye-off]' : 'icon-[lucide--eye]'
-            "
-            class="size-4"
-          />
-        </button>
-      </div>
+      <PasswordInput
+        v-bind="$field.props"
+        id="comfy-org-sign-in-password"
+        autocomplete="current-password"
+        :placeholder="t('auth.login.passwordPlaceholder')"
+        :aria-invalid="$field.invalid"
+        class="h-10"
+      />
       <small v-if="$field.invalid" class="text-red-500">{{
         $field.error.message
       }}</small>
@@ -97,11 +78,12 @@ import { Form, FormField } from '@primevue/forms'
 import { zodResolver } from '@primevue/forms/resolvers/zod'
 import { useThrottleFn } from '@vueuse/core'
 import { useToast } from 'primevue/usetoast'
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import Button from '@/components/ui/button/Button.vue'
 import Input from '@/components/ui/input/Input.vue'
+import PasswordInput from '@/components/ui/input/PasswordInput.vue'
 import Spinner from '@/components/ui/spinner/Spinner.vue'
 import { useAuthActions } from '@/composables/auth/useAuthActions'
 import { signInSchema } from '@/schemas/signInSchema'
@@ -121,7 +103,6 @@ const emit = defineEmits<{
 }>()
 
 const emailInputId = 'comfy-org-sign-in-email'
-const passwordVisible = ref(false)
 
 const onSubmit = useThrottleFn((event: FormSubmitEvent) => {
   if (event.valid) {

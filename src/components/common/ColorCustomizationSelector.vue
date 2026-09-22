@@ -8,7 +8,6 @@
         :key="option.name"
         :value="option.name"
         :aria-label="option.name"
-        class="flex-none"
       >
         <div
           v-if="option.name !== '_custom'"
