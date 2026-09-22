@@ -14,22 +14,32 @@ import { useAgentWorkflowTabBindingStore } from '../stores/agent/agentWorkflowTa
  *
  * Best-effort and in-session: it answers null when the thread list has not
  * loaded yet, or when the tab carries no agent binding on this browser. The
- * durable answer is derived server-side onto `execution_start` from
- * `workflow_versions.source` and `agent_threads.workflow_id`; this exists so
- * `app:run_button_click`, which has no server-side counterpart, can be joined
- * to a conversation too.
+ * durable answer is derived server-side onto `execution_start` from the agent
+ * tool-call trail; this exists so `app:run_button_click`, which has no
+ * server-side counterpart, can be joined to a conversation too.
+ *
+ * A storage failure also answers null rather than throwing. The binding store
+ * reads localStorage as it initialises, which throws outright in a browser
+ * privacy mode, and the run-button payload is built eagerly — so without this
+ * such a user would lose the whole `app:run_button_click` event rather than
+ * just its thread id. The sibling telemetry readers guard storage for the same
+ * reason.
  */
 export function getAgentThreadIdForActiveWorkflow(): string | null {
-  const activeWorkflow = useWorkflowStore().activeWorkflow
-  if (!activeWorkflow) return null
+  try {
+    const activeWorkflow = useWorkflowStore().activeWorkflow
+    if (!activeWorkflow) return null
 
-  const bindings = useAgentWorkflowTabBindingStore()
-  const cloudWorkflowId = bindings.workflowIdFor(activeWorkflow.path)
-  if (
-    cloudWorkflowId === undefined ||
-    !bindings.matchesWorkflow(cloudWorkflowId, activeWorkflow)
-  )
+    const bindings = useAgentWorkflowTabBindingStore()
+    const cloudWorkflowId = bindings.workflowIdFor(activeWorkflow.path)
+    if (
+      cloudWorkflowId === undefined ||
+      !bindings.matchesWorkflow(cloudWorkflowId, activeWorkflow)
+    )
+      return null
+
+    return useAgentChatHistoryStore().threadIdForWorkflow(cloudWorkflowId)
+  } catch {
     return null
-
-  return useAgentChatHistoryStore().threadIdForWorkflow(cloudWorkflowId)
+  }
 }

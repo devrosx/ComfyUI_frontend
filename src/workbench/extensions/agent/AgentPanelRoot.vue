@@ -976,21 +976,26 @@ function onFeedback(turnId: string, vote: 'up' | 'down' | null): void {
   })
 }
 
+/** Milliseconds for an RFC3339 stamp; `fallback` when absent or unparseable. */
+function stampMs(value: string | undefined, fallback: () => number): number {
+  if (!value) return fallback()
+  const parsed = Date.parse(value)
+  return Number.isNaN(parsed) ? fallback() : parsed
+}
+
 function toChatSession(thread: AgentThreadSummary): ChatSession {
-  const stamp = thread.last_message_at ?? thread.updated_at ?? thread.created_at
-  const updatedAt = stamp ? Date.parse(stamp) : Date.now()
-  const createdAt = thread.created_at
-    ? Date.parse(thread.created_at)
-    : Number.NaN
   return {
     id: thread.id,
     title: thread.title || thread.preview || t('agent.untitledChat'),
-    updatedAt: Number.isNaN(updatedAt) ? Date.now() : updatedAt,
+    updatedAt: stampMs(
+      thread.last_message_at ?? thread.updated_at ?? thread.created_at,
+      Date.now
+    ),
     // workflow_id is required on the wire but empty when the thread has none.
     workflowId: thread.workflow_id || null,
-    // Unparseable created_at sorts last, so it never wins the earliest-thread
-    // tie-break over a thread with a real timestamp.
-    createdAt: Number.isNaN(createdAt) ? Number.POSITIVE_INFINITY : createdAt
+    // An absent or unparseable created_at sorts last, so it never wins the
+    // earliest-thread tie-break over a thread with a real timestamp.
+    createdAt: stampMs(thread.created_at, () => Number.POSITIVE_INFINITY)
   }
 }
 

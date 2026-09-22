@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nextTick } from 'vue'
 
 import { useWorkflowStore } from '@/platform/workflow/management/stores/workflowStore'
@@ -101,6 +101,23 @@ describe('getAgentThreadIdForActiveWorkflow', () => {
   it('answers null before the thread list has loaded', async () => {
     await openBoundTab('wf-1', 'Agent draft.json')
 
+    expect(getAgentThreadIdForActiveWorkflow()).toBeNull()
+  })
+
+  // The binding store reads localStorage as it initialises, which throws
+  // outright in a browser privacy mode. The run-button payload is built
+  // eagerly, so throwing here would drop the whole app:run_button_click event
+  // rather than just its thread id.
+  it('answers null when storage access throws', async () => {
+    await openTab('Agent draft.json')
+    // Spy the instance, not Storage.prototype: happy-dom's localStorage does
+    // not route through the prototype spy, which would make this test pass
+    // whether or not the guard exists.
+    vi.spyOn(window.localStorage, 'getItem').mockImplementation(() => {
+      throw new DOMException('denied', 'SecurityError')
+    })
+
+    expect(() => getAgentThreadIdForActiveWorkflow()).not.toThrow()
     expect(getAgentThreadIdForActiveWorkflow()).toBeNull()
   })
 })
