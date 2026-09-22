@@ -44,9 +44,23 @@ export const WithHistory: Story = {
   args: {
     sessionId: 'portrait',
     historyGroups: {
-      current: [{ id: 'portrait', title: 'Portrait lighting', updatedAt: 0 }],
+      current: [
+        {
+          id: 'portrait',
+          title: 'Portrait lighting',
+          updatedAt: 0,
+          workflowId: null,
+          createdAt: 0
+        }
+      ],
       today: [
-        { id: 'upscale', title: 'Upscale a product photo', updatedAt: 0 }
+        {
+          id: 'upscale',
+          title: 'Upscale a product photo',
+          updatedAt: 0,
+          workflowId: null,
+          createdAt: 0
+        }
       ],
       yesterday: [],
       earlier: []

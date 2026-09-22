@@ -12,8 +12,16 @@ const DAY = 86_400_000
 const session = (id: string, updatedAt: number): ChatSession => ({
   id,
   title: id,
-  updatedAt
+  updatedAt,
+  workflowId: null,
+  createdAt: updatedAt
 })
+
+const threadOn = (
+  id: string,
+  workflowId: string | null,
+  createdAt: number
+): ChatSession => ({ ...session(id, createdAt), workflowId, createdAt })
 
 describe('groupSessionsByRecency', () => {
   it('buckets by recency, newest first, with the active session as Current', () => {
@@ -131,5 +139,65 @@ describe('useAgentChatHistoryStore', () => {
     expect(fetchSpy).not.toHaveBeenCalled()
     expect(store.sessions).toHaveLength(0)
     fetchSpy.mockRestore()
+  })
+})
+
+describe('threadIdForWorkflow', () => {
+  // The D3 trap. Run attribution must follow the workflow, so a thread the user
+  // opened afterwards — even the newest thread in the whole list — must not be
+  // credited with a run on a workflow it did not author.
+  it('resolves by workflow rather than by whichever thread is newest', () => {
+    const store = useAgentChatHistoryStore()
+    store.replaceAll([
+      threadOn('authored-wf-1', 'wf-1', NOW - 3 * DAY),
+      threadOn('new-chat', null, NOW),
+      threadOn('authored-wf-2', 'wf-2', NOW - DAY)
+    ])
+
+    expect(store.threadIdForWorkflow('wf-1')).toBe('authored-wf-1')
+    expect(store.threadIdForWorkflow('wf-2')).toBe('authored-wf-2')
+  })
+
+  // agent_threads.workflow_id is not unique, so several threads can claim one
+  // workflow. The earliest originated it; a later one only edited it.
+  it('picks the earliest thread when several share a workflow', () => {
+    const store = useAgentChatHistoryStore()
+    store.replaceAll([
+      threadOn('later', 'wf-1', NOW - DAY),
+      threadOn('earliest', 'wf-1', NOW - 5 * DAY),
+      threadOn('middle', 'wf-1', NOW - 3 * DAY)
+    ])
+
+    expect(store.threadIdForWorkflow('wf-1')).toBe('earliest')
+  })
+
+  it('answers null for a workflow no thread is bound to', () => {
+    const store = useAgentChatHistoryStore()
+    store.replaceAll([threadOn('a', 'wf-1', NOW)])
+
+    expect(store.threadIdForWorkflow('wf-other')).toBeNull()
+  })
+
+  it('answers null before the thread list has loaded', () => {
+    expect(useAgentChatHistoryStore().threadIdForWorkflow('wf-1')).toBeNull()
+  })
+
+  it('does not match threads carrying no workflow', () => {
+    const store = useAgentChatHistoryStore()
+    store.replaceAll([threadOn('unbound', null, NOW)])
+
+    expect(store.threadIdForWorkflow('')).toBeNull()
+  })
+
+  it('ignores a locally deleted thread', () => {
+    const store = useAgentChatHistoryStore()
+    store.replaceAll([
+      threadOn('earliest', 'wf-1', NOW - 5 * DAY),
+      threadOn('later', 'wf-1', NOW - DAY)
+    ])
+
+    store.remove('earliest')
+
+    expect(store.threadIdForWorkflow('wf-1')).toBe('later')
   })
 })

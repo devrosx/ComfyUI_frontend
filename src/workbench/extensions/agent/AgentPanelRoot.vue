@@ -979,10 +979,18 @@ function onFeedback(turnId: string, vote: 'up' | 'down' | null): void {
 function toChatSession(thread: AgentThreadSummary): ChatSession {
   const stamp = thread.last_message_at ?? thread.updated_at ?? thread.created_at
   const updatedAt = stamp ? Date.parse(stamp) : Date.now()
+  const createdAt = thread.created_at
+    ? Date.parse(thread.created_at)
+    : Number.NaN
   return {
     id: thread.id,
     title: thread.title || thread.preview || t('agent.untitledChat'),
-    updatedAt: Number.isNaN(updatedAt) ? Date.now() : updatedAt
+    updatedAt: Number.isNaN(updatedAt) ? Date.now() : updatedAt,
+    // workflow_id is required on the wire but empty when the thread has none.
+    workflowId: thread.workflow_id || null,
+    // Unparseable created_at sorts last, so it never wins the earliest-thread
+    // tie-break over a thread with a real timestamp.
+    createdAt: Number.isNaN(createdAt) ? Number.POSITIVE_INFINITY : createdAt
   }
 }
 

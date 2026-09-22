@@ -151,6 +151,13 @@ export class PostHogTelemetryProvider implements TelemetryProvider {
    * being submitted report `true` on the click and `false` on the start.
    */
   private lastAgentPanelOpen: boolean | undefined
+  /**
+   * Carried the same way, but out of necessity rather than consistency:
+   * resolving it needs agent state, which this layer cannot read (platform/
+   * must not import workbench/), so the composable that builds
+   * RunButtonProperties resolves it and this stashes the answer.
+   */
+  private lastAgentThreadId: string | null = null
   private disabledEvents = new Set<TelemetryEventName>(DEFAULT_DISABLED_EVENTS)
   private desktopEntryProps: DesktopEntryProps | null = null
   private stopSubscriptionTierWatch: WatchStopHandle | null = null
@@ -516,6 +523,7 @@ export class PostHogTelemetryProvider implements TelemetryProvider {
   trackRunButton(properties: RunButtonProperties): void {
     this.lastTriggerSource = properties.trigger_source
     this.lastAgentPanelOpen = properties.agent_panel_open
+    this.lastAgentThreadId = properties.agent_thread_id
     this.trackEvent(TelemetryEvents.RUN_BUTTON_CLICKED, properties)
   }
 
@@ -672,10 +680,12 @@ export class PostHogTelemetryProvider implements TelemetryProvider {
       trigger_source: this.lastTriggerSource ?? 'unknown',
       // Falls back to a fresh read for a run the button did not start.
       agent_panel_open: this.lastAgentPanelOpen ?? getAgentPanelOpen(),
+      agent_thread_id: this.lastAgentThreadId,
       event_source: EXECUTION_EVENT_SOURCE
     })
     this.lastTriggerSource = undefined
     this.lastAgentPanelOpen = undefined
+    this.lastAgentThreadId = null
   }
 
   trackExecutionError(metadata: ExecutionErrorMetadata): void {

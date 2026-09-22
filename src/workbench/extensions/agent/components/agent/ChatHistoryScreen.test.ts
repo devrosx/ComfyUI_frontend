@@ -3,7 +3,10 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { i18n } from '@/i18n'
-import type { HistoryGroups } from '../../stores/agent/agentChatHistoryStore'
+import type {
+  ChatSession,
+  HistoryGroups
+} from '../../stores/agent/agentChatHistoryStore'
 
 import ChatHistoryScreen from './ChatHistoryScreen.vue'
 
@@ -14,17 +17,14 @@ const emptyGroups: HistoryGroups = {
   earlier: []
 }
 
-const originalSession = {
-  id: 'thread-1',
-  title: 'Original title',
-  updatedAt: 1
+/** A history row; this screen renders id/title only. */
+function row(id: string, title: string, updatedAt: number): ChatSession {
+  return { id, title, updatedAt, workflowId: null, createdAt: updatedAt }
 }
 
-const secondSession = {
-  id: 'thread-2',
-  title: 'Second title',
-  updatedAt: 2
-}
+const originalSession = row('thread-1', 'Original title', 1)
+
+const secondSession = row('thread-2', 'Second title', 2)
 
 const bucketLabels = /^(Current|Today|Yesterday|Earlier)$/
 
@@ -110,10 +110,10 @@ describe('ChatHistoryScreen', () => {
 
   it('orders populated bucket labels current, today, yesterday, earlier', () => {
     renderScreen({
-      current: [{ id: 'thread-c', title: 'Alpha', updatedAt: 4 }],
-      today: [{ id: 'thread-t', title: 'Bravo', updatedAt: 3 }],
-      yesterday: [{ id: 'thread-y', title: 'Charlie', updatedAt: 2 }],
-      earlier: [{ id: 'thread-e', title: 'Delta', updatedAt: 1 }]
+      current: [row('thread-c', 'Alpha', 4)],
+      today: [row('thread-t', 'Bravo', 3)],
+      yesterday: [row('thread-y', 'Charlie', 2)],
+      earlier: [row('thread-e', 'Delta', 1)]
     })
 
     expect(renderedBucketLabels()).toEqual([

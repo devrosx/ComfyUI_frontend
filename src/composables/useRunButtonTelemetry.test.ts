@@ -36,6 +36,13 @@ vi.mock<unknown>(
   })
 )
 
+import { nextTick } from 'vue'
+
+import { useWorkflowStore } from '@/platform/workflow/management/stores/workflowStore'
+import { blankGraph } from '@/scripts/defaultGraph'
+import { useAgentChatHistoryStore } from '@/workbench/extensions/agent/stores/agent/agentChatHistoryStore'
+import { useAgentWorkflowTabBindingStore } from '@/workbench/extensions/agent/stores/agent/agentWorkflowTabBindingStore'
+
 import {
   getRunButtonTelemetryProperties,
   useRunButtonTelemetry
@@ -70,7 +77,35 @@ describe('useRunButtonTelemetry', () => {
       view_mode: 'graph',
       is_app_mode: false,
       dock_state: 'floating',
-      agent_panel_open: false
+      agent_panel_open: false,
+      agent_thread_id: null
+    })
+  })
+
+  // Proves the wiring, not just the field's presence: the resolver's own
+  // workflow-vs-current-thread behaviour is covered in agentRunAttribution.test.
+  it('carries the thread that authored the active workflow', async () => {
+    const workflows = useWorkflowStore()
+    const tab = workflows.createTemporary('Agent draft.json', {
+      ...blankGraph,
+      id: '3d4d7f1e-3c8b-4a0a-9a3c-1d2e3f4a5b6c'
+    })
+    workflows.openWorkflowsInBackground({ right: [tab.path] })
+    workflows.activeWorkflow = await tab.load()
+    useAgentWorkflowTabBindingStore().bind('wf-1', tab.path)
+    useAgentChatHistoryStore().replaceAll([
+      {
+        id: 'thread-1',
+        title: 'build a duck',
+        updatedAt: 1,
+        workflowId: 'wf-1',
+        createdAt: 1
+      }
+    ])
+    await nextTick()
+
+    expect(getRunButtonTelemetryProperties()).toMatchObject({
+      agent_thread_id: 'thread-1'
     })
   })
 

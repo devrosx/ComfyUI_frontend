@@ -38,7 +38,8 @@ describe('HostTelemetrySink', () => {
       view_mode: 'graph',
       is_app_mode: false,
       dock_state: 'docked',
-      agent_panel_open: true
+      agent_panel_open: true,
+      agent_thread_id: 'thread-3'
     })
 
     expect(state.capture).toHaveBeenCalledExactlyOnceWith(
@@ -58,7 +59,8 @@ describe('HostTelemetrySink', () => {
         view_mode: 'graph',
         is_app_mode: false,
         dock_state: 'docked',
-        agent_panel_open: true
+        agent_panel_open: true,
+        agent_thread_id: 'thread-3'
       }
     )
   })

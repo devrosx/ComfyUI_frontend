@@ -6,6 +6,10 @@ export interface ChatSession {
   id: string
   title: string
   updatedAt: number
+  /** Cloud workflow this thread is bound to, null when it has none. */
+  workflowId: string | null
+  /** Thread creation time, used to pick the earliest thread on a workflow. */
+  createdAt: number
 }
 
 export interface HistoryGroups {
@@ -73,6 +77,30 @@ export const useAgentChatHistoryStore = defineStore('agentChatHistory', () => {
     return id === null ? undefined : customTitles.value[id]
   }
 
+  /**
+   * The thread that authored a workflow, resolved from the workflow itself
+   * rather than from whichever thread is currently open — a run on workflow W
+   * belongs to the conversation that built W even when the user has since
+   * started a new chat.
+   *
+   * A workflow can carry several threads (the server does not make
+   * agent_threads.workflow_id unique), so the earliest-created one wins: a
+   * later thread that also touched the workflow did not originate it.
+   */
+  function threadIdForWorkflow(workflowId: string): string | null {
+    return (
+      sessions.value
+        .filter((session) => session.workflowId === workflowId)
+        .reduce<ChatSession | null>(
+          (earliest, session) =>
+            earliest === null || session.createdAt < earliest.createdAt
+              ? session
+              : earliest,
+          null
+        )?.id ?? null
+    )
+  }
+
   function rename(id: string, title: string): void {
     const trimmed = title.trim()
     if (trimmed === '') return
@@ -103,6 +131,7 @@ export const useAgentChatHistoryStore = defineStore('agentChatHistory', () => {
     activeId,
     grouped,
     titleFor,
+    threadIdForWorkflow,
     rename,
     remove,
     replaceAll,

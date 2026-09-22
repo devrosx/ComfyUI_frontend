@@ -235,6 +235,12 @@ export interface RunButtonProperties {
   dock_state: ActionbarDockState
   /** Whether the agent panel was open when the run was submitted. */
   agent_panel_open: boolean
+  /**
+   * The agent conversation that authored the workflow being run, null when no
+   * agent thread is bound to it on this browser. Resolved from the workflow,
+   * not from whichever thread is currently open.
+   */
+  agent_thread_id: string | null
 }
 
 /**
