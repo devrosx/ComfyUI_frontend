@@ -15,7 +15,9 @@ describe('ColorCustomizationSelector', () => {
   const i18n = createI18n({
     legacy: false,
     locale: 'en',
-    messages: { en: { color: { hex: 'Hex', rgba: 'RGBA' } } }
+    messages: {
+      en: { color: { custom: 'Custom', hex: 'Hex', rgba: 'RGBA' } }
+    }
   })
 
   function renderComponent(
@@ -40,7 +42,7 @@ describe('ColorCustomizationSelector', () => {
   }
 
   function getToggleButtons() {
-    return ['Blue', 'Green', '_custom'].map((name) =>
+    return ['Blue', 'Green', 'Custom'].map((name) =>
       screen.getByRole('button', { name })
     )
   }

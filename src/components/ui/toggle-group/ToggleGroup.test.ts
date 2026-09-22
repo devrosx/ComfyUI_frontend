@@ -13,7 +13,7 @@ describe('ToggleGroup', () => {
       components: { ToggleGroup, ToggleGroupItem },
       setup: () => ({ value: ref('one') }),
       template: `
-        <ToggleGroup v-model="value" type="single" required>
+        <ToggleGroup v-model="value" type="single" :allow-empty="false">
           <ToggleGroupItem value="one">One</ToggleGroupItem>
           <ToggleGroupItem value="two">Two</ToggleGroupItem>
         </ToggleGroup>`
@@ -24,6 +24,6 @@ describe('ToggleGroup', () => {
 
     await user.click(selected)
 
-    expect(selected).toHaveAttribute('data-state', 'on')
+    expect(selected).toHaveAttribute('aria-pressed', 'true')
   })
 })
