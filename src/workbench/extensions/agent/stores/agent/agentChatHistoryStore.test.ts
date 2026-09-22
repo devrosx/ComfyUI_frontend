@@ -189,6 +189,48 @@ describe('threadIdForWorkflow', () => {
     expect(store.threadIdForWorkflow('')).toBeNull()
   })
 
+  // toChatSession maps an absent or unparseable created_at to +Infinity, and
+  // created_at is only z.string() on the wire, so an empty stamp validates.
+  it('prefers a dated thread over one whose creation time is unknown', () => {
+    const store = useAgentChatHistoryStore()
+    store.replaceAll([
+      threadOn('undated', 'wf-1', Number.POSITIVE_INFINITY),
+      threadOn('dated', 'wf-1', NOW - DAY)
+    ])
+
+    expect(store.threadIdForWorkflow('wf-1')).toBe('dated')
+  })
+
+  it('still resolves a lone thread whose creation time is unknown', () => {
+    const store = useAgentChatHistoryStore()
+    store.replaceAll([threadOn('only', 'wf-1', Number.POSITIVE_INFINITY)])
+
+    expect(store.threadIdForWorkflow('wf-1')).toBe('only')
+  })
+
+  // Breaking this tie by list order would credit a conversation for a run it
+  // may not have authored — the exact mistake this resolver exists to avoid.
+  it('answers null rather than guessing between undated threads', () => {
+    const store = useAgentChatHistoryStore()
+    store.replaceAll([
+      threadOn('first-in-list', 'wf-1', Number.POSITIVE_INFINITY),
+      threadOn('second-in-list', 'wf-1', Number.POSITIVE_INFINITY)
+    ])
+
+    expect(store.threadIdForWorkflow('wf-1')).toBeNull()
+  })
+
+  it('answers null when two threads share the earliest creation time', () => {
+    const store = useAgentChatHistoryStore()
+    store.replaceAll([
+      threadOn('tied-a', 'wf-1', NOW - 5 * DAY),
+      threadOn('tied-b', 'wf-1', NOW - 5 * DAY),
+      threadOn('later', 'wf-1', NOW - DAY)
+    ])
+
+    expect(store.threadIdForWorkflow('wf-1')).toBeNull()
+  })
+
   it('ignores a locally deleted thread', () => {
     const store = useAgentChatHistoryStore()
     store.replaceAll([

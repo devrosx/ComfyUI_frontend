@@ -86,19 +86,22 @@ export const useAgentChatHistoryStore = defineStore('agentChatHistory', () => {
    * A workflow can carry several threads (the server does not make
    * agent_threads.workflow_id unique), so the earliest-created one wins: a
    * later thread that also touched the workflow did not originate it.
+   *
+   * An earliest that is not unique answers null rather than guessing.
+   * `toChatSession` maps an absent or unparseable `created_at` to +Infinity so
+   * that a thread of unknown age never outranks a dated one — but that also
+   * ties every undated thread with every other, and `created_at` is only
+   * `z.string()` on the wire, so an empty stamp passes validation. Breaking
+   * such a tie by list order would credit a conversation for a run it may not
+   * have authored, which is the mistake this whole function exists to avoid.
    */
   function threadIdForWorkflow(workflowId: string): string | null {
-    return (
-      sessions.value
-        .filter((session) => session.workflowId === workflowId)
-        .reduce<ChatSession | null>(
-          (earliest, session) =>
-            earliest === null || session.createdAt < earliest.createdAt
-              ? session
-              : earliest,
-          null
-        )?.id ?? null
+    const candidates = sessions.value.filter(
+      (session) => session.workflowId === workflowId
     )
+    const earliest = Math.min(...candidates.map((session) => session.createdAt))
+    const tied = candidates.filter((session) => session.createdAt === earliest)
+    return tied.length === 1 ? tied[0].id : null
   }
 
   function rename(id: string, title: string): void {
