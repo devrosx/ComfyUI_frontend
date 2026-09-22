@@ -20,7 +20,12 @@
         class="p-0"
       />
     </div>
-    <ListboxRoot v-else v-model="selectedVersion" class="w-full">
+    <ListboxRoot
+      v-else
+      v-model="selectedVersion"
+      selection-behavior="replace"
+      class="w-full"
+    >
       <ListboxContent class="max-h-[50vh] scrollbar-hide overflow-y-auto p-1">
         <ListboxItem
           v-for="option in processedVersionOptions"

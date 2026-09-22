@@ -15,11 +15,13 @@ import {
 interface Props extends ToggleGroupRootProps {
   class?: HTMLAttributes['class']
   variant?: ToggleGroupVariants['variant']
+  allowEmpty?: boolean
 }
 
 const {
   class: className,
   variant = 'default',
+  allowEmpty = true,
   ...restProps
 } = defineProps<Props>()
 
@@ -28,7 +30,7 @@ const emits = defineEmits<ToggleGroupRootEmits>()
 const forwarded = useForwardProps(restProps)
 
 function updateModelValue(value: ToggleGroupRootEmits['update:modelValue'][0]) {
-  if (restProps.required && restProps.type === 'single' && value == null) return
+  if (!allowEmpty && restProps.type === 'single' && value == null) return
   emits('update:modelValue', value)
 }
 

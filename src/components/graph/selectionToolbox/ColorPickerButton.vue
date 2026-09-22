@@ -33,7 +33,7 @@
           :key="option.name"
           :value="option.name"
           :aria-label="option.localizedName"
-          class="color-picker-option"
+          class="px-1 py-2"
         >
           <i
             v-tooltip.top="option.localizedName"
@@ -181,9 +181,3 @@ watch(
   { immediate: true }
 )
 </script>
-
-<style scoped>
-:deep(.color-picker-option) {
-  padding: calc(var(--spacing) * 2) var(--spacing);
-}
-</style>

@@ -1,27 +1,24 @@
 <script setup lang="ts">
-import type { RadioGroupRootProps } from 'reka-ui'
-import { RadioGroupRoot, useForwardProps } from 'reka-ui'
+import { reactiveOmit } from '@vueuse/core'
+import type { RadioGroupRootEmits, RadioGroupRootProps } from 'reka-ui'
+import { RadioGroupRoot, useForwardPropsEmits } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
 
 import { cn } from '@comfyorg/tailwind-utils'
 
-interface Props extends Omit<
-  RadioGroupRootProps,
-  'modelValue' | 'defaultValue'
-> {
-  class?: HTMLAttributes['class']
-}
-
-const { class: customClass = '', ...restProps } = defineProps<Props>()
-const modelValue = defineModel<string>()
-const forwardedProps = useForwardProps(restProps)
+const props = defineProps<
+  // eslint-disable-next-line vue/no-unused-properties
+  RadioGroupRootProps & { class?: HTMLAttributes['class'] }
+>()
+const emits = defineEmits<RadioGroupRootEmits>()
+const forwarded = useForwardPropsEmits(reactiveOmit(props, 'class'), emits)
 </script>
 
 <template>
   <RadioGroupRoot
-    v-bind="forwardedProps"
-    v-model="modelValue"
-    :class="cn('flex gap-2', customClass)"
+    v-bind="forwarded"
+    data-slot="radio-group"
+    :class="cn('flex gap-2', props.class)"
   >
     <slot />
   </RadioGroupRoot>

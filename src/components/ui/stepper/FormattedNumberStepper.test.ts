@@ -41,7 +41,8 @@ describe('FormattedNumberStepper', () => {
 
   it('displays a suffix', () => {
     render(FormattedNumberStepper, {
-      props: { modelValue: 5, suffix: '%' },
+      props: { modelValue: 5 },
+      slots: { suffix: '%' },
       global: { plugins: [i18n] }
     })
 
@@ -110,6 +111,59 @@ describe('FormattedNumberStepper', () => {
     await fireEvent.update(input, '12')
     expect(value.value).toBe(10)
     expect(input).toHaveValue('10')
+  })
+
+  it('defers clamping until Enter when configured', async () => {
+    const user = userEvent.setup()
+    const Harness = defineComponent({
+      components: { FormattedNumberStepper },
+      setup: () => ({ value: ref(5) }),
+      template:
+        '<FormattedNumberStepper v-model="value" :min="1" :max="10" :clamp-on-input="false" />'
+    })
+    render(Harness, { global: { plugins: [i18n] } })
+    const input = screen.getByRole('spinbutton')
+
+    await user.clear(input)
+    await user.type(input, '12')
+    expect(input).toHaveValue('12')
+    expect(input).toHaveAttribute('aria-valuenow', '12')
+
+    await user.keyboard('{Enter}')
+    expect(input).toHaveValue('10')
+    expect(input).toHaveAttribute('aria-valuenow', '10')
+  })
+
+  it('steps fractional values without floating point drift', async () => {
+    const user = userEvent.setup()
+    const Harness = defineComponent({
+      components: { FormattedNumberStepper },
+      setup: () => ({ value: ref(0.1) }),
+      template: '<FormattedNumberStepper v-model="value" :step="0.2" />'
+    })
+    render(Harness, { global: { plugins: [i18n] } })
+
+    await user.click(screen.getByRole('button', { name: 'Increment' }))
+    expect(screen.getByRole('spinbutton')).toHaveValue('0.3')
+  })
+
+  it('does not commit a stale edit over an external update', async () => {
+    const updates: number[] = []
+    const { rerender } = render(FormattedNumberStepper, {
+      props: {
+        modelValue: 1,
+        'onUpdate:modelValue': (value: number) => updates.push(value)
+      },
+      global: { plugins: [i18n] }
+    })
+    const input = screen.getByRole('spinbutton')
+
+    await fireEvent.update(input, '2')
+    await rerender({ modelValue: 9 })
+    expect(input).toHaveValue('9')
+
+    await fireEvent.blur(input)
+    expect(updates).toEqual([2])
   })
 
   it('does not round the model on focus and blur', async () => {

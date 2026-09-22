@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import Button from '@/components/ui/button/Button.vue'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import RadioGroup from '@/components/ui/radio-group/RadioGroup.vue'
+import RadioGroupItem from '@/components/ui/radio-group/RadioGroupItem.vue'
 import { useSettingStore } from '@/platform/settings/settingStore'
 import type { ControlOptions } from '@/types/simplifiedWidget'
 
@@ -65,16 +65,15 @@ const controlMode = defineModel<ControlOptions>()
     </div>
 
     <RadioGroup v-model="controlMode" class="flex-col space-y-2">
-      <Button
+      <div
         v-for="option in controlOptions"
         :key="option.mode"
-        as="label"
-        variant="textonly"
-        size="lg"
         class="flex h-[unset] w-full items-center justify-between gap-7 py-2 text-left"
-        :for="option.mode"
       >
-        <div class="flex min-w-0 flex-1 items-center gap-2 text-wrap">
+        <label
+          :for="option.mode"
+          class="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-wrap"
+        >
           <div
             class="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border-subtle bg-secondary-background"
           >
@@ -101,10 +100,10 @@ const controlMode = defineModel<ControlOptions>()
               {{ $t(`widgets.valueControl.${option.description}`) }}
             </div>
           </div>
-        </div>
+        </label>
 
         <RadioGroupItem :id="option.mode" class="shrink" :value="option.mode" />
-      </Button>
+      </div>
     </RadioGroup>
   </div>
 </template>

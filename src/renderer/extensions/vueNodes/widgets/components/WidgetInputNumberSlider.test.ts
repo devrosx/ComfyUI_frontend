@@ -2,7 +2,7 @@ import { defineComponent } from 'vue'
 import { describe, expect, it } from 'vitest'
 import { createI18n } from 'vue-i18n'
 
-import { render } from '@testing-library/vue'
+import { fireEvent, render } from '@testing-library/vue'
 
 import type { SimplifiedWidget } from '@/types/simplifiedWidget'
 import enMessages from '@/locales/en/main.json' with { type: 'json' }
@@ -89,6 +89,15 @@ describe('WidgetInputNumberSlider Value Binding', () => {
   })
 
   describe('Component Rendering', () => {
+    it('updates the model from the number input', async () => {
+      const widget = createSliderWidget(5)
+      const { container, emitted } = renderComponent(widget, 5)
+
+      await fireEvent.update(getNumberInput(container), '7')
+
+      expect(emitted()['update:modelValue']).toEqual([[7]])
+    })
+
     it('renders slider component', () => {
       const widget = createSliderWidget(5)
       const { container } = renderComponent(widget, 5)

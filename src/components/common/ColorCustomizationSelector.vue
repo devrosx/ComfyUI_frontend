@@ -7,7 +7,9 @@
         v-for="option in colorOptionsWithCustom"
         :key="option.name"
         :value="option.name"
-        :aria-label="option.name"
+        :aria-label="
+          option.name === '_custom' ? t('color.custom') : option.name
+        "
       >
         <div
           v-if="option.name !== '_custom'"
@@ -30,9 +32,12 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import ColorPicker from '@/components/ui/color-picker/ColorPicker.vue'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+
+const { t } = useI18n()
 
 const {
   modelValue,

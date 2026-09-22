@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/vue'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import type { ComponentProps } from 'vue-component-type-helpers'
 
@@ -152,6 +153,20 @@ describe('FormRadioGroup', () => {
   })
 
   describe('component functionality', () => {
+    it('renders and updates the selected option', async () => {
+      const user = userEvent.setup()
+      const { emitted } = renderComponent({
+        modelValue: 'A',
+        options: ['A', 'B'],
+        id: 'selection'
+      })
+
+      expect(screen.getByRole('radio', { name: 'A' })).toBeChecked()
+
+      await user.click(screen.getByRole('radio', { name: 'B' }))
+      expect(emitted()['update:modelValue']).toEqual([['B']])
+    })
+
     it('sets ids on radio buttons', () => {
       renderComponent({
         modelValue: 'A',

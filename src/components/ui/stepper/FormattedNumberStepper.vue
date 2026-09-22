@@ -43,8 +43,8 @@
         @focus="handleInputFocus"
         @keydown.up.prevent="handleStep(1)"
         @keydown.down.prevent="handleStep(-1)"
+        @keydown.enter.prevent="handleInputCommit"
       />
-      <span v-if="suffix">{{ suffix }}</span>
       <slot name="suffix" />
     </div>
     <Button
@@ -72,11 +72,10 @@ import { formatNumberInput } from './formatNumberInput'
 
 const {
   modelValue,
-  min = 0,
+  min = -Infinity,
   max = Infinity,
   step = 1,
   formatOptions = { useGrouping: true },
-  suffix,
   ariaLabel,
   ariaLabelledby,
   clampOnInput = true,
@@ -86,8 +85,10 @@ const {
   min?: number
   max?: number
   step?: number | ((value: number) => number)
-  formatOptions?: Intl.NumberFormatOptions
-  suffix?: string
+  formatOptions?: Pick<
+    Intl.NumberFormatOptions,
+    'useGrouping' | 'minimumFractionDigits' | 'maximumFractionDigits'
+  >
   ariaLabel?: string
   ariaLabelledby?: string
   clampOnInput?: boolean
@@ -103,6 +104,7 @@ const inputId = useId()
 const inputRef = ref<HTMLInputElement | null>(null)
 const inputValue = ref(formatNumber(modelValue))
 const isDirty = ref(false)
+const lastEmittedValue = ref<number>()
 
 const inputWidth = computed(() =>
   Math.min(Math.max(inputValue.value.length, 1) + 0.5, 9)
@@ -111,9 +113,12 @@ const inputWidth = computed(() =>
 watch(
   () => modelValue,
   (newValue) => {
-    if (document.activeElement !== inputRef.value) {
-      inputValue.value = formatNumber(newValue)
+    if (newValue === lastEmittedValue.value) {
+      lastEmittedValue.value = undefined
+      return
     }
+    isDirty.value = false
+    inputValue.value = formatNumber(newValue)
   }
 )
 
@@ -137,7 +142,20 @@ function getStepAmount(): number {
 }
 
 function updateModelValue(value: number) {
-  if (value !== modelValue) emit('update:modelValue', value)
+  if (value !== modelValue) {
+    lastEmittedValue.value = value
+    emit('update:modelValue', value)
+  }
+}
+
+function roundToStepPrecision(value: number, stepAmount: number): number {
+  const [coefficient, exponent = '0'] = Math.abs(stepAmount)
+    .toString()
+    .toLowerCase()
+    .split('e')
+  const fractionDigits = coefficient.split('.')[1]?.length ?? 0
+  const decimalPlaces = Math.max(0, fractionDigits - Number(exponent))
+  return Number(value.toFixed(decimalPlaces))
 }
 
 function handleInputChange(e: Event) {
@@ -180,18 +198,24 @@ function handleInputChange(e: Event) {
   })
 }
 
-function handleInputBlur() {
-  const parsed = isDirty.value
-    ? parseFormattedNumber(inputValue.value)
-    : modelValue
-  isDirty.value = false
-  if (parsed === undefined || parsed === null) {
+function handleInputCommit() {
+  if (!isDirty.value) {
     inputValue.value = formatNumber(modelValue)
     return
   }
-  const clamped = clamp(parsed, min, max)
+  const parsed = parseFormattedNumber(inputValue.value)
+  isDirty.value = false
+  if (parsed === undefined) {
+    inputValue.value = formatNumber(modelValue)
+    return
+  }
+  const clamped = clamp(roundToStepPrecision(parsed, getStepAmount()), min, max)
   updateModelValue(clamped)
   inputValue.value = formatNumber(clamped)
+}
+
+function handleInputBlur() {
+  handleInputCommit()
 }
 
 function handleInputFocus(e: FocusEvent) {
@@ -204,7 +228,11 @@ function handleInputFocus(e: FocusEvent) {
 function handleStep(direction: 1 | -1) {
   const stepAmount = getStepAmount()
   const currentValue = modelValue ?? 0
-  const newValue = clamp(currentValue + stepAmount * direction, min, max)
+  const newValue = clamp(
+    roundToStepPrecision(currentValue + stepAmount * direction, stepAmount),
+    min,
+    max
+  )
   updateModelValue(newValue)
   inputValue.value = formatNumber(newValue)
   isDirty.value = false

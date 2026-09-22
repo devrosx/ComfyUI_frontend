@@ -29,7 +29,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import RadioGroup from '@/components/ui/radio-group/RadioGroup.vue'
+import RadioGroupItem from '@/components/ui/radio-group/RadioGroupItem.vue'
 import type { SettingOption } from '@/platform/settings/types'
 
 type RadioValue = string | number | null
