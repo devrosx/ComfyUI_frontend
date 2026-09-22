@@ -7,7 +7,7 @@ import enMessages from '@/locales/en/main.json' with { type: 'json' }
 import FormItem from './FormItem.vue'
 
 describe('FormItem', () => {
-  it('passes a nullable number value to the stepper', () => {
+  it('passes a nullable number value to the number field', () => {
     render(FormItem, {
       props: {
         formValue: null,

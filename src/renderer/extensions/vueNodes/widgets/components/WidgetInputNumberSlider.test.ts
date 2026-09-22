@@ -1,5 +1,5 @@
 import userEvent from '@testing-library/user-event'
-import { fireEvent, render, screen } from '@testing-library/vue'
+import { render, screen } from '@testing-library/vue'
 import { describe, expect, it } from 'vitest'
 import { createI18n } from 'vue-i18n'
 
@@ -88,10 +88,12 @@ describe('WidgetInputNumberSlider', () => {
     expect(emitted('update:modelValue')).toEqual([[expected]])
   })
 
-  it('updates the model from the number input', async () => {
+  it('commits a typed number input on Enter', async () => {
+    const user = userEvent.setup()
     const { emitted } = renderComponent(5)
 
-    await fireEvent.update(screen.getByRole('spinbutton'), '7')
+    await user.tripleClick(screen.getByRole('spinbutton'))
+    await user.keyboard('7{Enter}')
 
     expect(emitted('update:modelValue')).toEqual([[7]])
   })

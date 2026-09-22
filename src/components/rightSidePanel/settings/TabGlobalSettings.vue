@@ -5,7 +5,8 @@ import { useI18n } from 'vue-i18n'
 import Button from '@/components/ui/button/Button.vue'
 import Slider from '@/components/ui/slider/Slider.vue'
 import SingleSelect from '@/components/ui/single-select/SingleSelect.vue'
-import FormattedNumberStepper from '@/components/ui/stepper/FormattedNumberStepper.vue'
+import NumberField from '@/components/ui/number-field/NumberField.vue'
+import NumberFieldInput from '@/components/ui/number-field/NumberFieldInput.vue'
 import { LiteGraph } from '@/lib/litegraph/src/litegraph'
 import type { LinkRenderType } from '@/lib/litegraph/src/types/globalEnums'
 import { LinkMarkerShape } from '@/lib/litegraph/src/types/globalEnums'
@@ -84,13 +85,6 @@ function updateGridSpacingFromSlider(values?: number[]) {
   gridSpacing.value = values[0]
 }
 
-function updateGridSpacingFromInput(value: number | null | undefined) {
-  if (typeof value !== 'number') return
-
-  const clampedValue = Math.min(GRID_SIZE_MAX, Math.max(GRID_SIZE_MIN, value))
-  gridSpacing.value = Math.round(clampedValue / GRID_SIZE_STEP) * GRID_SIZE_STEP
-}
-
 function openFullSettings() {
   settingsDialog.show()
 }
@@ -142,14 +136,19 @@ function openFullSettings() {
               :step="GRID_SIZE_STEP"
               @update:model-value="updateGridSpacingFromSlider"
             />
-            <FormattedNumberStepper
-              :model-value="gridSpacing"
-              class="w-16 shrink-0"
+            <NumberField
+              v-model="gridSpacing"
+              class="h-auto w-16 shrink-0 bg-transparent hover:bg-transparent"
               :min="GRID_SIZE_MIN"
               :max="GRID_SIZE_MAX"
               :step="GRID_SIZE_STEP"
-              @update:model-value="updateGridSpacingFromInput"
-            />
+              :format-options="{ maximumFractionDigits: 0 }"
+            >
+              <NumberFieldInput
+                :aria-label="t('rightSidePanel.globalSettings.gridSpacing')"
+                class="text-xs"
+              />
+            </NumberField>
           </div>
         </LayoutField>
         <FieldSwitch

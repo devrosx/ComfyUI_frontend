@@ -37,13 +37,13 @@ import BackgroundImageUpload from '@/components/common/BackgroundImageUpload.vue
 import CustomFormValue from '@/components/common/CustomFormValue.vue'
 import FormColorPicker from '@/components/common/FormColorPicker.vue'
 import FormImageUpload from '@/components/common/FormImageUpload.vue'
+import FormNumberField from '@/components/common/FormNumberField.vue'
 import FormRadioGroup from '@/components/common/FormRadioGroup.vue'
 import InputKnob from '@/components/common/InputKnob.vue'
 import InputSlider from '@/components/common/InputSlider.vue'
 import UrlInput from '@/components/common/UrlInput.vue'
 import Input from '@/components/ui/input/Input.vue'
 import SingleSelect from '@/components/ui/single-select/SingleSelect.vue'
-import FormattedNumberStepper from '@/components/ui/stepper/FormattedNumberStepper.vue'
 import Switch from '@/components/ui/switch/Switch.vue'
 import type { FormItem } from '@/platform/settings/types'
 
@@ -100,7 +100,7 @@ function getFormComponent(item: FormItem): Component {
     case 'boolean':
       return Switch
     case 'number':
-      return FormattedNumberStepper
+      return FormNumberField
     case 'slider':
       return InputSlider
     case 'knob':

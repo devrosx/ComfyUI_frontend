@@ -11,19 +11,20 @@
         :aria-label="widget.name"
         class="min-w-0 flex-1"
       />
-      <FormattedNumberStepper
+      <NumberField
         v-model="modelValue"
         :step="stepValue"
-        :min="widget.options?.min ?? -Infinity"
+        :min="widget.options?.min"
         :max="widget.options?.max"
         :disabled="widget.options?.disabled"
         :format-options="{
           minimumFractionDigits: precision,
           maximumFractionDigits: precision
         }"
-        :aria-label="widget.name"
-        class="w-16 shrink-0"
-      />
+        class="h-auto w-16 shrink-0 bg-transparent hover:bg-transparent"
+      >
+        <NumberFieldInput :aria-label="widget.name" class="text-xs" />
+      </NumberField>
     </div>
   </WidgetLayoutField>
 </template>
@@ -32,7 +33,8 @@
 import { computed } from 'vue'
 
 import GradientSlider from '@/components/gradientslider/GradientSlider.vue'
-import FormattedNumberStepper from '@/components/ui/stepper/FormattedNumberStepper.vue'
+import NumberField from '@/components/ui/number-field/NumberField.vue'
+import NumberFieldInput from '@/components/ui/number-field/NumberFieldInput.vue'
 import type { ColorStop } from '@/lib/litegraph/src/interfaces'
 import type { IWidgetGradientSliderOptions } from '@/lib/litegraph/src/types/widgets'
 import type { SimplifiedWidget } from '@/types/simplifiedWidget'

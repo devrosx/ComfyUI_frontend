@@ -14,25 +14,30 @@
         (value) => value && emit('update:modelValue', value[0])
       "
     />
-    <FormattedNumberStepper
+    <NumberField
       :model-value
-      class="input-part"
+      :class="cn('input-part', inputClass)"
       :format-options="{ maximumFractionDigits: 3 }"
-      :class="inputClass"
       :min
       :max
       :step
       :disabled
-      :aria-label
-      :aria-labelledby="ariaLabelledby"
       @update:model-value="(value) => emit('update:modelValue', value)"
-    />
+    >
+      <NumberFieldDecrement />
+      <NumberFieldInput :aria-label :aria-labelledby="ariaLabelledby" />
+      <NumberFieldIncrement />
+    </NumberField>
   </div>
 </template>
 
 <script setup lang="ts">
 import Slider from '@/components/ui/slider/Slider.vue'
-import FormattedNumberStepper from '@/components/ui/stepper/FormattedNumberStepper.vue'
+import NumberField from '@/components/ui/number-field/NumberField.vue'
+import NumberFieldDecrement from '@/components/ui/number-field/NumberFieldDecrement.vue'
+import NumberFieldIncrement from '@/components/ui/number-field/NumberFieldIncrement.vue'
+import NumberFieldInput from '@/components/ui/number-field/NumberFieldInput.vue'
+import { cn } from '@comfyorg/tailwind-utils'
 
 defineProps<{
   modelValue: number

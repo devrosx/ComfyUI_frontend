@@ -51,15 +51,18 @@
           class="zoomInputContainer flex items-center gap-1 rounded-sm bg-input-surface p-2"
           data-testid="zoom-percentage-input"
         >
-          <FormattedNumberStepper
+          <NumberField
             :model-value="canvasStore.appScalePercentage"
             :min="1"
             :max="1000"
-            :clamp-on-input="false"
-            :format-options="{ useGrouping: false }"
-            @update:model-value="applyZoom"
-          />
-          <span class="shrink-0 text-sm text-text-primary">%</span>
+            :format-options="{ useGrouping: false, maximumFractionDigits: 0 }"
+            @update:model-value="canvasStore.setAppZoomFromPercentage"
+          >
+            <NumberFieldDecrement />
+            <NumberFieldInput :aria-label="$t('zoomControls.zoomPercentage')" />
+            <span class="shrink-0 text-sm text-text-primary">%</span>
+            <NumberFieldIncrement />
+          </NumberField>
         </div>
       </div>
     </div>
@@ -69,7 +72,10 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 
-import FormattedNumberStepper from '@/components/ui/stepper/FormattedNumberStepper.vue'
+import NumberField from '@/components/ui/number-field/NumberField.vue'
+import NumberFieldDecrement from '@/components/ui/number-field/NumberFieldDecrement.vue'
+import NumberFieldIncrement from '@/components/ui/number-field/NumberFieldIncrement.vue'
+import NumberFieldInput from '@/components/ui/number-field/NumberFieldInput.vue'
 import { useCanvasStore } from '@/renderer/core/canvas/canvasStore'
 import { useMinimap } from '@/renderer/extensions/minimap/composables/useMinimap'
 import { useCommandStore } from '@/stores/commandStore'
@@ -86,13 +92,6 @@ interface Props {
 const props = defineProps<Props>()
 
 const interval = ref<number | null>(null)
-
-const applyZoom = (inputValue: number) => {
-  if (isNaN(inputValue) || inputValue < 1 || inputValue > 1000) {
-    return
-  }
-  canvasStore.setAppZoomFromPercentage(inputValue)
-}
 
 const executeCommand = (command: string) => {
   void commandStore.execute(command)

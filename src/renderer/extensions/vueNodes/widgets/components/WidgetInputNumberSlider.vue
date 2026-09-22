@@ -16,19 +16,20 @@
         :aria-label="widget.name"
         @update:model-value="updateLocalValue"
       />
-      <FormattedNumberStepper
+      <NumberField
         v-model="modelValue"
         :step="stepValue"
-        :min="widget.options?.min ?? -Infinity"
+        :min="widget.options?.min"
         :max="widget.options?.max"
         :disabled="widget.options?.disabled"
         :format-options="{
           minimumFractionDigits: precision,
           maximumFractionDigits: precision
         }"
-        :aria-label="widget.name"
-        class="w-16 shrink-0"
-      />
+        class="h-auto w-16 shrink-0 bg-transparent hover:bg-transparent"
+      >
+        <NumberFieldInput :aria-label="widget.name" class="text-xs" />
+      </NumberField>
     </div>
   </WidgetLayoutField>
 </template>
@@ -37,7 +38,8 @@
 import { computed } from 'vue'
 
 import Slider from '@/components/ui/slider/Slider.vue'
-import FormattedNumberStepper from '@/components/ui/stepper/FormattedNumberStepper.vue'
+import NumberField from '@/components/ui/number-field/NumberField.vue'
+import NumberFieldInput from '@/components/ui/number-field/NumberFieldInput.vue'
 import type { SimplifiedWidget } from '@/types/simplifiedWidget'
 import { cn } from '@comfyorg/tailwind-utils'
 import {
