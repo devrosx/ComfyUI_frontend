@@ -3,6 +3,7 @@
     :model-value="internalValue"
     v-bind="$attrs"
     :debounce-time="0"
+    :disabled
     :invalid="validationState === ValidationState.INVALID"
     @update:model-value="handleInput"
     @blur="handleBlur"
@@ -15,9 +16,9 @@
         size="icon-sm"
         :class="cn('absolute flex', positionClass)"
         :aria-label="$t('g.validate')"
-        :disabled="validationState === ValidationState.LOADING"
+        :disabled="disabled || validationState === ValidationState.LOADING"
         :data-validation-state="validationState"
-        @click="validateUrl(props.modelValue)"
+        @click="validateUrl(modelValue)"
       >
         <i :class="cn(validationIcon, iconClass)" />
       </Button>
@@ -36,9 +37,14 @@ import { isValidUrl } from '@/utils/formatUtil'
 import { checkUrlReachable } from '@/utils/networkUtil'
 import { ValidationState } from '@/utils/validationUtil'
 
-const props = defineProps<{
+const {
+  modelValue,
+  validateUrlFn,
+  disabled = false
+} = defineProps<{
   modelValue: string
   validateUrlFn?: (url: string) => Promise<boolean>
+  disabled?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -64,11 +70,11 @@ const cleanInput = (value: string): string =>
   value ? value.replace(/\s+/g, '') : ''
 
 // Add internal value state
-const internalValue = ref(cleanInput(props.modelValue))
+const internalValue = ref(cleanInput(modelValue))
 
 // Watch for external modelValue changes
 watch(
-  () => props.modelValue,
+  () => modelValue,
   async (newValue: string) => {
     internalValue.value = cleanInput(newValue)
     await validateUrl(newValue)
@@ -81,7 +87,7 @@ watch(validationState, (newState) => {
 
 // Validate on mount
 onMounted(async () => {
-  await validateUrl(props.modelValue)
+  await validateUrl(modelValue)
 })
 
 const handleInput = (value: string) => {
@@ -128,7 +134,7 @@ const validateUrl = async (value: string) => {
 
   validationState.value = ValidationState.LOADING
   try {
-    const isValid = await (props.validateUrlFn ?? defaultValidateUrl)(url)
+    const isValid = await (validateUrlFn ?? defaultValidateUrl)(url)
     validationState.value = isValid
       ? ValidationState.VALID
       : ValidationState.INVALID

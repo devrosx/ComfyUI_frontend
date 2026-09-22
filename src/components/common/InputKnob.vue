@@ -7,6 +7,7 @@
       :min
       :max
       :step
+      :disabled
       :aria-label="ariaLabel"
       :aria-labelledby="ariaLabelledby"
       v-bind="$attrs"
@@ -20,6 +21,7 @@
       :min
       :max
       :step
+      :disabled
       :aria-label
       :aria-labelledby="ariaLabelledby"
       @update:model-value="updateValue"
@@ -32,17 +34,26 @@ import Knob from 'primevue/knob'
 
 import FormattedNumberStepper from '@/components/ui/stepper/FormattedNumberStepper.vue'
 
-const { modelValue, min, max, step, resolution, ariaLabel, ariaLabelledby } =
-  defineProps<{
-    modelValue: number
-    inputClass?: string
-    min?: number
-    max?: number
-    step?: number
-    resolution?: number
-    ariaLabel?: string
-    ariaLabelledby?: string
-  }>()
+const {
+  modelValue,
+  min,
+  max,
+  step,
+  resolution,
+  disabled,
+  ariaLabel,
+  ariaLabelledby
+} = defineProps<{
+  modelValue: number
+  inputClass?: string
+  min?: number
+  max?: number
+  step?: number
+  resolution?: number
+  disabled?: boolean
+  ariaLabel?: string
+  ariaLabelledby?: string
+}>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: number): void

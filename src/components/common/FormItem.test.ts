@@ -75,4 +75,30 @@ describe('FormItem', () => {
       expect(screen.getAllByLabelText('Volume')).toHaveLength(2)
     }
   )
+
+  it('disables numeric entry in a knob field', () => {
+    render(FormItem, {
+      props: {
+        formValue: 5,
+        id: 'volume',
+        item: {
+          name: 'Volume',
+          type: 'knob',
+          attrs: { disabled: true }
+        }
+      },
+      global: {
+        plugins: [
+          createI18n({
+            legacy: false,
+            locale: 'en',
+            messages: { en: enMessages }
+          })
+        ],
+        directives: { tooltip: {} }
+      }
+    })
+
+    expect(screen.getByRole('spinbutton', { name: 'Volume' })).toBeDisabled()
+  })
 })
