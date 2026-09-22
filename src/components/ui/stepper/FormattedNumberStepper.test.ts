@@ -89,28 +89,57 @@ describe('FormattedNumberStepper', () => {
     expect(input).toHaveValue('5')
   })
 
-  it('clamps typed values to both bounds', async () => {
-    const value = ref(5)
-    render(FormattedNumberStepper, {
-      props: {
-        modelValue: value.value,
-        min: 1,
-        max: 10,
-        'onUpdate:modelValue': (nextValue: number) => {
-          value.value = nextValue
-        }
-      },
-      global: { plugins: [i18n] }
+  it('clamps the upper bound while typing and the lower bound on commit', async () => {
+    const user = userEvent.setup()
+    const Harness = defineComponent({
+      components: { FormattedNumberStepper },
+      setup: () => ({ value: ref(512) }),
+      template:
+        '<FormattedNumberStepper v-model="value" :min="64" :max="8192" />'
     })
+    render(Harness, { global: { plugins: [i18n] } })
     const input = screen.getByRole('spinbutton')
 
-    await fireEvent.update(input, '-2')
-    expect(value.value).toBe(1)
-    expect(input).toHaveValue('1')
+    await user.clear(input)
+    await user.type(input, '256')
+    expect(input).toHaveValue('256')
+    expect(input).toHaveAttribute('aria-valuenow', '256')
 
-    await fireEvent.update(input, '12')
-    expect(value.value).toBe(10)
-    expect(input).toHaveValue('10')
+    await user.clear(input)
+    await user.type(input, '9000')
+    expect(input).toHaveValue('8,192')
+    expect(input).toHaveAttribute('aria-valuenow', '8192')
+
+    await user.clear(input)
+    await user.type(input, '2')
+    expect(input).toHaveValue('2')
+    expect(input).toHaveAttribute('aria-valuenow', '8192')
+
+    await user.tab()
+    expect(input).toHaveValue('64')
+    expect(input).toHaveAttribute('aria-valuenow', '64')
+  })
+
+  it('reflects an external model change after the parent rewrote an emit', async () => {
+    const user = userEvent.setup()
+    const Harness = defineComponent({
+      components: { FormattedNumberStepper },
+      setup: () => ({ value: ref(1) }),
+      template: `
+        <FormattedNumberStepper :model-value="value" @update:model-value="value = 8" />
+        <button @click="value = 7">Reset</button>
+      `
+    })
+    render(Harness, { global: { plugins: [i18n] } })
+    const input = screen.getByRole('spinbutton')
+
+    await user.clear(input)
+    await user.type(input, '7')
+    await user.tab()
+    expect(input).toHaveValue('8')
+
+    await user.click(screen.getByRole('button', { name: 'Reset' }))
+    expect(input).toHaveValue('7')
   })
 
   it('defers clamping until Enter when configured', async () => {

@@ -104,7 +104,6 @@ const inputId = useId()
 const inputRef = ref<HTMLInputElement | null>(null)
 const inputValue = ref(formatNumber(modelValue))
 const isDirty = ref(false)
-const lastEmittedValue = ref<number>()
 
 const inputWidth = computed(() =>
   Math.min(Math.max(inputValue.value.length, 1) + 0.5, 9)
@@ -113,10 +112,8 @@ const inputWidth = computed(() =>
 watch(
   () => modelValue,
   (newValue) => {
-    if (newValue === lastEmittedValue.value) {
-      lastEmittedValue.value = undefined
+    if (isDirty.value && parseFormattedNumber(inputValue.value) === newValue)
       return
-    }
     isDirty.value = false
     inputValue.value = formatNumber(newValue)
   }
@@ -142,10 +139,7 @@ function getStepAmount(): number {
 }
 
 function updateModelValue(value: number) {
-  if (value !== modelValue) {
-    lastEmittedValue.value = value
-    emit('update:modelValue', value)
-  }
+  if (value !== modelValue) emit('update:modelValue', value)
 }
 
 function roundToStepPrecision(value: number, stepAmount: number): number {
@@ -170,14 +164,15 @@ function handleInputChange(e: Event) {
     return
   }
 
-  const clamped = clampOnInput ? clamp(num, min, max) : num
+  const clamped = clampOnInput ? Math.min(num, max) : num
   const wasClamped = clamped !== num
 
   if (num > max) {
     emit('max-reached')
   }
 
-  updateModelValue(clamped)
+  const belowMinWhileTyping = clampOnInput && clamped < min
+  if (!belowMinWhileTyping) updateModelValue(clamped)
 
   if (!wasClamped && (raw.startsWith('-') || raw.includes('.'))) {
     inputValue.value = raw

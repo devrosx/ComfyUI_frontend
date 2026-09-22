@@ -10,7 +10,9 @@
       :aria-label="ariaLabel"
       :aria-labelledby="ariaLabelledby"
       v-bind="$attrs"
-      @update:model-value="(value) => updateValue(value?.[0] ?? modelValue)"
+      @update:model-value="
+        (value) => value && emit('update:modelValue', value[0])
+      "
     />
     <FormattedNumberStepper
       :model-value
@@ -23,7 +25,7 @@
       :disabled
       :aria-label
       :aria-labelledby="ariaLabelledby"
-      @update:model-value="updateValue"
+      @update:model-value="(value) => emit('update:modelValue', value)"
     />
   </div>
 </template>
@@ -32,37 +34,20 @@
 import Slider from '@/components/ui/slider/Slider.vue'
 import FormattedNumberStepper from '@/components/ui/stepper/FormattedNumberStepper.vue'
 
-const { modelValue, min, max, step, disabled, ariaLabel, ariaLabelledby } =
-  defineProps<{
-    modelValue: number
-    inputClass?: string
-    min?: number
-    max?: number
-    step?: number
-    disabled?: boolean
-    ariaLabel?: string
-    ariaLabelledby?: string
-  }>()
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: number): void
+defineProps<{
+  modelValue: number
+  inputClass?: string
+  min?: number
+  max?: number
+  step?: number
+  disabled?: boolean
+  ariaLabel?: string
+  ariaLabelledby?: string
 }>()
 
-const updateValue = (newValue: number | null) => {
-  if (newValue === null) {
-    newValue = Number(min) || 0
-  }
-
-  const minimum = Number(min ?? Number.NEGATIVE_INFINITY)
-  const maximum = Number(max ?? Number.POSITIVE_INFINITY)
-  const stepAmount = Number(step) || 1
-
-  newValue = Math.max(minimum, Math.min(maximum, newValue))
-
-  newValue = Math.round(newValue / stepAmount) * stepAmount
-
-  emit('update:modelValue', newValue)
-}
+const emit = defineEmits<{
+  'update:modelValue': [value: number]
+}>()
 
 defineOptions({
   inheritAttrs: false

@@ -11,7 +11,7 @@
       :aria-label="ariaLabel"
       :aria-labelledby="ariaLabelledby"
       v-bind="$attrs"
-      @update:model-value="updateValue"
+      @update:model-value="(value) => emit('update:modelValue', value)"
     />
     <FormattedNumberStepper
       :model-value
@@ -24,7 +24,7 @@
       :disabled
       :aria-label
       :aria-labelledby="ariaLabelledby"
-      @update:model-value="updateValue"
+      @update:model-value="(value) => emit('update:modelValue', value)"
     />
   </div>
 </template>
@@ -34,16 +34,7 @@ import Knob from 'primevue/knob'
 
 import FormattedNumberStepper from '@/components/ui/stepper/FormattedNumberStepper.vue'
 
-const {
-  modelValue,
-  min,
-  max,
-  step,
-  resolution,
-  disabled,
-  ariaLabel,
-  ariaLabelledby
-} = defineProps<{
+const { step, resolution } = defineProps<{
   modelValue: number
   inputClass?: string
   min?: number
@@ -56,27 +47,10 @@ const {
 }>()
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: number): void
+  'update:modelValue': [value: number]
 }>()
 
-const updateValue = (newValue: number | null) => {
-  if (newValue === null) {
-    newValue = Number(min) || 0
-  }
-
-  const minimum = Number(min ?? Number.NEGATIVE_INFINITY)
-  const maximum = Number(max ?? Number.POSITIVE_INFINITY)
-  const stepAmount = Number(step) || 1
-
-  newValue = Math.max(minimum, Math.min(maximum, newValue))
-
-  newValue = Math.round(newValue / stepAmount) * stepAmount
-
-  emit('update:modelValue', newValue)
-}
-
 const displayValue = (value: number): string => {
-  updateValue(value)
   const stepString = (step ?? 1).toString()
   const stepResolution = stepString.includes('.')
     ? stepString.split('.')[1].length
