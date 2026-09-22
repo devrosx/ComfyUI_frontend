@@ -170,8 +170,6 @@
 </template>
 
 <script setup lang="ts">
-import { useFuse } from '@vueuse/integrations/useFuse'
-import type { UseFuseOptions } from '@vueuse/integrations/useFuse'
 import type { FocusOutsideEvent } from 'reka-ui'
 import {
   ComboboxAnchor,
@@ -202,6 +200,7 @@ import {
   stopEscapeToDocument
 } from '@/components/ui/select/select.variants'
 import type { SelectOption } from '@/components/ui/select/types'
+import { useSelectSearch } from '@/components/ui/select/useSelectSearch'
 import { useAttrsClass } from '@/composables/useAttrsClass'
 import { useModalLiftedZIndex } from '@/composables/useModalLiftedZIndex'
 import { usePopoverSizing } from '@/composables/usePopoverSizing'
@@ -293,31 +292,15 @@ const popoverStyle = usePopoverSizing({
   maxWidth: popoverMaxWidth
 })
 
-const fuseOptions: UseFuseOptions<SelectOption> = {
-  fuseOptions: {
-    keys: ['name', 'value'],
-    threshold: 0.3,
-    includeScore: false
-  },
-  matchAllWhenSearchEmpty: true
-}
-
-const { results } = useFuse(searchQuery, () => options, fuseOptions)
+const searchResults = useSelectSearch(searchQuery, () => options)
 
 const filteredOptions = computed(() => {
-  if (!searchQuery.value || searchQuery.value.trim() === '') {
-    return options
-  }
-
-  const searchResults = results.value.map(
-    (result: { item: SelectOption }) => result.item
-  )
+  if (!searchQuery.value.trim()) return options
 
   const selectedButNotInResults = selectedItems.value.filter(
-    (item) =>
-      !searchResults.some((result: SelectOption) => result.value === item.value)
+    (item) => !searchResults.value.some(({ value }) => value === item.value)
   )
 
-  return [...selectedButNotInResults, ...searchResults]
+  return [...selectedButNotInResults, ...searchResults.value]
 })
 </script>

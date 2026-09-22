@@ -100,7 +100,7 @@ import {
   SelectValue,
   SelectViewport
 } from 'reka-ui'
-import { computed, nextTick, ref, watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import type { StyleValue } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -112,6 +112,7 @@ import {
   stopEscapeToDocument
 } from '@/components/ui/select/select.variants'
 import type { SelectOption } from '@/components/ui/select/types'
+import { useSelectSearch } from '@/components/ui/select/useSelectSearch'
 import { useAttrsClass } from '@/composables/useAttrsClass'
 import { useModalLiftedZIndex } from '@/composables/useModalLiftedZIndex'
 import { usePopoverSizing } from '@/composables/usePopoverSizing'
@@ -124,7 +125,7 @@ const { attrsClass, attrsWithoutClass } = useAttrsClass()
 
 const {
   label,
-  options,
+  options = [],
   size = 'lg',
   invalid = false,
   loading = false,
@@ -167,11 +168,7 @@ const isOpen = ref(false)
 const searchQuery = ref('')
 const searchInputRef = ref<HTMLInputElement | null>(null)
 const liftedContentStyle = useModalLiftedZIndex(isOpen)
-const filteredOptions = computed(() => {
-  const query = searchQuery.value.trim().toLocaleLowerCase()
-  if (!query) return options
-  return options?.filter(({ name }) => name.toLocaleLowerCase().includes(query))
-})
+const filteredOptions = useSelectSearch(searchQuery, () => options)
 
 watch(isOpen, async (open) => {
   if (!open || !searchable) return
