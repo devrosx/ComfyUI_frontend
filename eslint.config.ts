@@ -5,6 +5,11 @@ import pluginJs from '@eslint/js'
 import pluginI18n from '@intlify/eslint-plugin-vue-i18n'
 import { configs as astroConfigs } from 'eslint-plugin-astro'
 import betterTailwindcss from 'eslint-plugin-better-tailwindcss'
+import { getDefaultSelectors } from 'eslint-plugin-better-tailwindcss/api/defaults'
+import {
+  MatcherType,
+  SelectorKind
+} from 'eslint-plugin-better-tailwindcss/api/types'
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript'
 import { importX } from 'eslint-plugin-import-x'
 import oxlint from 'eslint-plugin-oxlint'
@@ -279,7 +284,15 @@ export default defineConfig([
         entryPoint: path.resolve(
           import.meta.dirname,
           'packages/design-system/src/css/style.css'
-        )
+        ),
+        selectors: [
+          ...getDefaultSelectors(),
+          {
+            kind: SelectorKind.Callee,
+            name: '^cva$',
+            match: [{ type: MatcherType.ObjectValue, path: '^base$' }]
+          }
+        ]
       }
     },
     rules: {

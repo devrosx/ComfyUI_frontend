@@ -1,44 +1,4 @@
 {
-  "apps/website/src/components/cloud-nodes/PackCard.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "apps/website/src/components/cloud-nodes/PackDetail.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "apps/website/src/components/cloud-nodes/PackGridSection.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "apps/website/src/components/ui/navigation-menu/NavigationMenuLink.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "apps/website/src/components/ui/navigation-menu/navigationMenuTriggerStyle.ts": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "apps/website/src/pages/pixal3d-trellis2.astro": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "apps/website/src/pages/platform/serverless-animation.astro": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "apps/website/src/templates/platform/ServerlessAutoscaleAnimation.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 6
-    }
-  },
   "src/base/assert.ts": {
     "comfy/no-new-error-throw": {
       "count": 1
@@ -47,226 +7,6 @@
   "src/base/common/downloadUtil.ts": {
     "comfy/no-new-error-throw": {
       "count": 2
-    }
-  },
-  "src/components/boundingBoxes/WidgetBoundingBoxes.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 5
-    }
-  },
-  "src/components/breadcrumb/SubgraphBreadcrumb.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/builder/AppBuilder.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/builder/BuilderSaveDialogContent.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/builder/ConnectOutputPopover.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/card/CardTitle.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/common/Dialogue.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/components/common/DropdownMenu.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 4
-    }
-  },
-  "src/components/common/TreeExplorerV2.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/common/TreeExplorerV2Node.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/components/custom/widget/WorkflowTemplateSelectorDialog.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/components/dialog/content/TopUpCreditsDialogContentLegacy.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/components/dialog/content/credit/CreditTopUpOption.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/dialog/content/setting/keybinding/EditKeybindingContent.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/dialog/content/subscription/CancelSubscriptionDialogContent.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/graph/selectionToolbox/ArrangeButton.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 4
-    }
-  },
-  "src/components/hdr/HdrViewerContent.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 3
-    }
-  },
-  "src/components/load3d/menubar/RecordMenuControl.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/components/load3d/menubar/menuBarStyles.ts": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/maskeditor/BrushSettingsPanel.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 15
-    }
-  },
-  "src/components/maskeditor/dialog/TopBarHeader.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/node/NodePreviewCard.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 3
-    }
-  },
-  "src/components/painter/WidgetPainter.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 10
-    }
-  },
-  "src/components/rightSidePanel/errors/ErrorCardSection.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/components/rightSidePanel/errors/ErrorGroupList.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/rightSidePanel/errors/ErrorNodeCard.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/components/rightSidePanel/errors/MissingPackGroupRow.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 3
-    }
-  },
-  "src/components/rightSidePanel/parameters/TabGlobalParameters.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/searchbox/v2/NodeSearchInput.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/searchbox/v2/NodeSearchListItem.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/searchbox/v2/NodeSearchTypeFilterPopover.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 4
-    }
-  },
-  "src/components/sidebar/tabs/nodeLibrary/EssentialNodeCard.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/components/sidebar/tabs/nodeLibrary/EssentialNodesPanel.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/topbar/CurrentUserPopoverLegacy.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/topbar/WorkflowTab.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/ui/Popover.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 4
-    }
-  },
-  "src/components/ui/button/button.variants.ts": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/ui/number-field/NumberField.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/components/ui/number-field/NumberFieldDecrement.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/ui/number-field/NumberFieldIncrement.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/widget/SampleModelSelector.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/components/widget/layout/BaseModalLayout.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/widget/nav/NavIcon.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/components/widget/nav/NavItem.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
     }
   },
   "src/composables/auth/useAuthActions.ts": {
@@ -449,16 +189,6 @@
       "count": 1
     }
   },
-  "src/platform/assets/components/UploadModelUrlInput.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/platform/assets/components/modelInfo/ModelInfoPanel.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
   "src/platform/assets/services/assetService.ts": {
     "comfy/no-new-error-throw": {
       "count": 21
@@ -469,29 +199,14 @@
       "count": 7
     }
   },
-  "src/platform/cloud/oauth/OAuthConsentView.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
   "src/platform/cloud/oauth/oauthApi.ts": {
     "comfy/no-new-error-throw": {
       "count": 8
     }
   },
-  "src/platform/cloud/onboarding/CloudSubscriptionRedirectView.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
   "src/platform/cloud/subscription/components/CreditsTile.vue": {
     "comfy/no-new-error-throw": {
       "count": 1
-    }
-  },
-  "src/platform/cloud/subscription/components/PricingTable.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 11
     }
   },
   "src/platform/cloud/subscription/composables/useSubscription.ts": {
@@ -519,33 +234,8 @@
       "count": 6
     }
   },
-  "src/platform/missingMedia/components/MissingMediaCard.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/platform/missingModel/components/MissingModelRow.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/platform/nodeReplacement/components/SwapNodeGroupRow.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 5
-    }
-  },
   "src/platform/nodeReplacement/nodeReplacementService.ts": {
     "comfy/no-new-error-throw": {
-      "count": 1
-    }
-  },
-  "src/platform/secrets/components/SecretListItem.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/platform/settings/components/SettingDialog.vue": {
-    "better-tailwindcss/no-unknown-classes": {
       "count": 1
     }
   },
@@ -562,21 +252,6 @@
   "src/platform/workflow/management/stores/comfyWorkflow.ts": {
     "comfy/no-new-error-throw": {
       "count": 2
-    }
-  },
-  "src/platform/workflow/sharing/components/publish/ComfyHubDescribeStep.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/platform/workflow/sharing/components/publish/ComfyHubExamplesStep.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/platform/workflow/sharing/components/publish/ReorderableExampleImage.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
     }
   },
   "src/platform/workflow/sharing/composables/useComfyHubProfileGate.ts": {
@@ -604,86 +279,6 @@
       "count": 4
     }
   },
-  "src/platform/workspace/components/PricingTableWorkspace.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 11
-    }
-  },
-  "src/platform/workspace/components/SubscriptionSuccessWorkspace.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/platform/workspace/components/TopUpCreditsDialogContentWorkspace.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/platform/workspace/components/dialogs/ChangeMemberRoleDialogContent.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/platform/workspace/components/dialogs/CreateWorkspaceDialogContent.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/platform/workspace/components/dialogs/DeleteWorkspaceDialogContent.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/platform/workspace/components/dialogs/DowngradeRemoveMembersDialogContent.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/platform/workspace/components/dialogs/EditWorkspaceDialogContent.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/platform/workspace/components/dialogs/InviteMemberDialogContent.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/platform/workspace/components/dialogs/InviteMemberUpsellDialogContent.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/platform/workspace/components/dialogs/LeaveWorkspaceDialogContent.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/platform/workspace/components/dialogs/RemoveMemberDialogContent.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/platform/workspace/components/dialogs/RevokeInviteDialogContent.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/platform/workspace/components/dialogs/TeamWorkspacesDialogContent.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 4
-    }
-  },
-  "src/platform/workspace/components/dialogs/settings/MembersPanelContent.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/platform/workspace/components/toasts/InviteAcceptedToast.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
   "src/platform/workspace/composables/useDowngradeToPersonal.ts": {
     "comfy/no-new-error-throw": {
       "count": 8
@@ -709,16 +304,6 @@
       "count": 1
     }
   },
-  "src/renderer/extensions/firstRunTour/gettingStarted/GettingStartedCard.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/renderer/extensions/layerEditor/components/LayerEditorCanvas.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
   "src/renderer/extensions/layerEditor/composables/useLayerEditorExport.ts": {
     "comfy/no-new-error-throw": {
       "count": 1
@@ -736,46 +321,6 @@
   },
   "src/renderer/extensions/layerEditor/engine/tool.ts": {
     "comfy/no-new-error-throw": {
-      "count": 1
-    }
-  },
-  "src/renderer/extensions/linearMode/AppInput.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/renderer/extensions/linearMode/AppOutput.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/renderer/extensions/vueNodes/components/ImagePreview.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/renderer/extensions/vueNodes/components/LivePreview.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/renderer/extensions/vueNodes/widgets/components/audio/AudioPreviewPlayer.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 7
-    }
-  },
-  "src/renderer/extensions/vueNodes/widgets/components/form/dropdown/FormDropdownMenuActions.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/renderer/extensions/vueNodes/widgets/components/form/dropdown/FormDropdownMenuFilter.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/renderer/extensions/vueNodes/widgets/components/form/dropdown/FormDropdownMenuItem.vue": {
-    "better-tailwindcss/no-unknown-classes": {
       "count": 1
     }
   },
@@ -946,31 +491,6 @@
   },
   "src/utils/migration/migrateReroute.ts": {
     "comfy/no-new-error-throw": {
-      "count": 1
-    }
-  },
-  "src/workbench/extensions/manager/components/ManagerProgressToast.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/workbench/extensions/manager/components/manager/ManagerDialog.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/workbench/extensions/manager/components/manager/PackVersionSelectorPopover.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 1
-    }
-  },
-  "src/workbench/extensions/manager/components/manager/infoPanel/tabs/DescriptionTabPanel.vue": {
-    "better-tailwindcss/no-unknown-classes": {
-      "count": 2
-    }
-  },
-  "src/workbench/extensions/manager/components/survey/ManagerSurveyDialog.vue": {
-    "better-tailwindcss/no-unknown-classes": {
       "count": 1
     }
   }

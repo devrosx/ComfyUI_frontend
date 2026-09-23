@@ -16,7 +16,7 @@
         >
           <i
             v-if="isBuilderState"
-            class="bg-text-subtle icon-[lucide--hammer]"
+            class="icon-[lucide--hammer] bg-muted-foreground"
           />
           <i
             v-else-if="workflowOption.workflow.initialMode === 'app'"
