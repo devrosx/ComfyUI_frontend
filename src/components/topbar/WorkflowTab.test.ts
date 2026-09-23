@@ -1,8 +1,9 @@
 import userEvent from '@testing-library/user-event'
 import { render, screen } from '@testing-library/vue'
 import { fromPartial } from '@total-typescript/shoehorn'
+import { TabsList, TabsRoot } from 'reka-ui'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { markRaw, nextTick } from 'vue'
+import { defineComponent, h, markRaw, nextTick } from 'vue'
 import type { ComponentProps } from 'vue-component-type-helpers'
 import { createI18n } from 'vue-i18n'
 
@@ -125,19 +126,24 @@ function renderTab({
     path: resolvedActiveWorkflowPath
   })
   useSettingStore().settingValues['Comfy.Workflow.AutoSave'] = 'off'
-  const rendered = render(WorkflowTab, {
-    global: {
-      plugins: [i18n],
-      stubs: {
-        WorkflowActionsList: true
+  const rendered = render(
+    defineComponent(
+      () => () =>
+        h(TabsRoot, { modelValue: resolvedActiveWorkflowPath }, () =>
+          h(TabsList, () =>
+            h(WorkflowTab, { workflowOption, isFirst: false, isLast: false })
+          )
+        )
+    ),
+    {
+      global: {
+        plugins: [i18n],
+        stubs: {
+          WorkflowActionsList: true
+        }
       }
-    },
-    props: {
-      workflowOption,
-      isFirst: false,
-      isLast: false
     }
-  })
+  )
   const workflowStore = useWorkflowStore()
   for (const workflow of [workflowOption.workflow, ...otherOpenWorkflows])
     workflowStore.attachWorkflow(workflow, 0)

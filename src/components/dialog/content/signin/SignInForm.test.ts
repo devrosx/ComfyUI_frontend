@@ -1,14 +1,8 @@
-import { useToast } from '@/components/ui/toast'
-import { Form } from '@primevue/forms'
 import userEvent from '@testing-library/user-event'
-import { render, screen } from '@testing-library/vue'
-import PrimeVue from 'primevue/config'
+import { render, screen, waitFor } from '@testing-library/vue'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createI18n } from 'vue-i18n'
 
-import Button from '@/components/ui/button/Button.vue'
-import Input from '@/components/ui/input/Input.vue'
-import Spinner from '@/components/ui/spinner/Spinner.vue'
 import { useAuthActions } from '@/composables/auth/useAuthActions'
 import enMessages from '@/locales/en/main.json' with { type: 'json' }
 import { useAuthStore } from '@/stores/authStore'
@@ -21,26 +15,11 @@ vi.mock(import('@/composables/auth/useAuthActions'))
 
 // Mock toast
 const mockToastAdd = vi.fn()
-beforeEach(() => {
-  vi.mocked(useToast().success).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('success', ...args)
-  )
-  vi.mocked(useToast().error).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('error', ...args)
-  )
-  vi.mocked(useToast().info).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('info', ...args)
-  )
-  vi.mocked(useToast().warning).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('warning', ...args)
-  )
-  vi.mocked(useToast().loading).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('loading', ...args)
-  )
-  vi.mocked(useToast().custom).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('custom', ...args)
-  )
-})
+vi.mock<unknown>(import('primevue/usetoast'), () => ({
+  useToast: vi.fn(() => ({
+    add: mockToastAdd
+  }))
+}))
 
 const forgotPasswordText = enMessages.auth.login.forgotPassword
 const loginButtonText = enMessages.auth.login.loginButton
@@ -58,10 +37,7 @@ describe('SignInForm', () => {
     })
     const user = userEvent.setup()
     const result = render(SignInForm, {
-      global: {
-        plugins: [PrimeVue, i18n],
-        components: { Form, Button, Input, Spinner }
-      },
+      global: { plugins: [i18n] },
       props
     })
     return { ...result, user }
@@ -86,11 +62,11 @@ describe('SignInForm', () => {
 
       await user.click(screen.getByText(forgotPasswordText))
 
-      expect(mockToastAdd).toHaveBeenCalledWith(
-        'warning',
-        enMessages.auth.login.emailPlaceholder,
-        { duration: 5000 }
-      )
+      expect(mockToastAdd).toHaveBeenCalledWith({
+        severity: 'warn',
+        summary: enMessages.auth.login.emailPlaceholder,
+        life: 5000
+      })
 
       expect(focusSpy).toHaveBeenCalled()
 
@@ -105,11 +81,15 @@ describe('SignInForm', () => {
 
       await user.type(getEmailInput(), 'test@example.com')
       await user.type(getPasswordInput(), 'password123')
-      await user.click(screen.getByRole('button', { name: loginButtonText }))
+      const submit = screen.getByRole('button', { name: loginButtonText })
+      await waitFor(() => expect(submit).toBeEnabled())
+      await user.click(submit)
 
-      expect(onSubmit).toHaveBeenCalledWith({
-        email: 'test@example.com',
-        password: 'password123'
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          email: 'test@example.com',
+          password: 'password123'
+        })
       })
     })
 

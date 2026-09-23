@@ -26,7 +26,7 @@
           side="top"
         >
           <button
-            class="focus-visible:ring-ring flex items-center gap-1.5 rounded-md border-0 bg-transparent px-1 py-0.5 text-sm text-base-foreground transition-colors outline-none hover:bg-button-hover-surface focus-visible:ring-1"
+            class="flex items-center gap-1.5 rounded-md border-0 bg-transparent px-1 py-0.5 text-sm text-base-foreground transition-colors outline-none hover:bg-button-hover-surface focus-visible:ring-1 focus-visible:ring-border-default"
             type="button"
             :aria-label="t('load3d.menuBar.videoRecordingTooltip')"
             data-testid="load3d-recording-duration"
@@ -70,7 +70,7 @@
     </Popover>
     <Tooltip :config="tip(t('load3d.menuBar.deleteRecording'))" side="top">
       <button
-        class="focus-visible:ring-ring flex size-6 items-center justify-center rounded-md border-0 bg-transparent text-base-foreground transition-colors outline-none hover:bg-button-hover-surface focus-visible:ring-1"
+        class="flex size-6 items-center justify-center rounded-md border-0 bg-transparent text-base-foreground transition-colors outline-none hover:bg-button-hover-surface focus-visible:ring-1 focus-visible:ring-border-default"
         type="button"
         :aria-label="t('load3d.menuBar.deleteRecording')"
         @click="emit('clearRecording')"
