@@ -1,5 +1,4 @@
 import { useBillingContext } from '@/composables/billing/useBillingContext'
-import { useToast } from '@/components/ui/toast'
 import { useTeamWorkspaceStore } from '@/platform/workspace/stores/teamWorkspaceStore'
 import { render, screen, waitFor } from '@testing-library/vue'
 import userEvent from '@testing-library/user-event'
@@ -19,26 +18,11 @@ const { mockToastAdd } = vi.hoisted(() => ({
 
 vi.mock(import('@/composables/billing/useBillingContext'))
 
-beforeEach(() => {
-  vi.mocked(useToast().success).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('success', ...args)
-  )
-  vi.mocked(useToast().error).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('error', ...args)
-  )
-  vi.mocked(useToast().info).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('info', ...args)
-  )
-  vi.mocked(useToast().warning).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('warning', ...args)
-  )
-  vi.mocked(useToast().loading).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('loading', ...args)
-  )
-  vi.mocked(useToast().custom).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('custom', ...args)
-  )
-})
+vi.mock<unknown>(import('primevue/usetoast'), () => ({
+  useToast: () => ({
+    add: mockToastAdd
+  })
+}))
 
 vi.mock(import('@/platform/telemetry'))
 
@@ -244,7 +228,9 @@ describe('InviteMembersForm', () => {
     )
     expect(screen.getByText('fail@x.com')).toBeInTheDocument()
     expect(screen.queryByText('ok@x.com')).not.toBeInTheDocument()
-    expect(mockToastAdd.mock.calls.map(([method]) => method)).toContain('error')
+    expect(mockToastAdd).toHaveBeenCalledWith(
+      expect.objectContaining({ severity: 'error' })
+    )
     expect(emitted().submitted).toBeUndefined()
     expect(useTelemetry()?.trackWorkspaceInviteSent).toHaveBeenCalledWith({
       source: 'post_upgrade_success',
@@ -278,7 +264,9 @@ describe('InviteMembersForm', () => {
     )
     expect(screen.getByText('a@b.com')).toBeInTheDocument()
     expect(screen.getByText('c@d.com')).toBeInTheDocument()
-    expect(mockToastAdd.mock.calls.map(([method]) => method)).toContain('error')
+    expect(mockToastAdd).toHaveBeenCalledWith(
+      expect.objectContaining({ severity: 'error' })
+    )
     expect(emitted().submitted).toBeUndefined()
     expect(useTelemetry()?.trackWorkspaceInviteSent).not.toHaveBeenCalled()
     expect(useBillingContext().fetchStatus).not.toHaveBeenCalled()

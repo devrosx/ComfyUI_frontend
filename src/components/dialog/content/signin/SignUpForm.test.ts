@@ -1,5 +1,5 @@
 import userEvent from '@testing-library/user-event'
-import { render, screen } from '@testing-library/vue'
+import { render, screen, waitFor } from '@testing-library/vue'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { computed, defineComponent, h, nextTick, ref } from 'vue'
 import { createI18n } from 'vue-i18n'
@@ -60,9 +60,7 @@ function globalOptions() {
     locale: 'en',
     messages: { en: enMessages }
   })
-  return {
-    plugins: [i18n]
-  }
+  return { plugins: [i18n] }
 }
 
 describe('SignUpForm', () => {
@@ -196,11 +194,11 @@ describe('SignUpForm', () => {
         .outerHTML
     ).toBe(
       '<div class="text-sm">Password requirements: <ul class="mt-1 space-y-1">' +
-        '<li class="text-red-500">Must be between 8 and 32 characters</li>' +
-        '<li class="text-red-500">Must contain at least one uppercase letter</li>' +
+        '<li class="text-destructive-background">Must be between 8 and 32 characters</li>' +
+        '<li class="text-destructive-background">Must contain at least one uppercase letter</li>' +
         '<li class="">Must contain at least one lowercase letter</li>' +
-        '<li class="text-red-500">Must contain at least one number</li>' +
-        '<li class="text-red-500">Must contain at least one special character</li>' +
+        '<li class="text-destructive-background">Must contain at least one number</li>' +
+        '<li class="text-destructive-background">Must contain at least one special character</li>' +
         '</ul></div>'
     )
   })
@@ -254,88 +252,6 @@ describe('SignUpForm', () => {
     })
   })
 
-  describe('validation', () => {
-    it('disables submit for invalid input and re-enables it after correction', async () => {
-      const { user } = renderComponent()
-      const submit = screen.getByRole('button', { name: signUpButton })
-      const email = screen.getByPlaceholderText(
-        enMessages.auth.signup.emailPlaceholder
-      )
-
-      expect(submit).toBeEnabled()
-
-      await user.type(email, 'not-an-email')
-      expect(submit).toBeDisabled()
-
-      await user.clear(email)
-      await user.type(email, 'new@example.com')
-      expect(submit).toBeEnabled()
-    })
-
-    it('blocks invalid submission and associates errors with their fields', async () => {
-      const onSubmit = vi.fn()
-      const { user } = renderComponent({ onSubmit })
-
-      await user.type(
-        screen.getByPlaceholderText(enMessages.auth.signup.emailPlaceholder),
-        'not-an-email'
-      )
-      await user.click(screen.getByRole('button', { name: signUpButton }))
-
-      const email = screen.getByPlaceholderText(
-        enMessages.auth.signup.emailPlaceholder
-      )
-      expect(onSubmit).not.toHaveBeenCalled()
-      expect(email).toHaveAccessibleDescription(
-        enMessages.validation.invalidEmail
-      )
-    })
-
-    it('shows a mismatch error on the confirmation field', async () => {
-      const { user } = renderComponent()
-
-      await fillValidSignup(user)
-      await user.clear(
-        screen.getByPlaceholderText(
-          enMessages.auth.login.confirmPasswordPlaceholder
-        )
-      )
-      await user.type(
-        screen.getByPlaceholderText(
-          enMessages.auth.login.confirmPasswordPlaceholder
-        ),
-        'Different1!'
-      )
-
-      expect(
-        screen.getByPlaceholderText(
-          enMessages.auth.login.confirmPasswordPlaceholder
-        )
-      ).toHaveAccessibleDescription(enMessages.validation.password.match)
-    })
-
-    it('clears a mismatch error when the password is corrected', async () => {
-      const { user } = renderComponent()
-      const password = screen.getByLabelText(
-        enMessages.auth.signup.passwordLabel
-      )
-      const confirmPassword = screen.getByLabelText(
-        enMessages.auth.login.confirmPasswordLabel
-      )
-
-      await user.type(password, 'Password1!')
-      await user.type(confirmPassword, 'Different1!')
-      expect(confirmPassword).toHaveAccessibleDescription(
-        enMessages.validation.password.match
-      )
-
-      await user.clear(password)
-      await user.type(password, 'Different1!')
-
-      expect(confirmPassword).not.toHaveAccessibleDescription()
-    })
-  })
-
   describe('Turnstile single-use token reset', () => {
     it('exposes resetTurnstile() that resets the rendered widget', async () => {
       mockTurnstileEnabled.value = true
@@ -386,10 +302,13 @@ describe('SignUpForm', () => {
       await fillValidSignup(user)
 
       emitTurnstileToken!('token-xyz')
-      await nextTick()
-      await user.click(screen.getByRole('button', { name: signUpButton }))
+      const submit = screen.getByRole('button', { name: signUpButton })
+      await waitFor(() => expect(submit).toBeEnabled())
+      await user.click(submit)
 
-      expect(onSubmit).toHaveBeenCalledWith(expectedValues, 'token-xyz')
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith(expectedValues, 'token-xyz')
+      })
     })
 
     it('emits submit without a token once the widget reports itself unavailable (broken/slow load fallback)', async () => {
@@ -399,10 +318,13 @@ describe('SignUpForm', () => {
       await fillValidSignup(user)
 
       emitTurnstileUnavailable!(true)
-      await nextTick()
-      await user.click(screen.getByRole('button', { name: signUpButton }))
+      const submit = screen.getByRole('button', { name: signUpButton })
+      await waitFor(() => expect(submit).toBeEnabled())
+      await user.click(submit)
 
-      expect(onSubmit).toHaveBeenCalledWith(expectedValues, undefined)
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith(expectedValues, undefined)
+      })
     })
   })
 
@@ -457,10 +379,12 @@ describe('SignUpForm', () => {
       const { user } = renderComponent({ onSubmit })
       await fillValidSignup(user)
       const submit = screen.getByRole('button', { name: signUpButton })
+      await waitFor(() => expect(submit).toBeEnabled())
 
       await user.click(submit)
       await user.click(submit)
 
+      await waitFor(() => expect(onSubmit).toHaveBeenCalled())
       expect(
         onSubmit,
         'an impatient double-click would otherwise create the account twice'

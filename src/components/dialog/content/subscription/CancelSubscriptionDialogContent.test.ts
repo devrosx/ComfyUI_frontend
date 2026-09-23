@@ -1,4 +1,3 @@
-import { useToast } from '@/components/ui/toast'
 import { computed, ref } from 'vue'
 import { useBillingCapabilities } from '@/platform/workspace/composables/useBillingCapabilities'
 import userEvent from '@testing-library/user-event'
@@ -101,6 +100,16 @@ vi.mock<unknown>(
 
 vi.mock(import('@/platform/telemetry'))
 
+vi.mock<unknown>(
+  import('primevue/usetoast'),
+
+  () => ({
+    useToast: vi.fn(() => ({
+      add: mockToastAdd
+    }))
+  })
+)
+
 function renderComponent(
   props: { cancelAt?: string; flowAlreadyOpened?: boolean } = {}
 ) {
@@ -120,19 +129,6 @@ function renderComponent(
 
 describe('CancelSubscriptionDialogContent', () => {
   beforeEach(() => {
-    const toast = useToast()
-    for (const kind of [
-      'success',
-      'error',
-      'info',
-      'warning',
-      'loading'
-    ] as const) {
-      vi.mocked(toast[kind]).mockImplementation((...args) => {
-        mockToastAdd(kind, ...args)
-        return 0
-      })
-    }
     mockTier.value = 'STANDARD'
     mockShouldUseWorkspaceBilling.value = false
     useBillingCapabilities().canCancel = computed(() => true)
@@ -226,8 +222,8 @@ describe('CancelSubscriptionDialogContent', () => {
       )
 
       await waitFor(() =>
-        expect(mockToastAdd.mock.calls.map(([method]) => method)).toContain(
-          'error'
+        expect(mockToastAdd).toHaveBeenCalledWith(
+          expect.objectContaining({ severity: 'error' })
         )
       )
       expect(
@@ -286,10 +282,9 @@ describe('CancelSubscriptionDialogContent', () => {
 
       await waitFor(() =>
         expect(mockToastAdd).toHaveBeenCalledWith(
-          'error',
-          expect.any(String),
           expect.objectContaining({
-            description: 'Subscription cancellation timed out'
+            severity: 'error',
+            detail: 'Subscription cancellation timed out'
           })
         )
       )
@@ -311,8 +306,8 @@ describe('CancelSubscriptionDialogContent', () => {
         })
       )
       expect(mockFetchStatus).toHaveBeenCalled()
-      expect(mockToastAdd.mock.calls.map(([method]) => method)).toContain(
-        'success'
+      expect(mockToastAdd).toHaveBeenCalledWith(
+        expect.objectContaining({ severity: 'success' })
       )
     })
 
@@ -381,8 +376,8 @@ describe('CancelSubscriptionDialogContent', () => {
       )
 
       await waitFor(() =>
-        expect(mockToastAdd.mock.calls.map(([method]) => method)).toContain(
-          'success'
+        expect(mockToastAdd).toHaveBeenCalledWith(
+          expect.objectContaining({ severity: 'success' })
         )
       )
       expect(vi.mocked(useDialogStore().closeDialog)).toHaveBeenCalledWith({

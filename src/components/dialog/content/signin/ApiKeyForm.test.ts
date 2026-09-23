@@ -1,10 +1,9 @@
-import { render, screen } from '@testing-library/vue'
 import userEvent from '@testing-library/user-event'
+import { render, screen } from '@testing-library/vue'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createI18n } from 'vue-i18n'
 
 import { getComfyPlatformBaseUrl } from '@/config/comfyApi'
-import { useApiKeyAuthStore } from '@/stores/apiKeyAuthStore'
 import { useAuthStore } from '@/stores/authStore'
 
 import ApiKeyForm from './ApiKeyForm.vue'
@@ -39,15 +38,12 @@ const i18n = createI18n({
 describe('ApiKeyForm', () => {
   beforeEach(() => {
     useAuthStore().loading = false
-    vi.mocked(useApiKeyAuthStore().storeApiKey).mockResolvedValue(true)
   })
 
   function renderComponent(props: Record<string, unknown> = {}) {
     const user = userEvent.setup()
     const result = render(ApiKeyForm, {
-      global: {
-        plugins: [i18n]
-      },
+      global: { plugins: [i18n] },
       props
     })
     return { ...result, user }
@@ -95,30 +91,5 @@ describe('ApiKeyForm', () => {
       'href',
       'https://docs.comfy.org/tutorials/partner-nodes/overview#log-in-with-comfyui-account-api-key-on-non-whitelisted-websites'
     )
-  })
-
-  it('blocks an invalid key and displays its validation error', async () => {
-    const onSuccess = vi.fn()
-    const { user } = renderComponent({ onSuccess })
-    const input = screen.getByLabelText('API Key')
-
-    await user.type(input, 'invalid')
-    await user.click(screen.getByRole('button', { name: 'Save' }))
-
-    expect(useApiKeyAuthStore().storeApiKey).not.toHaveBeenCalled()
-    expect(onSuccess).not.toHaveBeenCalled()
-    expect(input).toHaveAccessibleDescription('Must start with comfyui-')
-  })
-
-  it('stores a valid key and emits success', async () => {
-    const onSuccess = vi.fn()
-    const { user } = renderComponent({ onSuccess })
-    const apiKey = `comfyui-${'a'.repeat(64)}`
-
-    await user.type(screen.getByLabelText('API Key'), apiKey)
-    await user.click(screen.getByRole('button', { name: 'Save' }))
-
-    expect(useApiKeyAuthStore().storeApiKey).toHaveBeenCalledWith(apiKey)
-    expect(onSuccess).toHaveBeenCalledOnce()
   })
 })

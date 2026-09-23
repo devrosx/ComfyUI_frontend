@@ -1,4 +1,4 @@
-import { useToast } from '@/components/ui/toast'
+import { useToast } from 'primevue/usetoast'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -109,19 +109,12 @@ export function useTemplateUrlLoader() {
     try {
       await templateWorkflows.loadTemplates()
 
-      const success = await templateWorkflows.loadWorkflowTemplate(
+      const result = await templateWorkflows.loadWorkflowTemplate(
         templateParam,
         sourceParam
       )
 
-      if (!success) {
-        toast.error(t('g.error'), {
-          description: t('templateWorkflows.error.templateNotFound', {
-            templateName: templateParam
-          })
-        })
-        return
-      }
+      if (result !== 'loaded') return
 
       if (modeParam === 'linear') {
         // Set linear mode after successful template load
@@ -134,7 +127,11 @@ export function useTemplateUrlLoader() {
         '[useTemplateUrlLoader] Failed to load template from URL:',
         error
       )
-      toast.error(t('g.error'), { description: t('g.errorLoadingTemplate') })
+      toast.add({
+        severity: 'error',
+        summary: t('g.error'),
+        detail: t('templateWorkflows.error.loading')
+      })
     } finally {
       cleanupUrlParams()
       clearPreservedQuery(TEMPLATE_NAMESPACE)

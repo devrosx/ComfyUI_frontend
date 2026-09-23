@@ -112,7 +112,7 @@ function openReference(reference: WorkflowReference): void {
       v-if="hasPrompt"
       ref="bubble"
       data-testid="user-message-bubble"
-      class="w-fit max-w-full rounded-lg border border-component-node-border bg-secondary-background px-2.5 py-1.5 text-sm/5 font-normal wrap-break-word whitespace-pre-wrap text-muted-foreground"
+      class="w-fit max-w-full rounded-lg border border-component-node-border bg-secondary-background px-2.5 py-1.5 text-sm/7 font-normal wrap-break-word whitespace-pre-wrap text-muted-foreground"
     >
       <template v-for="(part, index) in promptParts" :key="index">
         <WorkflowReferenceChip

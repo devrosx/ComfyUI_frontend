@@ -152,6 +152,30 @@ describe('UrlInput', () => {
     expect(validationCount).toBe(2) // Once on mount, once on click
   })
 
+  it('disables URL validation when the input is disabled', async () => {
+    let validationCount = 0
+    const { user } = renderComponent({
+      modelValue: 'https://test.com',
+      disabled: true,
+      validateUrlFn: () => {
+        validationCount++
+        return Promise.resolve(true)
+      }
+    })
+
+    await nextTick()
+    await nextTick()
+
+    const validationButton = screen.getByRole('button', {
+      name: enMessages.g.validate
+    })
+    expect(validationButton).toBeDisabled()
+
+    await user.click(validationButton)
+
+    expect(validationCount).toBe(1)
+  })
+
   it('prevents multiple simultaneous validations', async () => {
     let validationCount = 0
     const { rerender, user } = renderComponent({
