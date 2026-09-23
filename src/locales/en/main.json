@@ -1228,6 +1228,7 @@
       "default": "Default"
     },
     "error": {
+      "loading": "Couldn't open the template. Please try again.",
       "templateNotFound": "Template \"{templateName}\" not found"
     }
   },
@@ -1260,6 +1261,7 @@
   "zoomControls": {
     "label": "Zoom Controls",
     "zoomToFit": "Zoom To Fit",
+    "zoomPercentage": "Zoom percentage",
     "showMinimap": "Show Minimap",
     "hideMinimap": "Hide Minimap"
   },
@@ -2200,9 +2202,11 @@
     "errorNotSupported": "Clipboard API not supported in your browser"
   },
   "imageCompare": {
-    "noImages": "No images to compare",
+    "afterAlt": "After image",
     "batchLabelA": "A:",
-    "batchLabelB": "B:"
+    "batchLabelB": "B:",
+    "beforeAlt": "Before image",
+    "noImages": "No images to compare"
   },
   "batch": {
     "index": "{current} / {total}"

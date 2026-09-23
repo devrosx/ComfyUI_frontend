@@ -19,7 +19,7 @@
       >
         <img
           :src="thumbnailUrl"
-          class="bg-interface-menu-component-surface block h-50 rounded-lg object-cover p-2 shadow-lg"
+          class="block h-50 rounded-lg bg-secondary-background object-cover p-2 shadow-lg"
           :style="{ width: `${POPOVER_WIDTH}px` }"
         />
       </div>

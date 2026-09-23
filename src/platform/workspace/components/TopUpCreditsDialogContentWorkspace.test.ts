@@ -106,14 +106,7 @@ function renderDialog() {
   mockBillingContext()
   return render(TopUpCreditsDialogContentWorkspace, {
     global: {
-      plugins: [i18n],
-      stubs: {
-        FormattedNumberStepper: {
-          name: 'FormattedNumberStepper',
-          props: ['modelValue'],
-          template: '<div />'
-        }
-      }
+      plugins: [i18n]
     }
   })
 }

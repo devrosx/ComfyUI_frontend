@@ -17,13 +17,11 @@
         <slot name="name-suffix" />
       </span>
     </div>
-    <div
-      class="form-input flex justify-end [&_.input-knob_.knob-part]:w-32 [&_.input-slider_.slider-part]:w-20 [&>input]:w-44"
-    >
+    <div class="form-input flex justify-end">
       <component
         :is="markRaw(getFormComponent(props.item))"
         :id="props.id"
-        v-model:model-value="componentValue"
+        v-model:model-value="formValue"
         :aria-labelledby="`${props.id}-label`"
         v-bind="getFormAttrs(props.item)"
       />
@@ -32,20 +30,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed, markRaw } from 'vue'
+import { markRaw } from 'vue'
 import type { Component } from 'vue'
 
 import BackgroundImageUpload from '@/components/common/BackgroundImageUpload.vue'
 import CustomFormValue from '@/components/common/CustomFormValue.vue'
 import FormColorPicker from '@/components/common/FormColorPicker.vue'
 import FormImageUpload from '@/components/common/FormImageUpload.vue'
+import FormNumberField from '@/components/common/FormNumberField.vue'
 import FormRadioGroup from '@/components/common/FormRadioGroup.vue'
 import InputKnob from '@/components/common/InputKnob.vue'
 import InputSlider from '@/components/common/InputSlider.vue'
 import UrlInput from '@/components/common/UrlInput.vue'
 import Input from '@/components/ui/input/Input.vue'
 import SingleSelect from '@/components/ui/single-select/SingleSelect.vue'
-import FormattedNumberStepper from '@/components/ui/stepper/FormattedNumberStepper.vue'
 import Switch from '@/components/ui/switch/Switch.vue'
 import type { FormItem } from '@/platform/settings/types'
 
@@ -55,17 +53,6 @@ const props = defineProps<{
   id?: string
   labelClass?: string | Record<string, boolean>
 }>()
-
-const componentValue = computed({
-  get: () => {
-    if (props.item.type !== 'number' || typeof formValue.value === 'number') {
-      return formValue.value
-    }
-    const min = props.item.attrs?.min
-    return typeof min === 'number' && Number.isFinite(min) ? min : 0
-  },
-  set: (value: unknown) => (formValue.value = value)
-})
 
 function getFormAttrs(item: FormItem) {
   const attrs = { ...(item.attrs || {}) }
@@ -98,6 +85,9 @@ function getFormAttrs(item: FormItem) {
       attrs['options'] = item.options
       attrs['class'] = 'w-44'
       break
+    case 'text':
+      attrs['class'] = 'w-44'
+      break
   }
   return attrs
 }
@@ -110,7 +100,7 @@ function getFormComponent(item: FormItem): Component {
     case 'boolean':
       return Switch
     case 'number':
-      return FormattedNumberStepper
+      return FormNumberField
     case 'slider':
       return InputSlider
     case 'knob':

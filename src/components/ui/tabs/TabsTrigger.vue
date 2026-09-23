@@ -17,9 +17,9 @@ const forwarded = useForwardProps(restProps)
     :class="
       cn(
         'inline-flex cursor-pointer items-center justify-center rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap',
-        'focus-visible:ring-ring transition-colors outline-none focus-visible:ring-1',
+        'transition-colors outline-none focus-visible:ring-1 focus-visible:ring-border-default',
         'disabled:pointer-events-none disabled:opacity-50',
-        'data-[state=active]:text-secondary-foreground data-[state=active]:bg-secondary-background',
+        'data-[state=active]:bg-secondary-background data-[state=active]:text-base-foreground',
         className
       )
     "

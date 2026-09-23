@@ -21,6 +21,9 @@ catalogs:
     '@astrojs/vue':
       specifier: ^7.0.2
       version: 7.0.2
+    '@comfyorg/comfy-multi-player':
+      specifier: https://codeload.github.com/Comfy-Org/comfy-multi-player/tar.gz/b475423a0f8b019bbac261ce218dfc016e9aa634
+      version: 0.3.3
     '@comfyorg/comfyui-desktop-bridge-types':
       specifier: 0.2.0
       version: 0.2.0
@@ -33,6 +36,9 @@ catalogs:
     '@customerio/cdp-analytics-browser':
       specifier: ^0.5.3
       version: 0.5.6
+    '@datadog/browser-logs':
+      specifier: 6.33.0
+      version: 6.33.0
     '@datadog/browser-rum':
       specifier: ^6.33.0
       version: 6.33.0
@@ -76,9 +82,6 @@ catalogs:
       specifier: ^0.3.2
       version: 0.3.2
     '@primevue/core':
-      specifier: 4.2.5
-      version: 4.2.5
-    '@primevue/forms':
       specifier: 4.2.5
       version: 4.2.5
     '@primevue/themes':
@@ -153,6 +156,9 @@ catalogs:
     '@types/three':
       specifier: ^0.184.1
       version: 0.184.1
+    '@typescript-eslint/utils':
+      specifier: ^8.69.0
+      version: 8.69.0
     '@vee-validate/zod':
       specifier: ^4.15.1
       version: 4.15.1
@@ -504,8 +510,8 @@ importers:
         specifier: workspace:*
         version: link:packages/billing-contract
       '@comfyorg/comfy-multi-player':
-        specifier: 0.3.2
-        version: 0.3.2
+        specifier: 'catalog:'
+        version: https://codeload.github.com/Comfy-Org/comfy-multi-player/tar.gz/b475423a0f8b019bbac261ce218dfc016e9aa634
       '@comfyorg/comfyui-desktop-bridge-types':
         specifier: 'catalog:'
         version: 0.2.0
@@ -535,7 +541,7 @@ importers:
         version: 0.5.6
       '@datadog/browser-rum':
         specifier: 'catalog:'
-        version: 6.33.0
+        version: 6.33.0(@datadog/browser-logs@6.33.0)
       '@floating-ui/vue':
         specifier: 'catalog:'
         version: 1.1.11(vue@3.5.42(typescript@6.0.3))
@@ -549,9 +555,6 @@ importers:
         specifier: 'catalog:'
         version: 0.3.2
       '@primevue/core':
-        specifier: 'catalog:'
-        version: 4.2.5(vue@3.5.42(typescript@6.0.3))
-      '@primevue/forms':
         specifier: 'catalog:'
         version: 4.2.5(vue@3.5.42(typescript@6.0.3))
       '@primevue/themes':
@@ -765,6 +768,9 @@ importers:
       '@types/three':
         specifier: 'catalog:'
         version: 0.184.1
+      '@typescript-eslint/utils':
+        specifier: 'catalog:'
+        version: 8.69.0(eslint@10.10.0(jiti@2.7.0))(typescript@6.0.3)
       '@vitejs/plugin-vue':
         specifier: 'catalog:'
         version: 6.0.8(vite@8.2.2(@types/node@25.9.5)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(tsx@4.23.1)(yaml@2.9.0))(vue@3.5.42(typescript@6.0.3))
@@ -1069,6 +1075,9 @@ importers:
       '@customerio/cdp-analytics-browser':
         specifier: 'catalog:'
         version: 0.5.6
+      '@datadog/browser-logs':
+        specifier: 'catalog:'
+        version: 6.33.0(@datadog/browser-rum@6.33.0)
       '@lucide/vue':
         specifier: 'catalog:'
         version: 1.24.0(vue@3.5.42(typescript@6.0.3))
@@ -1946,8 +1955,9 @@ packages:
     resolution: {integrity: sha512-y7/yvZ2TPAnR9+jnc00klvNNLkJiXFFrQA/hlLCcxA9a2A4zQIOimyFQ9XfwYKiGD1fb5GY8vbKIIgO8d5Tb2A==}
     engines: {node: '>= 20.12.0'}
 
-  '@comfyorg/comfy-multi-player@0.3.2':
-    resolution: {integrity: sha512-xeNSPz0A9HvGemiDoA0W0QOWomeZGduG6dmAMRrScjq793AMVTpzVsr1gBxV0n1DLMm38ck7jKFIx2irMo9a5A==}
+  '@comfyorg/comfy-multi-player@https://codeload.github.com/Comfy-Org/comfy-multi-player/tar.gz/b475423a0f8b019bbac261ce218dfc016e9aa634':
+    resolution: {gitHosted: true, integrity: sha512-YhGP8rTlRGZjSgZVAfvdJOWaKvR7dF6Oo6w+IicyK+4f7XqQk30yW5hUFoHaGLFJH6RGwDvSey0/BS2Iq2r/PA==, tarball: https://codeload.github.com/Comfy-Org/comfy-multi-player/tar.gz/b475423a0f8b019bbac261ce218dfc016e9aa634}
+    version: 0.3.3
 
   '@comfyorg/comfyui-desktop-bridge-types@0.2.0':
     resolution: {integrity: sha512-V5Wj5KXDzTDm5GJAa0xBISjmndNIY5P79pRHQbLkkqJxgp/GPb/QGvcI+xG4ogol0ODJ4j/UBnUmkzpSafw8Aw==}
@@ -2038,6 +2048,14 @@ packages:
 
   '@datadog/browser-core@6.33.0':
     resolution: {integrity: sha512-h/xuBuY4Xi32CbBHkChMMWlOQ4al/mFF08x3o0hqrderfJvX7VO5tD3OVNwF+pfMXOGlDtBCIhwazr9sn24h3g==}
+
+  '@datadog/browser-logs@6.33.0':
+    resolution: {integrity: sha512-WZ1XEIIYK2sijR0hUG3hTPu2kQs8hE/PpoJcMDE7p0/NPXX3TR3dGVrwag+gvIVyBaszRkITiBsHQfnRvxV1DA==}
+    peerDependencies:
+      '@datadog/browser-rum': 6.33.0
+    peerDependenciesMeta:
+      '@datadog/browser-rum':
+        optional: true
 
   '@datadog/browser-rum-core@6.33.0':
     resolution: {integrity: sha512-Ais4x7zQBrBI6JyILYwFAmjUsqy0iQp2C7JcEEfzU4YYYcVO3DGpyVuYYrqHT27jY1QToHY8EnQUr3Yaj6saDA==}
@@ -3773,10 +3791,6 @@ packages:
   '@prettier/parse-srcset@3.1.0':
     resolution: {integrity: sha512-FIRv2rZotO9NP/r66taYqD1zICpPiBbrECqjKV/xqNotqDxF7fLzzUeK+1RSRx9Tenk0DajR/GcRmTJ2qtHaKQ==}
 
-  '@primeuix/forms@0.0.2':
-    resolution: {integrity: sha512-DpecPQd/Qf/kav4LKCaIeGuT3AkwhJzuHCkLANTVlN/zBvo8KIj3OZHsCkm0zlIMVVnaJdtx1ULNlRQdudef+A==}
-    engines: {node: '>=12.11.0'}
-
   '@primeuix/styled@0.3.2':
     resolution: {integrity: sha512-ColZes0+/WKqH4ob2x8DyNYf1NENpe5ZguOvx5yCLxaP8EIMVhLjWLO/3umJiDnQU4XXMLkn2mMHHw+fhTX/mw==}
     engines: {node: '>=12.11.0'}
@@ -3790,10 +3804,6 @@ packages:
     engines: {node: '>=12.11.0'}
     peerDependencies:
       vue: ^3.3.0
-
-  '@primevue/forms@4.2.5':
-    resolution: {integrity: sha512-5jarJQ9Qv32bOo/0tY5bqR3JZI6+YmmoUQ2mjhVSbVElQsE4FNfhT7a7JwF+xgBPMPc8KWGNA1QB248HhPNVAg==}
-    engines: {node: '>=12.11.0'}
 
   '@primevue/icons@4.2.5':
     resolution: {integrity: sha512-WFbUMZhQkXf/KmwcytkjGVeJ9aGEDXjP3uweOjQZMmRdEIxFnqYYpd90wE90JE1teZn3+TVnT4ZT7ejGyEXnFQ==}
@@ -10587,7 +10597,7 @@ snapshots:
       fast-wrap-ansi: 0.2.2
       sisteransi: 1.0.5
 
-  '@comfyorg/comfy-multi-player@0.3.2':
+  '@comfyorg/comfy-multi-player@https://codeload.github.com/Comfy-Org/comfy-multi-player/tar.gz/b475423a0f8b019bbac261ce218dfc016e9aa634':
     dependencies:
       yjs: 13.6.31
 
@@ -10675,14 +10685,22 @@ snapshots:
 
   '@datadog/browser-core@6.33.0': {}
 
+  '@datadog/browser-logs@6.33.0(@datadog/browser-rum@6.33.0)':
+    dependencies:
+      '@datadog/browser-core': 6.33.0
+    optionalDependencies:
+      '@datadog/browser-rum': 6.33.0(@datadog/browser-logs@6.33.0)
+
   '@datadog/browser-rum-core@6.33.0':
     dependencies:
       '@datadog/browser-core': 6.33.0
 
-  '@datadog/browser-rum@6.33.0':
+  '@datadog/browser-rum@6.33.0(@datadog/browser-logs@6.33.0)':
     dependencies:
       '@datadog/browser-core': 6.33.0
       '@datadog/browser-rum-core': 6.33.0
+    optionalDependencies:
+      '@datadog/browser-logs': 6.33.0(@datadog/browser-rum@6.33.0)
 
   '@dimforge/rapier3d-compat@0.12.0': {}
 
@@ -12181,10 +12199,6 @@ snapshots:
 
   '@prettier/parse-srcset@3.1.0': {}
 
-  '@primeuix/forms@0.0.2':
-    dependencies:
-      '@primeuix/utils': 0.3.2
-
   '@primeuix/styled@0.3.2':
     dependencies:
       '@primeuix/utils': 0.3.2
@@ -12196,14 +12210,6 @@ snapshots:
       '@primeuix/styled': 0.3.2
       '@primeuix/utils': 0.3.2
       vue: 3.5.42(typescript@6.0.3)
-
-  '@primevue/forms@4.2.5(vue@3.5.42(typescript@6.0.3))':
-    dependencies:
-      '@primeuix/forms': 0.0.2
-      '@primeuix/utils': 0.3.2
-      '@primevue/core': 4.2.5(vue@3.5.42(typescript@6.0.3))
-    transitivePeerDependencies:
-      - vue
 
   '@primevue/icons@4.2.5(vue@3.5.42(typescript@6.0.3))':
     dependencies:
