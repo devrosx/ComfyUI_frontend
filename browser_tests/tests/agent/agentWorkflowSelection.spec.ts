@@ -3,6 +3,7 @@ import { expect, mergeTests } from '@playwright/test'
 import enMessages from '@/locales/en/main.json' with { type: 'json' }
 
 import { agentTest } from '@e2e/fixtures/agentPanelFixture'
+import { Topbar } from '@e2e/fixtures/components/Topbar'
 import { workflowSelectionTest } from '@e2e/fixtures/agentWorkflowSelectionFixture'
 
 const test = mergeTests(agentTest, workflowSelectionTest)
@@ -207,9 +208,9 @@ test.describe(
         contentType: 'image/png'
       })
       await open.click()
-      await expect(
-        page.locator('.workflow-tab-button[data-state="on"]')
-      ).toHaveText('Unsaved Workflow')
+      await expect(new Topbar(page).getActiveTab()).toHaveText(
+        'Unsaved Workflow'
+      )
       await expect(targetPicker).toHaveText('Unsaved Workflow (2)')
       await expect(composer).toHaveText(
         'Unsaved Workflow Use this workflow as inspiration'
@@ -225,9 +226,9 @@ test.describe(
       await expect(chip).toHaveCount(0)
       await expect(composer).toHaveText('Use this workflow as inspiration')
       await expect(targetPicker).toHaveText('Unsaved Workflow (2)')
-      await expect(
-        page.locator('.workflow-tab-button[data-state="on"]')
-      ).toHaveText('Unsaved Workflow')
+      await expect(new Topbar(page).getActiveTab()).toHaveText(
+        'Unsaved Workflow'
+      )
       expect(workflowSelection.postedMessages).toHaveLength(0)
     })
 
@@ -326,12 +327,11 @@ test.describe(
           exact: true
         })
         .click()
-      const editorTabs = page.getByTestId('workflow-tab')
-      await expect(editorTabs).toHaveCount(2)
-      const tabButtons = page.locator('.workflow-tab-button')
-      await expect(tabButtons.last()).toHaveAttribute('aria-pressed', 'true')
-      await editorTabs.first().click()
-      await expect(tabButtons.first()).toHaveAttribute('aria-pressed', 'true')
+      const topbar = new Topbar(page)
+      await expect(topbar.tabs).toHaveCount(2)
+      await expect(topbar.getTab(1).and(topbar.getActiveTab())).toBeVisible()
+      await topbar.getTab(0).click()
+      await expect(topbar.getTab(0).and(topbar.getActiveTab())).toBeVisible()
       await page
         .getByRole('button', {
           name: enMessages.agent.entryButton,
@@ -532,9 +532,9 @@ test.describe(
       })
       await targetMenuItem.click()
       await expect(targetMarker).toBeVisible()
-      await expect(
-        page.locator('.workflow-tab-button[data-state="on"]')
-      ).toHaveText('Unsaved Workflow')
+      await expect(new Topbar(page).getActiveTab()).toHaveText(
+        'Unsaved Workflow'
+      )
       await panel
         .getByRole('button', { name: enMessages.agent.newChat })
         .click()

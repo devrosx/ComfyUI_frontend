@@ -25,9 +25,9 @@
         >
           <i
             v-if="!isPlaying"
-            class="text-secondary icon-[lucide--play] size-4"
+            class="icon-[lucide--play] size-4 text-muted-foreground"
           />
-          <i v-else class="text-secondary icon-[lucide--pause] size-4" />
+          <i v-else class="icon-[lucide--pause] size-4 text-muted-foreground" />
         </Button>
 
         <!-- Time Display -->
@@ -66,13 +66,16 @@
         >
           <i
             v-if="showVolumeTwo"
-            class="text-secondary icon-[lucide--volume-2] size-4"
+            class="icon-[lucide--volume-2] size-4 text-muted-foreground"
           />
           <i
             v-else-if="showVolumeOne"
-            class="text-secondary icon-[lucide--volume-1] size-4"
+            class="icon-[lucide--volume-1] size-4 text-muted-foreground"
           />
-          <i v-else class="text-secondary icon-[lucide--volume-x] size-4" />
+          <i
+            v-else
+            class="icon-[lucide--volume-x] size-4 text-muted-foreground"
+          />
         </Button>
 
         <!-- Download Button -->
@@ -85,7 +88,7 @@
           class="size-6 hover:bg-interface-menu-component-surface-hovered"
           @click="handleDownload"
         >
-          <i class="text-secondary icon-[lucide--download] size-4" />
+          <i class="icon-[lucide--download] size-4 text-muted-foreground" />
         </Button>
 
         <!-- Options Button -->
@@ -97,15 +100,22 @@
           class="size-6 rounded-sm"
           @click="toggleOptionsMenu"
         >
-          <i class="text-secondary icon-[lucide--more-vertical] size-4" />
+          <i
+            class="icon-[lucide--more-vertical] size-4 text-muted-foreground"
+          />
         </Button>
       </div>
 
       <!-- Options Menu -->
-      <Menu
+      <TieredMenu
         ref="optionsMenu"
         :model="menuItems"
-        class="border-component-node-border bg-component-node-widget-background"
+        popup
+        class="audio-player-menu"
+        :pt:root:class="
+          cn('border-component-node-border bg-component-node-widget-background')
+        "
+        :pt:submenu:class="cn('bg-component-node-widget-background')"
       >
         <template #item="{ item }">
           <div v-if="item.key === 'volume'" class="w-48 px-4 py-2">
@@ -124,20 +134,22 @@
           <div
             v-else
             class="flex cursor-pointer items-center px-4 py-2 text-xs hover:bg-white/10"
+            @click="item.onClick?.()"
           >
             <span class="text-base-foreground">{{ item.label }}</span>
             <i
-              v-if="item.checked"
+              v-if="item.selected"
               class="ml-auto icon-[lucide--check] size-4 text-base-foreground"
             />
           </div>
         </template>
-      </Menu>
+      </TieredMenu>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import TieredMenu from 'primevue/tieredmenu'
 import { computed, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { whenever } from '@vueuse/core'
@@ -146,8 +158,8 @@ import { useToast } from '@/components/ui/toast'
 
 import { downloadFile } from '@/base/common/downloadUtil'
 import Button from '@/components/ui/button/Button.vue'
-import Menu from '@/components/ui/menu/Menu.vue'
 import Slider from '@/components/ui/slider/Slider.vue'
+import { cn } from '@comfyorg/tailwind-utils'
 
 import { formatTime } from '@/utils/formatUtil'
 
@@ -161,7 +173,7 @@ const { hideWhenEmpty = true, showOptionsButton } = defineProps<{
 
 // Refs
 const audioRef = useTemplateRef('audioRef')
-const optionsMenu = ref<InstanceType<typeof Menu>>()
+const optionsMenu = ref()
 const isPlaying = ref(false)
 const isMuted = ref(false)
 const volume = ref(1)
@@ -267,18 +279,18 @@ const menuItems = computed(() => [
     items: [
       {
         label: t('g.halfSpeed'),
-        command: () => setPlaybackSpeed(0.5),
-        checked: playbackRate.value === 0.5
+        onClick: () => setPlaybackSpeed(0.5),
+        selected: playbackRate.value === 0.5
       },
       {
         label: t('g.1x'),
-        command: () => setPlaybackSpeed(1),
-        checked: playbackRate.value === 1
+        onClick: () => setPlaybackSpeed(1),
+        selected: playbackRate.value === 1
       },
       {
         label: t('g.2x'),
-        command: () => setPlaybackSpeed(2),
-        checked: playbackRate.value === 2
+        onClick: () => setPlaybackSpeed(2),
+        selected: playbackRate.value === 2
       }
     ]
   },
@@ -298,3 +310,10 @@ whenever(
   { immediate: true }
 )
 </script>
+
+<style scoped>
+.audio-player-menu {
+  --p-tieredmenu-item-focus-background: rgb(255 255 255 / 0.1);
+  --p-tieredmenu-item-active-background: rgb(255 255 255 / 0.1);
+}
+</style>

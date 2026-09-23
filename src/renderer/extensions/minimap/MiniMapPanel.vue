@@ -14,7 +14,7 @@
         name="node-colors"
         :model-value="nodeColors"
         @update:model-value="
-          (value) => $emit('updateOption', 'Comfy.Minimap.NodeColors', value)
+          (value) => updateOption('Comfy.Minimap.NodeColors', value)
         "
       />
       <i class="icon-[lucide--palette]" />
@@ -27,7 +27,7 @@
         name="show-links"
         :model-value="showLinks"
         @update:model-value="
-          (value) => $emit('updateOption', 'Comfy.Minimap.ShowLinks', value)
+          (value) => updateOption('Comfy.Minimap.ShowLinks', value)
         "
       />
       <i class="icon-[lucide--route]" />
@@ -40,7 +40,7 @@
         name="show-groups"
         :model-value="showGroups"
         @update:model-value="
-          (value) => $emit('updateOption', 'Comfy.Minimap.ShowGroups', value)
+          (value) => updateOption('Comfy.Minimap.ShowGroups', value)
         "
       />
       <i class="icon-[lucide--frame]" />
@@ -53,8 +53,7 @@
         name="render-bypass"
         :model-value="renderBypass"
         @update:model-value="
-          (value) =>
-            $emit('updateOption', 'Comfy.Minimap.RenderBypassState', value)
+          (value) => updateOption('Comfy.Minimap.RenderBypassState', value)
         "
       />
       <i class="icon-[lucide--circle-slash-2]" />
@@ -67,8 +66,7 @@
         name="render-error"
         :model-value="renderError"
         @update:model-value="
-          (value) =>
-            $emit('updateOption', 'Comfy.Minimap.RenderErrorState', value)
+          (value) => updateOption('Comfy.Minimap.RenderErrorState', value)
         "
       />
       <i class="icon-[lucide--message-circle-warning]" />
@@ -79,6 +77,7 @@
 
 <script setup lang="ts">
 import type { CSSProperties, Ref } from 'vue'
+import type { CheckboxRootEmits } from 'reka-ui'
 
 import Checkbox from '@/components/ui/checkbox/Checkbox.vue'
 import type { MinimapSettingsKey } from '@/renderer/extensions/minimap/types'
@@ -94,7 +93,14 @@ defineProps<{
   isMobile: Ref<boolean> | boolean
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   updateOption: [key: MinimapSettingsKey, value: boolean]
 }>()
+
+function updateOption(
+  key: MinimapSettingsKey,
+  value: CheckboxRootEmits['update:modelValue'][0]
+) {
+  if (typeof value === 'boolean') emit('updateOption', key, value)
+}
 </script>

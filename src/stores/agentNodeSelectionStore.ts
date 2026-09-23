@@ -117,7 +117,6 @@ export const useAgentNodeSelectionStore = defineStore(
       const canvas = canvasStore.canvas
       if (!canvas?.selectedItems.size) return
       canvas.deselectAll()
-      canvasStore.updateSelectedItems()
     }
 
     function saveNodeIds(

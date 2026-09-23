@@ -1,4 +1,3 @@
-import { useToast } from '@/components/ui/toast'
 import { useTeamWorkspaceStore } from '@/platform/workspace/stores/teamWorkspaceStore'
 import { useDialogStore } from '@/stores/dialogStore'
 import { render, screen, waitFor } from '@testing-library/vue'
@@ -12,26 +11,11 @@ import type { WorkspaceRole } from '@/platform/workspace/api/workspaceApi'
 
 const { mockToastAdd } = vi.hoisted(() => ({ mockToastAdd: vi.fn() }))
 
-beforeEach(() => {
-  vi.mocked(useToast().success).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('success', ...args)
-  )
-  vi.mocked(useToast().error).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('error', ...args)
-  )
-  vi.mocked(useToast().info).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('info', ...args)
-  )
-  vi.mocked(useToast().warning).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('warning', ...args)
-  )
-  vi.mocked(useToast().loading).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('loading', ...args)
-  )
-  vi.mocked(useToast().custom).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('custom', ...args)
-  )
-})
+vi.mock<unknown>(import('primevue/usetoast'), () => ({
+  useToast: () => ({
+    add: mockToastAdd
+  })
+}))
 
 const i18n = createI18n({
   legacy: false,
@@ -90,8 +74,8 @@ describe('ChangeMemberRoleDialogContent', () => {
         key: 'change-member-role'
       })
     )
-    expect(mockToastAdd.mock.calls.map(([method]) => method)).toContain(
-      'success'
+    expect(mockToastAdd).toHaveBeenCalledWith(
+      expect.objectContaining({ severity: 'success' })
     )
   })
 
@@ -130,8 +114,8 @@ describe('ChangeMemberRoleDialogContent', () => {
     )
 
     await waitFor(() =>
-      expect(mockToastAdd.mock.calls.map(([method]) => method)).toContain(
-        'error'
+      expect(mockToastAdd).toHaveBeenCalledWith(
+        expect.objectContaining({ severity: 'error' })
       )
     )
     expect(useDialogStore().closeDialog).not.toHaveBeenCalled()
