@@ -9,6 +9,7 @@ import { useSettingStore } from '@/platform/settings/settingStore'
 import { useCanvasStore } from '@/renderer/core/canvas/canvasStore'
 import { useCanvasInteractions } from '@/renderer/core/canvas/useCanvasInteractions'
 import { useExtensionService } from '@/services/extensionService'
+import { setCanvasSelection } from '@/utils/__tests__/canvasSelectionTestUtils'
 import { useCommandStore } from '@/stores/commandStore'
 import { ComfyNodeDefImpl, useNodeDefStore } from '@/stores/nodeDefStore'
 import { createMockCanvas } from '@/utils/__tests__/litegraphTestUtils'
@@ -201,21 +202,21 @@ describe('SelectionToolbox', () => {
 
     it('should show info button only for single selections', () => {
       // Single node selection
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
       const { container } = renderComponent()
       expect(container.querySelector('.info-button')).toBeTruthy()
 
       // Multiple node selection - render in separate test scope
-      canvasStore.selectedItems = [
+      setCanvasSelection([
         new LGraphNode('Test Node'),
         new LGraphNode('Test Node')
-      ]
+      ])
       const { container: container2 } = renderComponent()
       expect(container2.querySelector('.info-button')).toBeFalsy()
     })
 
     it('should not show info button when node definition is not found', () => {
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
       vi.mocked(useNodeDefStore().fromLGraphNode).mockReturnValue(null)
       const { container } = renderComponent()
       expect(container.querySelector('.info-button')).toBeFalsy()
@@ -226,7 +227,7 @@ describe('SelectionToolbox', () => {
         'Comfy.UseNewMenu': 'Disabled',
         'Comfy.NodeLibrary.NewDesign': true
       })
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
 
       const { container } = renderComponent()
 
@@ -238,7 +239,7 @@ describe('SelectionToolbox', () => {
         'Comfy.UseNewMenu': 'Disabled',
         'Comfy.NodeLibrary.NewDesign': false
       })
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
 
       const { container } = renderComponent()
 
@@ -250,7 +251,7 @@ describe('SelectionToolbox', () => {
         'Comfy.UseNewMenu': 'Top',
         'Comfy.NodeLibrary.NewDesign': false
       })
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
 
       const { container } = renderComponent()
 
@@ -259,17 +260,17 @@ describe('SelectionToolbox', () => {
 
     it('should show color picker for all selections', () => {
       // Single node selection
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
       const { container } = renderComponent()
       expect(
         container.querySelector('[data-testid="color-picker-button"]')
       ).toBeTruthy()
 
       // Multiple node selection
-      canvasStore.selectedItems = [
+      setCanvasSelection([
         new LGraphNode('Test Node'),
         new LGraphNode('Test Node')
-      ]
+      ])
       const { container: container2 } = renderComponent()
       expect(
         container2.querySelector('[data-testid="color-picker-button"]')
@@ -278,32 +279,32 @@ describe('SelectionToolbox', () => {
 
     it('should show frame nodes only for multiple selections', () => {
       // Single node selection
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
       const { container } = renderComponent()
       expect(container.querySelector('.frame-nodes')).toBeFalsy()
 
       // Multiple node selection
-      canvasStore.selectedItems = [
+      setCanvasSelection([
         new LGraphNode('Test Node'),
         new LGraphNode('Test Node')
-      ]
+      ])
       const { container: container2 } = renderComponent()
       expect(container2.querySelector('.frame-nodes')).toBeTruthy()
     })
 
     it('should show bypass button for appropriate selections', () => {
       // Single node selection
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
       const { container } = renderComponent()
       expect(
         container.querySelector('[data-testid="bypass-button"]')
       ).toBeTruthy()
 
       // Multiple node selection
-      canvasStore.selectedItems = [
+      setCanvasSelection([
         new LGraphNode('Test Node'),
         new LGraphNode('Test Node')
-      ]
+      ])
       const { container: container2 } = renderComponent()
       expect(
         container2.querySelector('[data-testid="bypass-button"]')
@@ -311,7 +312,7 @@ describe('SelectionToolbox', () => {
     })
 
     it('should show common buttons for all selections', () => {
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
       const { container } = renderComponent()
 
       expect(
@@ -330,24 +331,24 @@ describe('SelectionToolbox', () => {
       imageNode.previewMediaType = 'image'
 
       // Single image node
-      canvasStore.selectedItems = [imageNode]
+      setCanvasSelection([imageNode])
       const { container } = renderComponent()
       expect(container.querySelector('.mask-editor-button')).toBeTruthy()
 
       // Single non-image node
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
       const { container: container2 } = renderComponent()
       expect(container2.querySelector('.mask-editor-button')).toBeFalsy()
     })
 
     it('should show Color picker button only for single Load3D nodes', () => {
       // Single Load3D node
-      canvasStore.selectedItems = [new LGraphNode('Test Node', 'Load3D')]
+      setCanvasSelection([new LGraphNode('Test Node', 'Load3D')])
       const { container } = renderComponent()
       expect(container.querySelector('.load-3d-viewer-button')).toBeTruthy()
 
       // Single non-Load3D node
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
       const { container: container2 } = renderComponent()
       expect(container2.querySelector('.load-3d-viewer-button')).toBeFalsy()
     })
@@ -361,19 +362,19 @@ describe('SelectionToolbox', () => {
       filterOutputNodesSpy.mockReturnValue([
         { type: 'SaveImage' }
       ] as LGraphNode[])
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
       const { container } = renderComponent()
       expect(container.querySelector('.execute-button')).toBeTruthy()
 
       // Without output node selected
       isOutputNodeSpy.mockReturnValue(false)
       filterOutputNodesSpy.mockReturnValue([])
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
       const { container: container2 } = renderComponent()
       expect(container2.querySelector('.execute-button')).toBeFalsy()
 
       // No selection at all
-      canvasStore.selectedItems = []
+      setCanvasSelection([])
       const { container: container3 } = renderComponent()
       expect(container3.querySelector('.execute-button')).toBeFalsy()
     })
@@ -382,7 +383,7 @@ describe('SelectionToolbox', () => {
   describe('Divider Visibility Logic', () => {
     it('should show dividers between button groups when both groups have buttons', () => {
       // Setup single node to show info + other buttons
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
       const { container } = renderComponent()
 
       const dividers = container.querySelectorAll('.vertical-divider')
@@ -391,7 +392,7 @@ describe('SelectionToolbox', () => {
 
     it('should not show dividers when adjacent groups are empty', () => {
       // No selection should show minimal buttons and dividers
-      canvasStore.selectedItems = []
+      setCanvasSelection([])
       const { container } = renderComponent()
 
       expect(
@@ -420,7 +421,7 @@ describe('SelectionToolbox', () => {
         invokeExtensionsAsync: vi.fn()
       } as ReturnType<typeof useExtensionService>)
 
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
       const { container } = renderComponent()
 
       expect(container.querySelector('.extension-command-button')).toBeTruthy()
@@ -430,7 +431,7 @@ describe('SelectionToolbox', () => {
       const mockExtensionService = vi.mocked(useExtensionService)
       mockExtensionService.mockReturnValue(createMockExtensionService())
 
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
       const { container } = renderComponent()
 
       expect(container.querySelector('.extension-command-button')).toBeFalsy()
@@ -455,7 +456,7 @@ describe('SelectionToolbox', () => {
       const mockExtensionService = vi.mocked(useExtensionService)
       mockExtensionService.mockReturnValue(createMockExtensionService())
 
-      canvasStore.selectedItems = [new LGraphNode('Test Node')]
+      setCanvasSelection([new LGraphNode('Test Node')])
       const { container } = renderComponent()
 
       const panel = container.querySelector('[data-testid="selection-toolbox"]')
@@ -473,7 +474,7 @@ describe('SelectionToolbox', () => {
     })
 
     it('should hide most buttons when no items selected', () => {
-      canvasStore.selectedItems = []
+      setCanvasSelection([])
       const { container } = renderComponent()
 
       expect(container.querySelector('.info-button')).toBeFalsy()

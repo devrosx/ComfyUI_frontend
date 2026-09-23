@@ -132,6 +132,7 @@ test.describe(
       await comfyPage.nextFrame()
 
       try {
+        await expect(comfyPage.page.getByRole('tooltip')).toBeHidden()
         await expect(comfyPage.canvas).toHaveScreenshot(
           'vue-node-dragging-link.png'
         )

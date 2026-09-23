@@ -4,8 +4,9 @@ import { useClipboard } from '@vueuse/core'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { computed, ref } from 'vue'
 
-import { useToast } from '@/components/ui/toast'
 import { i18n } from '@/i18n'
+import { useToast } from '@/components/ui/toast'
+import { api } from '@/scripts/api'
 
 import type { ReplyAsset } from '../../../utils/replyAssets'
 import MessageFeedback from './MessageFeedback.vue'
@@ -16,14 +17,8 @@ vi.mock(import('@/platform/telemetry/reportError'), () => ({
   reportError: vi.fn()
 }))
 
-const fetchApi = vi.hoisted(() => vi.fn())
-vi.mock<unknown>(import('@/scripts/api'), () => ({
-  api: {
-    apiURL: (route: string) => '/api' + route,
-    fetchApi,
-    addEventListener: vi.fn()
-  }
-}))
+vi.mock(import('@/scripts/api'))
+const fetchApi = vi.mocked(api.fetchApi)
 
 vi.mock(import('@/platform/assets/utils/assetPreviewUtil'), () => ({
   isAssetPreviewSupported: () => false,
@@ -31,6 +26,16 @@ vi.mock(import('@/platform/assets/utils/assetPreviewUtil'), () => ({
 }))
 
 vi.mock(import('@vueuse/core'), { spy: true })
+vi.mocked(useClipboard).mockImplementation(
+  () =>
+    ({
+      copy: clipboard.copy,
+      copyPending: ref(false),
+      copied: ref(false),
+      isSupported: computed(() => true),
+      text: ref('')
+    }) satisfies ReturnType<typeof useClipboard>
+)
 
 const markdownSource = '# Title\n\n**bold** move'
 
@@ -45,6 +50,7 @@ function renderFeedback(assets?: ReplyAsset[]) {
 
 describe('MessageFeedback', () => {
   beforeEach(() => {
+    vi.mocked(api.apiURL).mockImplementation((route) => '/api' + route)
     vi.stubGlobal(
       'ResizeObserver',
       class {
@@ -55,13 +61,6 @@ describe('MessageFeedback', () => {
     )
     clipboard.copy.mockClear()
     fetchApi.mockReset()
-    vi.mocked(useClipboard).mockReturnValue({
-      copy: clipboard.copy,
-      copied: ref(false),
-      copyPending: ref(false),
-      isSupported: computed(() => true),
-      text: ref('')
-    })
   })
 
   it('emits the vote, then null when the same vote is clicked again', async () => {
@@ -178,12 +177,9 @@ describe('MessageFeedback', () => {
     await user.click(download)
 
     await waitFor(() =>
-      expect(useToast().error).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          description: '1 download failed'
-        })
-      )
+      expect(useToast().error).toHaveBeenCalledWith('Error', {
+        description: '1 download failed'
+      })
     )
     await waitFor(() => expect(download).toBeEnabled())
 

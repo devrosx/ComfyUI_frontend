@@ -2,28 +2,19 @@ import { render, screen, waitFor } from '@testing-library/vue'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useToast } from '@/components/ui/toast'
 import { i18n } from '@/i18n'
+import { useToast } from '@/components/ui/toast'
+import { api } from '@/scripts/api'
 
 import type { ReplyAsset } from '../../../utils/replyAssets'
 import ReplyAudioCard from './ReplyAudioCard.vue'
-
-vi.mock(import('@/components/ui/slider/Slider.vue'))
 
 vi.mock(import('@/platform/telemetry/reportError'), () => ({
   reportError: vi.fn()
 }))
 
-const fetchApi = vi.hoisted(() =>
-  vi.fn(async () => new Response(new Blob(['x'])))
-)
-vi.mock<unknown>(import('@/scripts/api'), () => ({
-  api: {
-    apiURL: (route: string) => `http://x/api${route}`,
-    fetchApi,
-    addEventListener: vi.fn()
-  }
-}))
+vi.mock(import('@/scripts/api'))
+const fetchApi = vi.mocked(api.fetchApi)
 
 const isAssetPreviewSupported = vi.hoisted(() => vi.fn(() => false))
 const findOutputAsset = vi.hoisted(() =>
@@ -59,6 +50,7 @@ describe('ReplyAudioCard', () => {
   let anchorClick: ReturnType<typeof vi.spyOn>
 
   beforeEach(() => {
+    vi.mocked(api.apiURL).mockImplementation((route) => `http://x/api${route}`)
     fetchApi.mockReset().mockResolvedValue(new Response(new Blob(['x'])))
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock')
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
@@ -109,8 +101,8 @@ describe('ReplyAudioCard', () => {
     })
 
     const slider = await screen.findByRole('slider')
-    ;(slider as HTMLInputElement).value = '50'
-    slider.dispatchEvent(new Event('input', { bubbles: true }))
+    slider.focus()
+    await userEvent.keyboard('{PageUp>50}')
 
     expect(await screen.findByText('1:00 / 2:00')).toBeInTheDocument()
   })
@@ -156,12 +148,9 @@ describe('ReplyAudioCard', () => {
     await userEvent.click(download)
 
     await waitFor(() =>
-      expect(useToast().error).toHaveBeenCalledWith(
-        expect.any(String),
-        expect.objectContaining({
-          description: '1 download failed'
-        })
-      )
+      expect(useToast().error).toHaveBeenCalledWith('Error', {
+        description: '1 download failed'
+      })
     )
 
     await userEvent.click(download)

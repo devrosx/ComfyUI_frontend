@@ -61,8 +61,7 @@ export function useSelectionOperations() {
     canvas.copyToClipboard()
 
     // Clear selection to avoid confusion
-    canvas.selectedItems.clear()
-    canvasStore.updateSelectedItems()
+    canvas.deselectAll()
 
     // Paste to create duplicates
     canvas.pasteFromClipboard({ connectInputs: false })

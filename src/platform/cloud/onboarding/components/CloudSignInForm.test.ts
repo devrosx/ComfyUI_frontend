@@ -105,6 +105,14 @@ describe('CloudSignInForm password manager support', () => {
 })
 
 describe('CloudSignInForm submit gating', () => {
+  it('disables submit while pristine', async () => {
+    renderRealForm()
+
+    await waitFor(() => {
+      expect(submitButton()).toBeDisabled()
+    })
+  })
+
   it('disables submit once a field is touched and invalid', async () => {
     const user = userEvent.setup()
     renderRealForm()
@@ -141,10 +149,6 @@ describe('CloudSignInForm submit gating', () => {
         screen.getByText(enMessages.validation.invalidEmail)
       ).toBeInTheDocument()
     })
-    expect(emailField()).toHaveAttribute(
-      'aria-describedby',
-      'cloud-sign-in-email-error'
-    )
   })
 
   it('does not emit submit for a malformed email, by button or by Enter', async () => {
@@ -164,7 +168,9 @@ describe('CloudSignInForm submit gating', () => {
     const { emitted } = renderRealForm()
 
     await user.type(emailField(), 'user@example.com')
-    await user.type(passwordField(), 'Password1!{Enter}')
+    await user.type(passwordField(), 'Password1!')
+    await waitFor(() => expect(submitButton()).toBeEnabled())
+    await user.keyboard('{Enter}')
 
     await waitFor(() => {
       expect(

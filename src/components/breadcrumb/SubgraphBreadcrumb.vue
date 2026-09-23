@@ -39,7 +39,9 @@
         class="breadcrumb-list m-0 flex list-none items-center p-0 text-muted"
       >
         <template v-for="(item, index) in items" :key="item.key">
-          <li class="breadcrumb-item hover:text-foreground pointer-events-auto">
+          <li
+            class="breadcrumb-item pointer-events-auto hover:text-base-foreground"
+          >
             <SubgraphBreadcrumbItem
               :item
               :is-active="item.key === activeItemKey"

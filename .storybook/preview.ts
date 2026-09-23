@@ -1,7 +1,6 @@
 import { setup } from '@storybook/vue3'
 import type { Preview, StoryContext, StoryFn } from '@storybook/vue3-vite'
 import { createPinia } from 'pinia'
-import 'primeicons/primeicons.css'
 
 import { i18n } from '@/i18n'
 import '@/lib/litegraph/public/css/litegraph.css'

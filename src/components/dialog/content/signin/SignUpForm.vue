@@ -1,39 +1,26 @@
 <template>
   <form class="flex flex-col gap-6" @submit.prevent="onSubmit">
-    <!-- Email Field -->
-    <div class="flex flex-col gap-2">
-      <label
-        class="mb-2 text-base font-medium opacity-80"
-        for="comfy-org-sign-up-email"
-      >
-        {{ t('auth.signup.emailLabel') }}
-      </label>
-      <Input
-        id="comfy-org-sign-up-email"
-        :model-value="values.email"
-        name="email"
-        autocomplete="email"
-        :class="fieldClass"
-        type="email"
-        :placeholder="t('auth.signup.emailPlaceholder')"
-        :aria-invalid="Boolean(errors.email)"
-        :aria-describedby="errors.email ? emailErrorId : undefined"
-        @update:model-value="updateEmail"
-      />
-      <small v-if="errors.email" :id="emailErrorId" class="text-red-500">
-        {{ errors.email }}
-      </small>
-    </div>
+    <FieldGroup>
+      <VeeField v-slot="{ componentField, errors }" name="email">
+        <Field :data-invalid="!!errors.length">
+          <FieldLabel for="comfy-org-sign-up-email">
+            {{ t('auth.signup.emailLabel') }}
+          </FieldLabel>
+          <Input
+            v-bind="componentField"
+            id="comfy-org-sign-up-email"
+            autocomplete="email"
+            :class="fieldClass"
+            type="email"
+            :placeholder="t('auth.signup.emailPlaceholder')"
+            :aria-invalid="!!errors.length"
+          />
+          <FieldError v-if="errors.length" :errors />
+        </Field>
+      </VeeField>
 
-    <PasswordFields
-      v-model:password="values.password"
-      v-model:confirm-password="values.confirmPassword"
-      :field-class="fieldClass"
-      :password-error="errors.password"
-      :confirm-password-error="errors.confirmPassword"
-      @update:password="validatePasswords"
-      @update:confirm-password="validatePasswords"
-    />
+      <PasswordFields :field-class="fieldClass" />
+    </FieldGroup>
 
     <TurnstileWidget
       v-if="turnstileEnabled"
@@ -42,15 +29,14 @@
       v-model:unavailable="turnstileUnavailable"
     />
 
-    <small
+    <FieldDescription
       v-show="waitingForTurnstile"
       id="comfy-org-sign-up-turnstile-hint"
       role="status"
       aria-live="polite"
-      class="opacity-80"
     >
       {{ t('auth.turnstile.submitBlockedHint') }}
-    </small>
+    </FieldDescription>
 
     <Button
       type="submit"
@@ -58,7 +44,7 @@
       :size="submitSize"
       :class="cn('mt-4', submitClass)"
       :loading="loading"
-      :disabled="!isValid || waitingForTurnstile"
+      :disabled="!meta.valid || waitingForTurnstile"
       :aria-describedby="
         waitingForTurnstile ? 'comfy-org-sign-up-turnstile-hint' : undefined
       "
@@ -69,27 +55,32 @@
 </template>
 
 <script setup lang="ts">
+import { cn } from '@comfyorg/tailwind-utils'
+import { toTypedSchema } from '@vee-validate/zod'
 import { useThrottleFn } from '@vueuse/core'
-import { computed, reactive, useTemplateRef } from 'vue'
+import { Field as VeeField, useForm } from 'vee-validate'
+import { computed, useTemplateRef } from 'vue'
 import type { HTMLAttributes } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import { cn } from '@comfyorg/tailwind-utils'
-
 import Button from '@/components/ui/button/Button.vue'
 import type { ButtonVariants } from '@/components/ui/button/button.variants'
+import Field from '@/components/ui/field/Field.vue'
+import FieldDescription from '@/components/ui/field/FieldDescription.vue'
+import FieldError from '@/components/ui/field/FieldError.vue'
+import FieldGroup from '@/components/ui/field/FieldGroup.vue'
+import FieldLabel from '@/components/ui/field/FieldLabel.vue'
 import Input from '@/components/ui/input/Input.vue'
 import { useTurnstile, useTurnstileGate } from '@/composables/auth/useTurnstile'
 import { signUpSchema } from '@/schemas/signInSchema'
 import type { SignUpData } from '@/schemas/signInSchema'
 import { useAuthStore } from '@/stores/authStore'
-import { getZodFieldErrors } from '@/utils/zodFieldErrors'
 
 import PasswordFields from './PasswordFields.vue'
 import TurnstileWidget from './TurnstileWidget.vue'
 
 const {
-  fieldClass = 'h-10',
+  fieldClass,
   submitClass,
   submitVariant = 'secondary',
   submitSize = 'lg'
@@ -112,59 +103,23 @@ const {
 } = useTurnstileGate(turnstileEnabled)
 const turnstileWidget =
   useTemplateRef<InstanceType<typeof TurnstileWidget>>('turnstileWidget')
-const emailErrorId = 'comfy-org-sign-up-email-error'
-const values = reactive<SignUpData>({
-  email: '',
-  password: '',
-  confirmPassword: ''
-})
-const errors = reactive<Partial<Record<keyof SignUpData, string>>>({})
-const isValid = computed(() => Object.keys(errors).length === 0)
 
 const emit = defineEmits<{
   submit: [values: SignUpData, turnstileToken?: string]
 }>()
 
-function validateField(field: keyof SignUpData) {
-  const result = signUpSchema.safeParse(values)
-  const message = result.success
-    ? undefined
-    : getZodFieldErrors(result.error)[field]
+const { handleSubmit, meta } = useForm({
+  validationSchema: toTypedSchema(signUpSchema),
+  initialValues: { email: '', password: '', confirmPassword: '' }
+})
 
-  if (message) errors[field] = message
-  else delete errors[field]
-}
-
-function updateEmail(value: string | number | undefined) {
-  values.email = String(value ?? '')
-  validateField('email')
-}
-
-function validatePasswords() {
-  const result = signUpSchema.safeParse(values)
-  const fieldErrors = result.success
-    ? undefined
-    : getZodFieldErrors(result.error)
-
-  if (fieldErrors?.password) errors.password = fieldErrors.password
-  else delete errors.password
-
-  if (fieldErrors?.confirmPassword) {
-    errors.confirmPassword = fieldErrors.confirmPassword
-  } else delete errors.confirmPassword
-}
-
-const onSubmit = useThrottleFn(() => {
-  const result = signUpSchema.safeParse(values)
-  if (result.success && !waitingForTurnstile.value) {
-    emit('submit', result.data, turnstileToken.value || undefined)
-    return
-  }
-
-  if (!result.success) {
-    Object.assign(errors, getZodFieldErrors(result.error))
-  }
-}, 1_500)
+const onSubmit = useThrottleFn(
+  handleSubmit((values) => {
+    if (waitingForTurnstile.value) return
+    emit('submit', values, turnstileToken.value || undefined)
+  }),
+  1_500
+)
 
 // Turnstile tokens are single-use. The parent calls this after a FAILED signup
 // (the form can't observe the submit outcome itself) to discard the spent token

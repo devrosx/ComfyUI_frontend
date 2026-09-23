@@ -9,7 +9,7 @@
   >
     <div
       data-testid="agent-panel-resize-handle"
-      class="hover:bg-agent-accent data-[resizing=true]:bg-agent-accent absolute top-0 left-0 z-10 h-full w-[5px] cursor-col-resize transition-colors delay-300 duration-200"
+      class="agent-resize-handle absolute top-0 left-0 z-10 h-full w-[5px] cursor-col-resize"
       :data-resizing="isResizing"
       @pointerdown="onResizeStart"
       @lostpointercapture="isResizing = false"

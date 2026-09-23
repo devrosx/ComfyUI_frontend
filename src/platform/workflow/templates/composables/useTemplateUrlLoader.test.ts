@@ -1,11 +1,12 @@
-import { useToast } from '@/components/ui/toast'
 import { useCanvasStore } from '@/renderer/core/canvas/canvasStore' // eslint-disable-line import-x/no-restricted-paths
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { App } from 'vue'
 import { createApp, defineComponent } from 'vue'
 
+import { useToast } from '@/components/ui/toast'
 import { i18n } from '@/i18n'
 import { useTemplateUrlLoader as createTemplateUrlLoader } from '@/platform/workflow/templates/composables/useTemplateUrlLoader'
+import type { useTemplateWorkflows } from '@/platform/workflow/templates/composables/useTemplateWorkflows'
 
 /**
  * Unit tests for useTemplateUrlLoader composable
@@ -42,7 +43,9 @@ vi.mock(
 
 // Mock template workflows composable
 const mockLoadTemplates = vi.fn(async () => true)
-const mockLoadWorkflowTemplate = vi.fn(async () => true)
+const mockLoadWorkflowTemplate = vi.fn<
+  ReturnType<typeof useTemplateWorkflows>['loadWorkflowTemplate']
+>(async () => 'loaded')
 
 vi.mock<unknown>(
   import('@/platform/workflow/templates/composables/useTemplateWorkflows'),
@@ -56,14 +59,6 @@ vi.mock<unknown>(
 
 // Mock toast
 const mockToastAdd = vi.fn()
-beforeEach(() => {
-  vi.mocked(useToast().success).mockImplementation(mockToastAdd)
-  vi.mocked(useToast().error).mockImplementation(mockToastAdd)
-  vi.mocked(useToast().info).mockImplementation(mockToastAdd)
-  vi.mocked(useToast().warning).mockImplementation(mockToastAdd)
-  vi.mocked(useToast().loading).mockImplementation(mockToastAdd)
-  vi.mocked(useToast().custom).mockImplementation(mockToastAdd)
-})
 
 const apps: App<Element>[] = []
 
@@ -87,6 +82,7 @@ function useTemplateUrlLoader() {
 afterEach(() => apps.splice(0).forEach((app) => app.unmount()))
 
 beforeEach(() => {
+  vi.mocked(useToast().error).mockImplementation(mockToastAdd)
   Object.assign(useCanvasStore(), { linearMode: false })
 })
 
@@ -144,17 +140,18 @@ describe('useTemplateUrlLoader', () => {
     )
   })
 
-  it('shows error toast when template loading fails', async () => {
-    mockQueryParams = { template: 'invalid-template' }
-    mockLoadWorkflowTemplate.mockResolvedValueOnce(false)
+  it.for(['not-started', 'graph-failed'] as const)(
+    'does not add a toast when the template loader returns %s',
+    async (result) => {
+      mockQueryParams = { template: 'invalid-template' }
+      mockLoadWorkflowTemplate.mockResolvedValueOnce(result)
 
-    const { loadTemplateFromUrl } = useTemplateUrlLoader()
-    await loadTemplateFromUrl()
+      const { loadTemplateFromUrl } = useTemplateUrlLoader()
+      await loadTemplateFromUrl()
 
-    expect(mockToastAdd).toHaveBeenCalledWith('Error', {
-      description: 'Template "invalid-template" not found'
-    })
-  })
+      expect(mockToastAdd).not.toHaveBeenCalled()
+    }
+  )
 
   it('handles array query params correctly', () => {
     // Vue Router can return string[] for duplicate params
@@ -243,7 +240,7 @@ describe('useTemplateUrlLoader', () => {
     await loadTemplateFromUrl()
 
     expect(mockToastAdd).toHaveBeenCalledWith('Error', {
-      description: i18n.global.t('g.errorLoadingTemplate')
+      description: i18n.global.t('templateWorkflows.error.loading')
     })
   })
 
@@ -265,7 +262,7 @@ describe('useTemplateUrlLoader', () => {
 
   it('removes template params from URL even on error', async () => {
     mockQueryParams = { template: 'invalid', source: 'custom', other: 'param' }
-    mockLoadWorkflowTemplate.mockResolvedValueOnce(false)
+    mockLoadWorkflowTemplate.mockResolvedValueOnce('not-started')
 
     const { loadTemplateFromUrl } = useTemplateUrlLoader()
     await loadTemplateFromUrl()
@@ -302,7 +299,7 @@ describe('useTemplateUrlLoader', () => {
 
   it('does not set linear mode when template loading fails', async () => {
     mockQueryParams = { template: 'invalid-template', mode: 'linear' }
-    mockLoadWorkflowTemplate.mockResolvedValueOnce(false)
+    mockLoadWorkflowTemplate.mockResolvedValueOnce('graph-failed')
 
     const { loadTemplateFromUrl } = useTemplateUrlLoader()
     await loadTemplateFromUrl()

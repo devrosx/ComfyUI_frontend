@@ -16,6 +16,7 @@ import { vCoachmark } from '@/platform/onboarding/vCoachmark'
 import Popover from '@/components/ui/Popover.vue'
 import Button from '@/components/ui/button/Button.vue'
 import { useBillingContext } from '@/composables/billing/useBillingContext'
+import { isCloud } from '@/platform/distribution/types'
 import FreeTierQuota from '@/platform/cloud/subscription/components/FreeTierQuota.vue'
 import SubscribeToRunButton from '@/platform/cloud/subscription/components/SubscribeToRun.vue'
 import { useSettingStore } from '@/platform/settings/settingStore'
@@ -35,6 +36,9 @@ const commandStore = useCommandStore()
 const { batchCount } = storeToRefs(useQueueSettingsStore())
 const settingStore = useSettingStore()
 const { canRunWorkflows, showsSubscribeToRunPrompt } = useBillingContext()
+const showsCloudSubscribePrompt = computed(
+  () => isCloud && showsSubscribeToRunPrompt.value
+)
 const workflowStore = useWorkflowStore()
 const { isBuilderMode } = useAppMode()
 const appModeStore = useAppModeStore()
@@ -186,7 +190,7 @@ function replayAppModeTour() {
         <LinearRunErrorWarning v-if="showRunErrorWarning" />
         <div v-coachmark="COACH_IDS.appRunButton">
           <SubscribeToRunButton
-            v-if="showsSubscribeToRunPrompt"
+            v-if="showsCloudSubscribePrompt"
             class="mt-4 w-full"
           />
           <div v-else class="mt-4 flex">
@@ -253,7 +257,7 @@ function replayAppModeTour() {
             class="h-7 min-w-40"
           />
           <SubscribeToRunButton
-            v-if="showsSubscribeToRunPrompt"
+            v-if="showsCloudSubscribePrompt"
             class="mt-4 w-full"
           />
           <Button
