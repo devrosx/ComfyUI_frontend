@@ -1,8 +1,8 @@
 <template>
-  <div class="input-slider flex flex-row items-center gap-2">
+  <div class="flex flex-row items-center gap-2">
     <Slider
       :model-value="[modelValue]"
-      class="slider-part w-20"
+      class="w-20"
       :min
       :max
       :step
@@ -16,7 +16,7 @@
     />
     <NumberField
       :model-value
-      :class="cn('input-part', inputClass)"
+      class="w-32"
       :format-options="{ maximumFractionDigits: 3 }"
       :min
       :max
@@ -37,11 +37,9 @@ import NumberField from '@/components/ui/number-field/NumberField.vue'
 import NumberFieldDecrement from '@/components/ui/number-field/NumberFieldDecrement.vue'
 import NumberFieldIncrement from '@/components/ui/number-field/NumberFieldIncrement.vue'
 import NumberFieldInput from '@/components/ui/number-field/NumberFieldInput.vue'
-import { cn } from '@comfyorg/tailwind-utils'
 
 defineProps<{
   modelValue: number
-  inputClass?: string
   min?: number
   max?: number
   step?: number

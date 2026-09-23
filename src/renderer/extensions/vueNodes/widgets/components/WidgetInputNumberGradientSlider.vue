@@ -1,6 +1,14 @@
 <template>
   <WidgetLayoutField :widget="widget">
-    <div :class="cn(WidgetInputBaseClass, 'flex items-center gap-2 pr-2 pl-3')">
+    <div
+      :class="
+        cn(
+          WidgetInputBaseClass,
+          'flex items-center gap-2 pr-2 pl-3',
+          useWidgetHeight()
+        )
+      "
+    >
       <GradientSlider
         v-model="modelValue"
         :stops="gradientStops"
@@ -38,6 +46,7 @@ import NumberFieldInput from '@/components/ui/number-field/NumberFieldInput.vue'
 import type { ColorStop } from '@/lib/litegraph/src/interfaces'
 import type { IWidgetGradientSliderOptions } from '@/lib/litegraph/src/types/widgets'
 import type { SimplifiedWidget } from '@/types/simplifiedWidget'
+import { useWidgetHeight } from '@/types/widgetTypes'
 import { cn } from '@comfyorg/tailwind-utils'
 
 import { useNumberStepCalculation } from '../composables/useNumberStepCalculation'

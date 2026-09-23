@@ -125,7 +125,7 @@ function openFullSettings() {
         <LayoutField :label="t('rightSidePanel.globalSettings.gridSpacing')">
           <div
             :class="
-              cn(WidgetInputBaseClass, 'flex items-center gap-2 pr-2 pl-3')
+              cn(WidgetInputBaseClass, 'flex h-7 items-center gap-2 pr-2 pl-3')
             "
           >
             <Slider

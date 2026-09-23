@@ -4,7 +4,8 @@
       :class="
         cn(
           WidgetInputBaseClass,
-          'flex items-center gap-2 pr-2 pl-3 not-disabled:hover:bg-component-node-widget-background-hovered'
+          'flex items-center gap-2 pr-2 pl-3 not-disabled:hover:bg-component-node-widget-background-hovered',
+          useWidgetHeight()
         )
       "
     >
@@ -41,6 +42,7 @@ import Slider from '@/components/ui/slider/Slider.vue'
 import NumberField from '@/components/ui/number-field/NumberField.vue'
 import NumberFieldInput from '@/components/ui/number-field/NumberFieldInput.vue'
 import type { SimplifiedWidget } from '@/types/simplifiedWidget'
+import { useWidgetHeight } from '@/types/widgetTypes'
 import { cn } from '@comfyorg/tailwind-utils'
 import {
   STANDARD_EXCLUDED_PROPS,
