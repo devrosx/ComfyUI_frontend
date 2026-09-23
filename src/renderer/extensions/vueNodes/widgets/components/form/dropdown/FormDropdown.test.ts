@@ -18,9 +18,11 @@ function createItem(id: string, name: string): FormDropdownItem {
 }
 
 const i18n = createI18n({ legacy: false, locale: 'en', messages: { en: {} } })
+const mockFocusTrigger = vi.fn()
 
 beforeEach(() => {
   vi.mocked(useToast().warning).mockImplementation(vi.fn())
+  mockFocusTrigger.mockClear()
 })
 
 const transformState = vi.hoisted(() => ({ camera: { x: 0, y: 0, z: 1 } }))
@@ -71,7 +73,7 @@ const MockFormDropdownInput = {
   ) {
     const triggerButton = ref<HTMLButtonElement>()
     expose({
-      focus: () => triggerButton.value?.focus()
+      focus: mockFocusTrigger
     })
     return { triggerButton }
   },
@@ -261,7 +263,7 @@ describe('FormDropdown', () => {
     await flushPromises()
 
     expect(onUpdateSelected).toHaveBeenCalledWith(new Set(['alpha']))
-    expect(screen.getByRole('button', { name: 'Open' })).toHaveFocus()
+    expect(mockFocusTrigger).toHaveBeenCalledOnce()
   })
 
   it('keeps the selected item when it is clicked again in single-select mode', async () => {
@@ -279,7 +281,7 @@ describe('FormDropdown', () => {
 
     expect(onUpdateSelected).not.toHaveBeenCalled()
     expect(onUpdateIsOpen).toHaveBeenLastCalledWith(false)
-    expect(screen.getByRole('button', { name: 'Open' })).toHaveFocus()
+    expect(mockFocusTrigger).toHaveBeenCalledOnce()
   })
 
   it('replaces the selected item when a different item is clicked in single-select mode', async () => {
@@ -295,7 +297,7 @@ describe('FormDropdown', () => {
     await user.click(screen.getByRole('button', { name: secondItem.label }))
 
     expect(onUpdateSelected).toHaveBeenCalledWith(new Set([secondItem.id]))
-    expect(screen.getByRole('button', { name: 'Open' })).toHaveFocus()
+    expect(mockFocusTrigger).toHaveBeenCalledOnce()
   })
 
   it('does not select when Enter is pressed with an empty search query', async () => {
