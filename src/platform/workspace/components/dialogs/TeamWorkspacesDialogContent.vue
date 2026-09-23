@@ -115,7 +115,7 @@
         <p
           v-if="workspaceName.length > 0 && !isValidName"
           id="workspace-name-error"
-          class="text-danger m-0 text-xs"
+          class="m-0 text-xs text-destructive-background"
         >
           {{ $t('teamWorkspacesDialog.nameValidationError') }}
         </p>

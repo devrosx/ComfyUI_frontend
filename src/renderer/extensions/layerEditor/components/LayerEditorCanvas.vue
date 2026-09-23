@@ -34,7 +34,9 @@
       class="absolute inset-0 flex items-center justify-center"
       data-testid="layer-editor-gl-unavailable"
     >
-      <span class="text-danger rounded-md bg-base-background px-4 py-2 text-sm">
+      <span
+        class="rounded-md bg-base-background px-4 py-2 text-sm text-destructive-background"
+      >
         {{ t('layerEditor.webglUnavailable') }}
       </span>
     </div>

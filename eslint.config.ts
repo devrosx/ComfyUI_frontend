@@ -29,6 +29,34 @@ import { primeVueImportAllowlist } from './scripts/primevue-import-allowlist'
 
 const extraFileExtensions = ['.vue']
 
+// Only utilities that resolve a theme token are checked, so a class like
+// `text-danger` with no `--color-danger` fails lint while custom CSS hooks
+// (`side-bar-button`, `lg-node`, PrimeIcons `pi-*`) stay allowed.
+const tailwindTokenUtilityPrefixes = [
+  'text',
+  'bg',
+  'border',
+  'ring',
+  'inset-ring',
+  'outline',
+  'shadow',
+  'inset-shadow',
+  'fill',
+  'stroke',
+  'decoration',
+  'accent',
+  'caret',
+  'divide',
+  'placeholder',
+  'from',
+  'via',
+  'to',
+  'font',
+  'rounded',
+  'animate'
+]
+const nonTokenUtilityClassPattern = `^(?!(?:.*:)?(?:${tailwindTokenUtilityPrefixes.join('|')})-)`
+
 const commonGlobals = {
   ...globals.browser,
   __COMFYUI_FRONTEND_VERSION__: 'readonly',
@@ -255,8 +283,10 @@ export default defineConfig([
       }
     },
     rules: {
-      // Off: requires whitelisting non-Tailwind classes (PrimeIcons, custom CSS)
-      'better-tailwindcss/no-unknown-classes': 'off',
+      'better-tailwindcss/no-unknown-classes': [
+        'error',
+        { ignore: [nonTokenUtilityClassPattern] }
+      ],
       // Off: may conflict with oxfmt formatting
       'better-tailwindcss/enforce-consistent-line-wrapping': 'off',
       // Off: large batch change, enable and apply with `eslint --fix`
