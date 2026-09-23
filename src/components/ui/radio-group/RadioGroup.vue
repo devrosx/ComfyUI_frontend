@@ -7,7 +7,6 @@ import type { HTMLAttributes } from 'vue'
 import { cn } from '@comfyorg/tailwind-utils'
 
 const props = defineProps<
-  // eslint-disable-next-line vue/no-unused-properties -- forwarded to Reka via useForwardPropsEmits
   RadioGroupRootProps & { class?: HTMLAttributes['class'] }
 >()
 const emits = defineEmits<RadioGroupRootEmits>()

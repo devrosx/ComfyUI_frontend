@@ -6,10 +6,7 @@ import type { HTMLAttributes } from 'vue'
 
 import { cn } from '@comfyorg/tailwind-utils'
 
-const props = defineProps<
-  // eslint-disable-next-line vue/no-unused-properties -- forwarded to Reka via useForwardProps
-  LabelProps & { class?: HTMLAttributes['class'] }
->()
+const props = defineProps<LabelProps & { class?: HTMLAttributes['class'] }>()
 const forwarded = useForwardProps(reactiveOmit(props, 'class'))
 </script>
 
