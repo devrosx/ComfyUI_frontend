@@ -26,6 +26,7 @@
         @wheel="handleWheel"
       >
         <ToggleGroup
+          :key="selectionRevision"
           :class="
             cn('workflow-tabs flex h-full gap-0 bg-transparent', props.class)
           "
@@ -290,6 +291,9 @@ const onWorkflowClick = async (event: MouseEvent) => {
     if (opened === false) {
       selectionRevision.value++
       await nextTick()
+      Array.from(containerRef.value?.querySelectorAll('button') ?? [])
+        .find((button) => button.value === path)
+        ?.focus()
     }
   } catch (error) {
     selectionRevision.value++

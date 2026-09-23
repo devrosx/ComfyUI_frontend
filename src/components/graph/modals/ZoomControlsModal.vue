@@ -52,12 +52,12 @@
           data-testid="zoom-percentage-input"
         >
           <FormattedNumberStepper
-            :model-value="canvasStore.appScalePercentage"
+            v-model="pendingZoomPercentage"
             :min="1"
             :max="1000"
             :clamp-on-input="false"
             :format-options="{ useGrouping: false }"
-            @update:model-value="applyZoom"
+            @commit="applyZoom"
           />
           <span class="shrink-0 text-sm text-text-primary">%</span>
         </div>
@@ -86,13 +86,17 @@ interface Props {
 const props = defineProps<Props>()
 
 const interval = ref<number | null>(null)
+const pendingZoomPercentage = ref(canvasStore.appScalePercentage)
 
 const applyZoom = (inputValue: number) => {
-  if (isNaN(inputValue) || inputValue < 1 || inputValue > 1000) {
-    return
-  }
+  if (isNaN(inputValue)) return
   canvasStore.setAppZoomFromPercentage(inputValue)
 }
+
+watch(
+  () => canvasStore.appScalePercentage,
+  (value) => (pendingZoomPercentage.value = value)
+)
 
 const executeCommand = (command: string) => {
   void commandStore.execute(command)
