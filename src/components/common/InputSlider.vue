@@ -20,6 +20,7 @@
       :max="max"
       :step="step"
       :disabled="disabled"
+      v-bind="$attrs"
       @update:model-value="updateValue"
     />
   </div>

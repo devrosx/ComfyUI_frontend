@@ -55,16 +55,17 @@
 </template>
 
 <script setup lang="ts">
-import Tooltip from '@/components/ui/tooltip/Tooltip.vue'
-
+import { useEventListener } from '@vueuse/core'
 import type { Raw } from 'vue'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import Button from '@/components/ui/button/Button.vue'
+import Tooltip from '@/components/ui/tooltip/Tooltip.vue'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type {
   ColorOption as CanvasColorOption,
+  LiteGraphCanvasEvent,
   Positionable
 } from '@/lib/litegraph/src/litegraph'
 import {
@@ -169,6 +170,15 @@ const updateColorSelectionFromNode = (
   selectedColorOption.value = null
   currentColorOption.value = getItemsColorOption(newSelectedItems)
 }
+useEventListener(
+  document,
+  'litegraph:canvas',
+  (event: LiteGraphCanvasEvent) => {
+    if (event.detail.subType === 'after-change') {
+      updateColorSelectionFromNode(canvasStore.selectedItems)
+    }
+  }
+)
 watch(
   () => canvasStore.selectedItems,
   (newSelectedItems) => {

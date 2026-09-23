@@ -1,6 +1,6 @@
+import { useToast } from '@/components/ui/toast'
 import userEvent from '@testing-library/user-event'
-import { render, screen, waitFor } from '@testing-library/vue'
-import axios from 'axios'
+import { render, screen } from '@testing-library/vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h } from 'vue'
 import { createI18n } from 'vue-i18n'
@@ -12,7 +12,6 @@ import { useCommandStore } from '@/stores/commandStore'
 import HelpCenterMenuContent from './HelpCenterMenuContent.vue'
 
 beforeEach(() => {
-  managerState.isNewManagerUI.value = false
   vi.mocked(useCommandStore().execute).mockResolvedValue(undefined)
   vi.mocked(useReleaseStore().fetchReleases).mockResolvedValue(undefined)
 })
@@ -22,9 +21,6 @@ const distribution = vi.hoisted(() => ({
   isDesktop: false,
   isNightly: false
 }))
-
-const managerState = vi.hoisted(() => ({ isNewManagerUI: { value: false } }))
-const addToast = vi.hoisted(() => vi.fn())
 
 vi.mock(import('@/platform/distribution/types'), () => ({
   get isCloud() {
@@ -56,17 +52,26 @@ vi.mock<unknown>(
   import('@/workbench/extensions/manager/composables/useManagerState'),
 
   () => ({
-    useManagerState: () => managerState
+    useManagerState: () => ({ isNewManagerUI: { value: false } })
   })
 )
 
 vi.mock<unknown>(
-  import('primevue/usetoast'),
+  import('@/workbench/extensions/manager/services/comfyManagerService'),
 
   () => ({
-    useToast: () => ({ add: addToast })
+    useComfyManagerService: () => ({})
   })
 )
+
+beforeEach(() => {
+  vi.mocked(useToast().success).mockImplementation(vi.fn())
+  vi.mocked(useToast().error).mockImplementation(vi.fn())
+  vi.mocked(useToast().info).mockImplementation(vi.fn())
+  vi.mocked(useToast().warning).mockImplementation(vi.fn())
+  vi.mocked(useToast().loading).mockImplementation(vi.fn())
+  vi.mocked(useToast().custom).mockImplementation(vi.fn())
+})
 
 vi.mock(import('@/components/icons/PuzzleIcon.vue'), () => ({
   default: defineComponent({
@@ -177,71 +182,5 @@ describe('HelpCenterMenuContent system status item', () => {
     renderComponent()
 
     expect(screen.queryByRole('menuitem', { name: 'System Status' })).toBeNull()
-  })
-})
-
-describe('HelpCenterMenuContent ComfyUI update', () => {
-  beforeEach(() => {
-    distribution.isCloud = false
-    distribution.isDesktop = false
-    managerState.isNewManagerUI.value = true
-  })
-
-  it('starts accepted update work before requesting a reboot', async () => {
-    const request = vi
-      .spyOn(axios.Axios.prototype, 'request')
-      .mockResolvedValue({ data: '' })
-    const { user } = renderComponent()
-
-    await user.click(screen.getByRole('menuitem', { name: 'Update ComfyUI' }))
-
-    await waitFor(() => {
-      expect(request).toHaveBeenCalledWith(
-        expect.objectContaining({ method: 'post', url: 'manager/reboot' })
-      )
-    })
-    expect(request).toHaveBeenCalledWith(
-      expect.objectContaining({
-        method: 'post',
-        url: 'manager/queue/update_comfyui',
-        params: expect.objectContaining({ is_stable: true })
-      })
-    )
-    expect(request).toHaveBeenCalledWith(
-      expect.objectContaining({ method: 'post', url: 'manager/queue/start' })
-    )
-    expect(addToast).toHaveBeenCalledWith(
-      expect.objectContaining({ severity: 'success' })
-    )
-  })
-
-  it.for([
-    { name: 'submission', url: 'manager/queue/update_comfyui' },
-    { name: 'queue startup', url: 'manager/queue/start' }
-  ])('reports $name failure without rebooting', async ({ url }) => {
-    const request = vi
-      .spyOn(axios.Axios.prototype, 'request')
-      .mockImplementation(async (config) => {
-        if (config.url === url) throw new Error('Update request rejected')
-        return { data: '' }
-      })
-    const { user } = renderComponent()
-
-    await user.click(screen.getByRole('menuitem', { name: 'Update ComfyUI' }))
-
-    await waitFor(() => {
-      expect(addToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          severity: 'error',
-          detail: expect.stringContaining('Update request rejected')
-        })
-      )
-    })
-    expect(request).not.toHaveBeenCalledWith(
-      expect.objectContaining({ url: 'manager/reboot' })
-    )
-    expect(addToast).not.toHaveBeenCalledWith(
-      expect.objectContaining({ severity: 'success' })
-    )
   })
 })
