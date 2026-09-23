@@ -16,13 +16,10 @@
       class="mt-16 flex flex-col gap-4 xl:gap-6"
       @submit.prevent="handleSubmit"
     >
-      <div class="flex flex-col gap-2">
-        <label
-          class="mb-1 text-base text-primary-comfy-canvas/70"
-          for="reset-email"
-        >
+      <Field :data-invalid="!!errorMessage">
+        <FieldLabel for="reset-email" :class="CLOUD_AUTH_LABEL_CLASS">
           {{ t('cloudForgotPassword_emailLabel') }}
-        </label>
+        </FieldLabel>
         <Input
           id="reset-email"
           v-model="email"
@@ -33,10 +30,8 @@
           autocomplete="email"
           required
         />
-        <small v-if="errorMessage" class="text-destructive-background">
-          {{ errorMessage }}
-        </small>
-      </div>
+        <FieldError v-if="errorMessage">{{ errorMessage }}</FieldError>
+      </Field>
 
       <Message v-if="successMessage" severity="success">
         {{ successMessage }}
@@ -74,11 +69,15 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 
 import Button from '@/components/ui/button/Button.vue'
+import Field from '@/components/ui/field/Field.vue'
+import FieldError from '@/components/ui/field/FieldError.vue'
+import FieldLabel from '@/components/ui/field/FieldLabel.vue'
 import Input from '@/components/ui/input/Input.vue'
 import Message from '@/components/ui/message/Message.vue'
 import { useAuthActions } from '@/composables/auth/useAuthActions'
 import {
   CLOUD_AUTH_FIELD_CLASS,
+  CLOUD_AUTH_LABEL_CLASS,
   CLOUD_AUTH_LINK_BUTTON_CLASS
 } from '@/platform/cloud/onboarding/constants/authClasses'
 

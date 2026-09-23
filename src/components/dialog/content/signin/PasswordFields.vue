@@ -1,85 +1,66 @@
 <template>
-  <!-- Password Field -->
-  <FormField
-    ref="passwordField"
-    v-slot="$field"
-    name="password"
-    class="flex flex-col gap-2"
-  >
-    <div class="mb-2 flex items-center justify-between">
-      <label
-        class="text-base font-medium opacity-80"
-        for="comfy-org-sign-up-password"
-      >
+  <VeeField v-slot="{ componentField, errors, meta, value }" name="password">
+    <Field ref="passwordField" :data-invalid="!!errors.length">
+      <FieldLabel for="comfy-org-sign-up-password">
         {{ t('auth.signup.passwordLabel') }}
-      </label>
-    </div>
-    <PasswordInput
-      v-bind="$field.props"
-      id="comfy-org-sign-up-password"
-      autocomplete="new-password"
-      :placeholder="t('auth.signup.passwordPlaceholder')"
-      :class="fieldClass"
-      :aria-invalid="$field.invalid"
-      @input="updatePasswordChecks"
-    />
-    <div v-if="$field.dirty && isPasswordFocused" class="flex flex-col gap-1">
+      </FieldLabel>
+      <PasswordInput
+        v-bind="componentField"
+        id="comfy-org-sign-up-password"
+        autocomplete="new-password"
+        :placeholder="t('auth.signup.passwordPlaceholder')"
+        :class="fieldClass"
+        :aria-invalid="!!errors.length"
+      />
       <PasswordRules
-        :password="password"
+        v-if="meta.dirty && isPasswordFocused"
+        :password="value ?? ''"
         :copy="passwordRulesCopy"
         root-class="text-sm"
         list-class="mt-1 space-y-1"
         unmet-class="text-destructive-background"
       />
-    </div>
-  </FormField>
+    </Field>
+  </VeeField>
 
-  <!-- Confirm Password Field -->
-  <FormField v-slot="$field" name="confirmPassword" class="flex flex-col gap-2">
-    <label
-      class="mb-2 text-base font-medium opacity-80"
-      for="comfy-org-sign-up-confirm-password"
-    >
-      {{ t('auth.login.confirmPasswordLabel') }}
-    </label>
-    <PasswordInput
-      v-bind="$field.props"
-      id="comfy-org-sign-up-confirm-password"
-      autocomplete="new-password"
-      :placeholder="t('auth.login.confirmPasswordPlaceholder')"
-      :class="fieldClass"
-      :aria-invalid="$field.invalid"
-    />
-    <small v-if="$field.error" class="text-destructive-background">{{
-      $field.error.message
-    }}</small>
-  </FormField>
+  <VeeField v-slot="{ componentField, errors }" name="confirmPassword">
+    <Field :data-invalid="!!errors.length">
+      <FieldLabel for="comfy-org-sign-up-confirm-password">
+        {{ t('auth.login.confirmPasswordLabel') }}
+      </FieldLabel>
+      <PasswordInput
+        v-bind="componentField"
+        id="comfy-org-sign-up-confirm-password"
+        autocomplete="new-password"
+        :placeholder="t('auth.login.confirmPasswordPlaceholder')"
+        :class="fieldClass"
+        :aria-invalid="!!errors.length"
+      />
+      <FieldError v-if="errors.length" :errors />
+    </Field>
+  </VeeField>
 </template>
 
 <script setup lang="ts">
-import { FormField } from '@primevue/forms'
 import { useFocusWithin } from '@vueuse/core'
-import { computed, ref, useTemplateRef } from 'vue'
-import type { ComponentPublicInstance, HTMLAttributes } from 'vue'
+import { Field as VeeField } from 'vee-validate'
+import { computed, useTemplateRef } from 'vue'
+import type { HTMLAttributes } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import PasswordRules from '@comfyorg/account-ui/auth/PasswordRules'
+import Field from '@/components/ui/field/Field.vue'
+import FieldError from '@/components/ui/field/FieldError.vue'
+import FieldLabel from '@/components/ui/field/FieldLabel.vue'
 import PasswordInput from '@/components/ui/input/PasswordInput.vue'
 
-const { fieldClass = 'h-10' } = defineProps<{
+const { fieldClass } = defineProps<{
   fieldClass?: HTMLAttributes['class']
 }>()
 
 const { t } = useI18n()
-const password = ref('')
-const passwordField = useTemplateRef<ComponentPublicInstance>('passwordField')
+const passwordField = useTemplateRef('passwordField')
 const { focused: isPasswordFocused } = useFocusWithin(passwordField)
-
-const updatePasswordChecks = (event: Event) => {
-  if (event.target instanceof HTMLInputElement) {
-    password.value = event.target.value
-  }
-}
 
 const passwordRulesCopy = computed(() => ({
   requirements: t('validation.password.requirements'),

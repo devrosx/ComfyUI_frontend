@@ -1,13 +1,9 @@
-import { Form, FormField } from '@primevue/forms'
 import userEvent from '@testing-library/user-event'
-import { render, screen } from '@testing-library/vue'
-import PrimeVue from 'primevue/config'
+import { render, screen, waitFor } from '@testing-library/vue'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { computed, defineComponent, h, nextTick, ref } from 'vue'
 import { createI18n } from 'vue-i18n'
 
-import Button from '@/components/ui/button/Button.vue'
-import Input from '@/components/ui/input/Input.vue'
 import enMessages from '@/locales/en/main.json' with { type: 'json' }
 import { useAuthStore } from '@/stores/authStore'
 
@@ -64,15 +60,7 @@ function globalOptions() {
     locale: 'en',
     messages: { en: enMessages }
   })
-  return {
-    plugins: [PrimeVue, i18n],
-    components: {
-      Form,
-      FormField,
-      Button,
-      Input
-    }
-  }
+  return { plugins: [i18n] }
 }
 
 describe('SignUpForm', () => {
@@ -314,10 +302,13 @@ describe('SignUpForm', () => {
       await fillValidSignup(user)
 
       emitTurnstileToken!('token-xyz')
-      await nextTick()
-      await user.click(screen.getByRole('button', { name: signUpButton }))
+      const submit = screen.getByRole('button', { name: signUpButton })
+      await waitFor(() => expect(submit).toBeEnabled())
+      await user.click(submit)
 
-      expect(onSubmit).toHaveBeenCalledWith(expectedValues, 'token-xyz')
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith(expectedValues, 'token-xyz')
+      })
     })
 
     it('emits submit without a token once the widget reports itself unavailable (broken/slow load fallback)', async () => {
@@ -327,10 +318,13 @@ describe('SignUpForm', () => {
       await fillValidSignup(user)
 
       emitTurnstileUnavailable!(true)
-      await nextTick()
-      await user.click(screen.getByRole('button', { name: signUpButton }))
+      const submit = screen.getByRole('button', { name: signUpButton })
+      await waitFor(() => expect(submit).toBeEnabled())
+      await user.click(submit)
 
-      expect(onSubmit).toHaveBeenCalledWith(expectedValues, undefined)
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith(expectedValues, undefined)
+      })
     })
   })
 
@@ -385,10 +379,12 @@ describe('SignUpForm', () => {
       const { user } = renderComponent({ onSubmit })
       await fillValidSignup(user)
       const submit = screen.getByRole('button', { name: signUpButton })
+      await waitFor(() => expect(submit).toBeEnabled())
 
       await user.click(submit)
       await user.click(submit)
 
+      await waitFor(() => expect(onSubmit).toHaveBeenCalled())
       expect(
         onSubmit,
         'an impatient double-click would otherwise create the account twice'
