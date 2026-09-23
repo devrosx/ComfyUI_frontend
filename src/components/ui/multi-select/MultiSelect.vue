@@ -31,18 +31,11 @@
           >
             {{ label }}
           </span>
-          <div v-else-if="chips" class="flex min-w-0 gap-1 overflow-hidden">
-            <span
-              v-for="item in selectedItems"
-              :key="item.value"
-              class="truncate rounded-sm bg-secondary-background px-1.5 py-0.5 text-xs"
-            >
-              {{ item.name }}
+          <slot v-else name="value" :selected="selectedItems">
+            <span class="truncate text-sm">
+              {{ selectedItems.map(({ name }) => name).join(', ') }}
             </span>
-          </div>
-          <span v-else class="truncate text-sm">
-            {{ selectedItems.map(({ name }) => name).join(', ') }}
-          </span>
+          </slot>
           <span
             v-if="selectedCount > 0"
             :class="
@@ -218,7 +211,6 @@ const {
   size = 'lg',
   disabled = false,
   showSearchBox = false,
-  chips = false,
   showSelectedCount = false,
   showClearButton = false,
   actionsPlacement = 'header',
@@ -238,8 +230,6 @@ const {
   disabled?: boolean
   /** Show search box in the panel header */
   showSearchBox?: boolean
-  /** Render selected values as individual chips */
-  chips?: boolean
   /** Show selected count text in the panel header */
   showSelectedCount?: boolean
   /** Show "Clear all" action in the panel header */

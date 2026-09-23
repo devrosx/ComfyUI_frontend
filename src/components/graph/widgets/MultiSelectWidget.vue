@@ -4,10 +4,21 @@
       v-model="selectedOptions"
       :options="options"
       show-search-box
-      :chips="inputSpec.multi_select?.chip"
       :label="placeholder"
       class="w-full"
-    />
+    >
+      <template v-if="inputSpec.multi_select?.chip" #value="{ selected }">
+        <div class="flex min-w-0 gap-1 overflow-hidden">
+          <span
+            v-for="item in selected"
+            :key="item.value"
+            class="truncate rounded-sm bg-secondary-background px-1.5 py-0.5 text-xs"
+          >
+            {{ item.name }}
+          </span>
+        </div>
+      </template>
+    </MultiSelect>
   </div>
 </template>
 
