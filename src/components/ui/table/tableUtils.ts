@@ -16,7 +16,7 @@ export function sortByText<T>(
   direction: TableSortDirection,
   getText: (item: T) => string
 ): T[] {
-  return items.toSorted((a, b) => {
+  return [...items].sort((a, b) => {
     const result = getText(a).localeCompare(getText(b))
     return direction === 'ascending' ? result : -result
   })

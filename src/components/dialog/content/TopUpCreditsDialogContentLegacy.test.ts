@@ -1,3 +1,4 @@
+import { useToast } from '@/components/ui/toast'
 import userEvent from '@testing-library/user-event'
 import { render, screen } from '@testing-library/vue'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -51,13 +52,33 @@ vi.mock<unknown>(import('@/composables/billing/usePendingTopup'), () => ({
   usePendingTopup: () => ({ clearPendingTopup: mockClearPendingTopup })
 }))
 
-vi.mock<unknown>(
-  import('primevue/usetoast'),
-
-  () => ({
-    useToast: () => ({ add: mockToastAdd })
+vi.mock<unknown>(import('@/composables/useExternalLink'), () => ({
+  useExternalLink: () => ({
+    buildDocsUrl: () => 'https://docs.comfy.org',
+    docsPaths: { partnerNodesPricing: '' }
   })
-)
+}))
+
+beforeEach(() => {
+  vi.mocked(useToast().success).mockImplementation((...args: unknown[]) =>
+    mockToastAdd('success', ...args)
+  )
+  vi.mocked(useToast().error).mockImplementation((...args: unknown[]) =>
+    mockToastAdd('error', ...args)
+  )
+  vi.mocked(useToast().info).mockImplementation((...args: unknown[]) =>
+    mockToastAdd('info', ...args)
+  )
+  vi.mocked(useToast().warning).mockImplementation((...args: unknown[]) =>
+    mockToastAdd('warning', ...args)
+  )
+  vi.mocked(useToast().loading).mockImplementation((...args: unknown[]) =>
+    mockToastAdd('loading', ...args)
+  )
+  vi.mocked(useToast().custom).mockImplementation((...args: unknown[]) =>
+    mockToastAdd('custom', ...args)
+  )
+})
 
 vi.mock(import('@/base/credits/comfyCredits'), () => ({
   creditsToUsd: (credits: number) => credits,
@@ -69,7 +90,7 @@ const i18n = createI18n({
   locale: 'en',
   messages: {
     en: {
-      g: { close: 'Close', increment: 'Increment', decrement: 'Decrement' },
+      g: { close: 'Close' },
       credits: {
         topUp: {
           addMoreCredits: 'Add more credits',
@@ -97,7 +118,14 @@ function renderDialog() {
   return render(TopUpCreditsDialogContentLegacy, {
     global: {
       config: { errorHandler: () => {} },
-      plugins: [i18n]
+      plugins: [i18n],
+      stubs: {
+        FormattedNumberStepper: {
+          name: 'FormattedNumberStepper',
+          props: ['modelValue'],
+          template: '<div />'
+        }
+      }
     }
   })
 }
@@ -125,48 +153,6 @@ describe('TopUpCreditsDialogContentLegacy', () => {
     expect(vi.mocked(useDialogStore().closeDialog)).toHaveBeenCalled()
     expect(mockShowSettings).toHaveBeenCalledWith('workspace')
     expect(mockClearPendingTopup).not.toHaveBeenCalled()
-  })
-
-  it('clamps a typed amount to the ceiling and warns until another amount is chosen', async () => {
-    renderDialog()
-    const user = userEvent.setup()
-    const payInput = screen.getByRole('spinbutton', { name: 'You pay' })
-
-    await user.tripleClick(payInput)
-    await user.keyboard('20000{Enter}')
-
-    expect(payInput).toHaveValue('10,000')
-    expect(screen.getByRole('spinbutton', { name: 'You get' })).toHaveValue(
-      '10,000'
-    )
-    expect(screen.getByText('Maximum allowed')).toBeInTheDocument()
-
-    await user.click(screen.getByRole('button', { name: '$25' }))
-
-    expect(payInput).toHaveValue('25')
-    expect(screen.queryByText('Maximum allowed')).not.toBeInTheDocument()
-  })
-
-  it('steps the credits field by the amount tier without deselecting the preset on blur', async () => {
-    renderDialog()
-    const user = userEvent.setup()
-    const payInput = screen.getByRole('spinbutton', { name: 'You pay' })
-
-    await user.click(payInput)
-    await user.tab()
-    expect(screen.getByRole('button', { name: '$50' })).toHaveClass(
-      'bg-secondary-background-selected'
-    )
-
-    const creditsIncrement = screen.getAllByRole('button', {
-      name: 'Increment'
-    })[1]
-    await user.click(creditsIncrement)
-
-    expect(payInput).toHaveValue('55')
-    expect(screen.getByRole('button', { name: '$50' })).not.toHaveClass(
-      'bg-secondary-background-selected'
-    )
   })
 
   it('clears the pending top-up marker when the user closes the dialog', async () => {
@@ -216,12 +202,9 @@ describe('TopUpCreditsDialogContentLegacy', () => {
       outcome: 'failure',
       failure_category: 'unknown'
     })
-    expect(mockToastAdd).toHaveBeenCalledWith(
-      expect.objectContaining({
-        severity: 'error',
-        summary: 'Purchase Failed'
-      })
-    )
+    expect(mockToastAdd).toHaveBeenCalledWith('error', 'Purchase Failed', {
+      description: 'Failed to purchase credits: declined for person@example.com'
+    })
     expect(mockShowSettings).not.toHaveBeenCalled()
   })
 

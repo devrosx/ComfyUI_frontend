@@ -37,8 +37,9 @@
         class="min-w-0 rounded-sm border-none bg-transparent text-center text-lg font-medium text-base-foreground focus-visible:outline-none"
         :disabled="disabled"
         @input="handleInputChange"
-        @blur="handleInputBlur"
+        @blur="commitInput"
         @focus="handleInputFocus"
+        @keydown.enter.prevent="commitInput"
         @keydown.up.prevent="handleStep(1)"
         @keydown.down.prevent="handleStep(-1)"
       />
@@ -88,6 +89,7 @@ const {
 
 const emit = defineEmits<{
   'max-reached': []
+  commit: [value: number]
 }>()
 
 const modelValue = defineModel<number>({ required: true })
@@ -166,7 +168,7 @@ function handleInputChange(e: Event) {
   })
 }
 
-function handleInputBlur() {
+function commitInput() {
   const parsed = isDirty.value
     ? parseFormattedNumber(inputValue.value)
     : modelValue.value
@@ -178,6 +180,7 @@ function handleInputBlur() {
   const clamped = clamp(parsed, min, max)
   modelValue.value = clamped
   inputValue.value = formatNumber(clamped)
+  emit('commit', clamped)
 }
 
 function handleInputFocus(e: FocusEvent) {
@@ -193,5 +196,6 @@ function handleStep(direction: 1 | -1) {
   modelValue.value = newValue
   inputValue.value = formatNumber(newValue)
   isDirty.value = false
+  emit('commit', newValue)
 }
 </script>

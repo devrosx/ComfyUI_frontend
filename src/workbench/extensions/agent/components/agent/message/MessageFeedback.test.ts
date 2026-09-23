@@ -26,16 +26,16 @@ vi.mock(import('@/platform/assets/utils/assetPreviewUtil'), () => ({
 }))
 
 vi.mock(import('@vueuse/core'), { spy: true })
-vi.mocked(useClipboard).mockImplementation(
-  () =>
-    ({
-      copy: clipboard.copy,
-      copyPending: ref(false),
-      copied: ref(false),
-      isSupported: computed(() => true),
-      text: ref('')
-    }) satisfies ReturnType<typeof useClipboard>
-)
+
+beforeEach(() => {
+  vi.mocked(useClipboard).mockReturnValue({
+    copy: clipboard.copy,
+    copyPending: ref(false),
+    copied: ref(false),
+    isSupported: computed(() => true),
+    text: ref('')
+  })
+})
 
 const markdownSource = '# Title\n\n**bold** move'
 

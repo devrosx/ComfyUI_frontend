@@ -1,6 +1,7 @@
 <template>
   <SearchInput
     :model-value="internalValue"
+    :disabled="props.disabled"
     v-bind="$attrs"
     class="w-full"
     :debounce-time="0"
@@ -14,7 +15,9 @@
         type="button"
         :class="cn('absolute flex', positionClass)"
         :aria-label="$t('g.validate')"
-        :disabled="validationState === ValidationState.LOADING"
+        :disabled="
+          props.disabled || validationState === ValidationState.LOADING
+        "
         :data-validation-state="validationState"
         @click="validateUrl(props.modelValue)"
       >
@@ -37,6 +40,7 @@ import { ValidationState } from '@/utils/validationUtil'
 const props = defineProps<{
   modelValue: string
   validateUrlFn?: (url: string) => Promise<boolean>
+  disabled?: boolean
 }>()
 
 const emit = defineEmits<{

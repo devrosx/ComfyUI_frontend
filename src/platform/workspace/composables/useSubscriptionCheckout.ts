@@ -32,6 +32,7 @@ import type {
   SubscribeOptions
 } from '@/platform/workspace/api/workspaceApi'
 import { workspaceApi } from '@/platform/workspace/api/workspaceApi'
+import { openHostedBillingTab } from '@/platform/workspace/billing/openHostedBillingTab'
 import type { SettledSubscribeResponse } from '@/platform/workspace/billing/sdk/subscriptionOperationView'
 import { readOnRail } from '@/platform/workspace/composables/readOnRail'
 import { useBillingCapabilities } from '@/platform/workspace/composables/useBillingCapabilities'
@@ -755,18 +756,22 @@ export function useSubscriptionCheckout(
       : canSubscribeSelfServe.value
   }
 
+  // Keep this synchronous so hosted checkout can open before an await drops
+  // the click's transient user activation in browsers such as Safari.
+  function needsTeamToPersonalDowngrade(): boolean {
+    return tierPlanType !== 'team' && isTeamPlan.value
+  }
+
   async function showTeamToPersonalDowngrade(
     planSlug: string,
     tierKey: CheckoutTierKey
-  ): Promise<boolean> {
-    if (tierPlanType === 'team' || !isTeamPlan.value) return false
-
+  ): Promise<void> {
     const { useDialogService } = await import('@/services/dialogService')
     const result = await useDialogService().showDowngradeToPersonalDialog({
       planName: t(`subscription.tiers.${tierKey}.name`),
       planSlug
     })
-    if (!result) return true
+    if (!result) return
 
     previewData.value = result.preview
     trackWorkspaceCheckoutStarted({
@@ -785,7 +790,6 @@ export function useSubscriptionCheckout(
       },
       false
     )
-    return true
   }
 
   const previewVariant = computed<PreviewVariant>(() => {
@@ -828,14 +832,25 @@ export function useSubscriptionCheckout(
     enterCheckoutJourney(`${tierKey}:${billingCycle}`)
 
     try {
-      const planSlug = await resolvePlanSlug(tierKey, billingCycle)
+      let planSlug = getApiPlanSlug(tierKey, billingCycle)
+      if (!planSlug) {
+        await fetchPlans()
+        planSlug = getApiPlanSlug(tierKey, billingCycle)
+      }
       if (!planSlug) {
         toast.error('Unable to subscribe', {
           description: 'This plan is not available'
         })
         return
       }
-      if (await showTeamToPersonalDowngrade(planSlug, tierKey)) return
+      if (needsTeamToPersonalDowngrade()) {
+        await showTeamToPersonalDowngrade(planSlug, tierKey)
+        return
+      }
+      if (openHostedBillingTab('checkout', { plan: planSlug })) {
+        emit('close', false)
+        return
+      }
       const response = await requestSubscriptionPreview(planSlug)
 
       if (!acceptsPersonalSubscriptionPreview(response)) return
@@ -893,16 +908,6 @@ export function useSubscriptionCheckout(
     return !isCloud || canSubscribeSelfServe.value || canChangeSeats.value
   }
 
-  async function resolvePlanSlug(
-    tierKey: CheckoutTierKey,
-    billingCycle: BillingCycle
-  ): Promise<string | null> {
-    const existingSlug = getApiPlanSlug(tierKey, billingCycle)
-    if (existingSlug) return existingSlug
-    await fetchPlans()
-    return getApiPlanSlug(tierKey, billingCycle)
-  }
-
   /**
    * Team-plan checkout entry. A fresh subscribe has nothing to prorate and shows
    * the display-only "Confirm your payment" step. An existing subscriber changing
@@ -930,6 +935,17 @@ export function useSubscriptionCheckout(
     previewData.value = null
     quoteIsCurrent.value = false
     enterCheckoutJourney(`team:${payload.stop.id}:${payload.billingCycle}`)
+
+    if (
+      payload.stop.id &&
+      openHostedBillingTab('checkout', {
+        plan: getTeamPlanSlug(payload.billingCycle),
+        teamCreditStopId: payload.stop.id
+      })
+    ) {
+      emit('close', false)
+      return
+    }
 
     await loadTeamSubscriptionPreview(payload, checkoutType, previewRequestId)
   }
@@ -1072,7 +1088,10 @@ export function useSubscriptionCheckout(
 
     isSubscribing.value = true
     try {
-      if (await showTeamToPersonalDowngrade(planSlug, tierKey)) return
+      if (needsTeamToPersonalDowngrade()) {
+        await showTeamToPersonalDowngrade(planSlug, tierKey)
+        return
+      }
       if (await prepareReactivation(planSlug, confirmReactivation)) return
       const attemptStartedAt = trackSubscriptionStarted({
         tier: tierKey,
@@ -1738,6 +1757,11 @@ export function useSubscriptionCheckout(
 
   async function handleResubscribe() {
     if (!canReactivatePlan.value) return
+
+    if (openHostedBillingTab('subscription')) {
+      emit('close', false)
+      return
+    }
 
     const source = 'pricing_dialog' as const
 

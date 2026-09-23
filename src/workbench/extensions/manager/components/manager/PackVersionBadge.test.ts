@@ -173,7 +173,7 @@ describe('PackVersionBadge', () => {
       await rerender({ nodePack: mockNodePack, isSelected: false })
       await nextTick()
 
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'closed')
     })
 
     it('does not close the popover when card is selected', async () => {
