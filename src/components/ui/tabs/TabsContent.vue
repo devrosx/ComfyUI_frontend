@@ -15,7 +15,10 @@ const forwarded = useForwardProps(restProps)
   <TabsContent
     v-bind="forwarded"
     :class="
-      cn('focus-visible:ring-ring outline-none focus-visible:ring-1', className)
+      cn(
+        'outline-none focus-visible:ring-1 focus-visible:ring-border-default',
+        className
+      )
     "
   >
     <slot />

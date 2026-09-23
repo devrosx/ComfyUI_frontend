@@ -1,7 +1,7 @@
 <template>
   <div class="w-80 pt-1">
     <div class="py-2">
-      <span class="text-md pl-3 font-semibold text-neutral-500">
+      <span class="pl-3 text-base font-semibold text-neutral-500">
         {{ $t('manager.selectVersion') }}
       </span>
     </div>
@@ -20,7 +20,12 @@
         class="p-0"
       />
     </div>
-    <ListboxRoot v-else v-model="selectedVersion" class="w-full">
+    <ListboxRoot
+      v-else
+      v-model="selectedVersion"
+      selection-behavior="replace"
+      class="w-full"
+    >
       <ListboxContent class="max-h-[50vh] scrollbar-hide overflow-y-auto p-1">
         <ListboxItem
           v-for="option in processedVersionOptions"

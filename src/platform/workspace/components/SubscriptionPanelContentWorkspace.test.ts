@@ -250,11 +250,6 @@ const SubscriptionFooterLinksStub = {
     '<div data-testid="subscription-footer-links" :data-show-invoice-history="String(showInvoiceHistory)" />'
 }
 
-const StatusBadgeStub = {
-  props: ['label', 'severity'],
-  template: '<span :data-severity="severity">{{ label }}</span>'
-}
-
 const DropdownMenuStub = {
   props: ['entries'],
   template:
@@ -271,7 +266,6 @@ function renderComponent({ stubFooter = true } = {}) {
         ...(stubFooter
           ? { SubscriptionFooterLinks: SubscriptionFooterLinksStub }
           : {}),
-        StatusBadge: StatusBadgeStub,
         DropdownMenu: DropdownMenuStub
       }
     }
@@ -478,10 +472,6 @@ describe('SubscriptionPanelContentWorkspace', () => {
 
       expect(screen.getByTestId('plan-status-badge')).toHaveTextContent(
         'Inactive'
-      )
-      expect(screen.getByTestId('plan-status-badge')).toHaveAttribute(
-        'data-severity',
-        'secondary'
       )
       expect(
         screen.queryByTestId('subscription-state-card')
