@@ -110,11 +110,9 @@ export function sortedTree<T>(
       const sortedChildren = [...node.children].sort((a, b) =>
         a.label.localeCompare(b.label)
       )
-      newNode.children = [
-        ...sortedChildren.map((child) =>
-          sortedTree(child, { groupLeaf: false })
-        )
-      ]
+      newNode.children = sortedChildren.map((child) =>
+        sortedTree(child, { groupLeaf: false })
+      )
     }
   }
 
