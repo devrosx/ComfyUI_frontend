@@ -1,4 +1,3 @@
-import { useToast } from '@/components/ui/toast'
 import { useBillingOperationStore } from '@/platform/workspace/stores/billingOperationStore'
 import { useTeamWorkspaceStore } from '@/platform/workspace/stores/teamWorkspaceStore'
 import {
@@ -77,33 +76,14 @@ vi.mock<unknown>(import('@/composables/billing/usePendingTopup'), () => ({
   usePendingTopup: () => ({ clearPendingTopup: mockClearPendingTopup })
 }))
 
-vi.mock<unknown>(import('@/composables/useExternalLink'), () => ({
-  useExternalLink: () => ({
-    buildDocsUrl: () => 'https://docs.comfy.org',
-    docsPaths: { partnerNodesPricing: '' }
-  })
+vi.mock<unknown>(import('primevue/usetoast'), () => ({
+  useToast: () => ({ add: mockToastAdd })
 }))
 
 vi.mock(import('@/base/credits/comfyCredits'), () => ({
   creditsToUsd: (credits: number) => credits,
   usdToCredits: (usd: number) => usd
 }))
-
-beforeEach(() => {
-  const toast = useToast()
-  for (const kind of [
-    'success',
-    'error',
-    'info',
-    'warning',
-    'loading'
-  ] as const) {
-    vi.mocked(toast[kind]).mockImplementation((...args) => {
-      mockToastAdd(...args)
-      return 0
-    })
-  }
-})
 
 const i18n = createI18n({
   legacy: false,
@@ -126,14 +106,7 @@ function renderDialog() {
   mockBillingContext()
   return render(TopUpCreditsDialogContentWorkspace, {
     global: {
-      plugins: [i18n],
-      stubs: {
-        FormattedNumberStepper: {
-          name: 'FormattedNumberStepper',
-          props: ['modelValue'],
-          template: '<div />'
-        }
-      }
+      plugins: [i18n]
     }
   })
 }
@@ -408,8 +381,9 @@ describe('TopUpCreditsDialogContentWorkspace', () => {
       })
     )
     expect(mockToastAdd).toHaveBeenCalledWith(
-      'Failed to open the billing portal. Please try again.',
-      { duration: 5000 }
+      expect.objectContaining({
+        summary: 'Failed to open the billing portal. Please try again.'
+      })
     )
   })
 
@@ -429,9 +403,8 @@ describe('TopUpCreditsDialogContentWorkspace', () => {
 
     await waitFor(() =>
       expect(mockToastAdd).toHaveBeenCalledWith(
-        expect.any(String),
         expect.objectContaining({
-          description:
+          detail:
             'No payment method is saved for this workspace. Add one via Settings → Plan & Credits → Manage billing, then retry the top-up.'
         })
       )
@@ -487,6 +460,63 @@ describe('TopUpCreditsDialogContentWorkspace', () => {
       screen.getByRole('button', { name: 'Complete verification' })
     ).toBeDisabled()
     expect(screen.queryByText('Select amount')).not.toBeInTheDocument()
+  })
+
+  // The server holds the invoice open and refuses a replacement purchase while
+  // it is, so a restart here would be rejected. Say what is true instead, and
+  // never offer an action the server will turn down.
+  it('explains a top-up parked with no link instead of offering a restart', async () => {
+    setIsAddingCredits(true)
+    setTopupActionOperation({
+      opId: 'op-parked',
+      status: 'pending',
+      phase: 'awaiting_invoice_payment',
+      actionUrl: null
+    })
+
+    renderDialog()
+
+    expect(screen.getByText('Verify your payment')).toBeInTheDocument()
+    expect(
+      screen.getByText(/bank needs to approve this payment/)
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/can't be started until this one completes/)
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Complete verification' })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: 'Start over' })
+    ).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: 'OK' }))
+
+    expect(useDialogStore().closeDialog).toHaveBeenCalledWith({
+      key: 'top-up-credits'
+    })
+    expect(useBillingOperationStore().dismissOperation).not.toHaveBeenCalled()
+  })
+
+  // Reachable whenever a purchase is submitted while the previous operation is
+  // still open — after Start over on a failed challenge, or from a second tab.
+  it('names the still-open purchase when the server refuses a replacement', async () => {
+    vi.mocked(mockBillingContext().topup).mockRejectedValue(
+      new WorkspaceApiError('conflict', 409, 'SUBSCRIPTION_CHANGE_IN_PROGRESS')
+    )
+
+    renderDialog()
+    await clickAddCredits()
+    await userEvent.click(screen.getByRole('button', { name: 'Pay $50.00' }))
+
+    await waitFor(() =>
+      expect(mockToastAdd).toHaveBeenCalledWith(
+        expect.objectContaining({
+          severity: 'error',
+          detail: expect.stringContaining('credit purchase is still open')
+        })
+      )
+    )
   })
 
   it('returns to amount selection when a reopened operation ends', async () => {
@@ -729,8 +759,10 @@ describe('TopUpCreditsDialogContentWorkspace', () => {
     await waitFor(() =>
       expect(screen.getByRole('button', { name: 'Pay $50.00' })).toBeEnabled()
     )
-    expect(mockToastAdd).toHaveBeenCalledWith('Purchase Failed', {
-      description: 'Failed to purchase credits: An unknown error occurred'
+    expect(mockToastAdd).toHaveBeenCalledWith({
+      severity: 'error',
+      summary: 'Purchase Failed',
+      detail: 'Failed to purchase credits: An unknown error occurred'
     })
     expect(useTelemetry()?.trackBillingEvent).toHaveBeenCalledWith({
       operation: 'topup',
@@ -773,6 +805,28 @@ describe('TopUpCreditsDialogContentWorkspace', () => {
     })
     expect(mockClearPendingTopup).not.toHaveBeenCalled()
   })
+
+  // Completing out of band is the expected outcome here — the copy sends the
+  // customer to their bank — and the marker is what refreshes the balance when
+  // they come back, so neither exit may discard it.
+  it.for([{ control: 'OK' }, { control: 'Close' }])(
+    'keeps the pending top-up marker when leaving a parked purchase via $control',
+    async ({ control }) => {
+      setIsAddingCredits(true)
+      setTopupActionOperation({
+        opId: 'op-parked',
+        status: 'pending',
+        phase: 'awaiting_invoice_payment',
+        actionUrl: null
+      })
+
+      renderDialog()
+      await userEvent.click(screen.getByRole('button', { name: control }))
+
+      expect(useDialogStore().closeDialog).toHaveBeenCalled()
+      expect(mockClearPendingTopup).not.toHaveBeenCalled()
+    }
+  )
 
   it('clears the pending top-up marker when the user closes the dialog', async () => {
     renderDialog()

@@ -1,4 +1,3 @@
-import { useToast } from '@/components/ui/toast'
 import { render } from '@testing-library/vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, nextTick } from 'vue'
@@ -7,30 +6,19 @@ import { createI18n } from 'vue-i18n'
 import { useReconnectingNotification } from '@/composables/useReconnectingNotification'
 import { useSettingStore } from '@/platform/settings/settingStore'
 
-const mockToastAdd = vi.fn((..._args: unknown[]) => 42)
+const mockToastAdd = vi.fn()
 const mockToastRemove = vi.fn()
 
-beforeEach(() => {
-  vi.mocked(useToast().success).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('success', ...args)
-  )
-  vi.mocked(useToast().error).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('error', ...args)
-  )
-  vi.mocked(useToast().info).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('info', ...args)
-  )
-  vi.mocked(useToast().warning).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('warning', ...args)
-  )
-  vi.mocked(useToast().loading).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('loading', ...args)
-  )
-  vi.mocked(useToast().custom).mockImplementation((...args: unknown[]) =>
-    mockToastAdd('custom', ...args)
-  )
-  vi.mocked(useToast().dismiss).mockImplementation(mockToastRemove)
-})
+vi.mock<unknown>(
+  import('primevue/usetoast'),
+
+  () => ({
+    useToast: () => ({
+      add: mockToastAdd,
+      remove: mockToastRemove
+    })
+  })
+)
 
 function setupComposable(): ReturnType<typeof useReconnectingNotification> {
   const i18n = createI18n({
@@ -76,7 +64,12 @@ describe('useReconnectingNotification', () => {
     onReconnecting()
     vi.advanceTimersByTime(2000)
 
-    expect(mockToastAdd).toHaveBeenCalledWith('error', 'Reconnecting')
+    expect(mockToastAdd).toHaveBeenCalledWith(
+      expect.objectContaining({
+        severity: 'error',
+        summary: 'Reconnecting'
+      })
+    )
   })
 
   it('suppresses toast when reconnected before delay expires', () => {
@@ -100,11 +93,18 @@ describe('useReconnectingNotification', () => {
 
     onReconnected()
 
-    expect(mockToastRemove).toHaveBeenCalledWith(42)
+    expect(mockToastRemove).toHaveBeenCalledWith(
+      expect.objectContaining({
+        severity: 'error',
+        summary: 'Reconnecting'
+      })
+    )
     expect(mockToastAdd).toHaveBeenCalledWith(
-      'success',
-      'Reconnected',
-      expect.objectContaining({ duration: 2000 })
+      expect.objectContaining({
+        severity: 'success',
+        summary: 'Reconnected',
+        life: 2000
+      })
     )
   })
 
@@ -170,7 +170,9 @@ describe('useReconnectingNotification', () => {
 
       // Extended delay (5000ms) elapses from the point visibility was regained.
       vi.advanceTimersByTime(3100)
-      expect(mockToastAdd).toHaveBeenCalledWith('error', 'Reconnecting')
+      expect(mockToastAdd).toHaveBeenCalledWith(
+        expect.objectContaining({ severity: 'error', summary: 'Reconnecting' })
+      )
     })
 
     it('avoids the reconnecting toast when reconnection completes shortly after refocus', async () => {
@@ -199,7 +201,9 @@ describe('useReconnectingNotification', () => {
       onReconnecting()
       vi.advanceTimersByTime(2000) // base delay again, not the extended one
 
-      expect(mockToastAdd).toHaveBeenCalledWith('error', 'Reconnecting')
+      expect(mockToastAdd).toHaveBeenCalledWith(
+        expect.objectContaining({ severity: 'error', summary: 'Reconnecting' })
+      )
     })
   })
 })

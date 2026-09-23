@@ -248,6 +248,9 @@ export const useBillingSdkStore = defineStore('billingSdk', () => {
   function onSubscriptionChanged(state: BillingOperationState) {
     if (state.phase !== 'pending') {
       offeredActions.delete(state.id)
+      if (resumedOperations.delete(state.id)) {
+        void settleResumedSubscription(state)
+      }
       return
     }
     void driveRequiredChallenge(state)
@@ -298,6 +301,29 @@ export const useBillingSdkStore = defineStore('billingSdk', () => {
     }
     if (state.phase === 'failed') {
       toast.error(t('billingOperation.topupFailed'), {
+        description: declineDetail(state.declineReason),
+        duration: 7000
+      })
+    }
+  }
+
+  // A subscribe this tab reattached to after a reload has no checkout left to
+  // report it, so it settles the way the poller settled it. Only a subscribe
+  // is ever reattached: the status names a pending subscription or top-up.
+  async function settleResumedSubscription(state: BillingOperationState) {
+    if (state.phase === 'succeeded') {
+      await refreshAfterSubscriptionChange()
+      toast.success(t('billingOperation.subscriptionSuccess'), {
+        duration: 5000
+      })
+      return
+    }
+    if (state.phase === 'timed_out') {
+      toast.error(t('billingOperation.subscriptionTimeout'))
+      return
+    }
+    if (state.phase === 'failed') {
+      toast.error(t('billingOperation.subscriptionFailed'), {
         description: declineDetail(state.declineReason),
         duration: 7000
       })
