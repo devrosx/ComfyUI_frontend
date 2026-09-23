@@ -310,7 +310,11 @@ const {
     mockIsTeamPlan: ref(true),
     mockSubscriptionStatus: ref<string | null>('active'),
     mockWorkspaceRole: ref<'owner' | 'member'>('owner'),
-    mockSubscription: ref<{ tier: string; isCancelled?: boolean } | null>({
+    mockSubscription: ref<{
+      tier: string
+      isCancelled?: boolean
+      endDate?: string | null
+    } | null>({
       tier: 'PRO',
       isCancelled: false
     })
@@ -1037,6 +1041,40 @@ describe('useMembersPanel', () => {
       expect(panel.permissions.value.canInviteMembers).toBe(false)
       panel.handleInviteMember()
       expect(useDialogService().showInviteMemberDialog).not.toHaveBeenCalled()
+    })
+
+    // FE-2846: an Enterprise cancel_at is an agreed end date (FE-2035) — the
+    // plan runs until then, so `canceled` must not read as a lapsed plan.
+    it('keeps invites live for an end-dated Enterprise plan still running', async () => {
+      mockSubscription.value = {
+        tier: 'ENTERPRISE',
+        isCancelled: true,
+        endDate: '2027-01-15T00:00:00Z'
+      }
+      const panel = await setup()
+      expect(panel.isInviteDisabled.value).toBe(false)
+      expect(panel.permissions.value.canInviteMembers).toBe(true)
+      expect(panel.isSelfServeCancelled.value).toBe(false)
+      panel.handleInviteMember()
+      expect(useDialogService().showInviteMemberDialog).toHaveBeenCalled()
+    })
+
+    it('keeps the stock cancelled treatment for Enterprise without an end date', async () => {
+      mockSubscription.value = { tier: 'ENTERPRISE', isCancelled: true }
+      const panel = await setup()
+      expect(panel.isInviteDisabled.value).toBe(true)
+      expect(panel.isSelfServeCancelled.value).toBe(true)
+    })
+
+    it('never lends the quiet path to a cancelled self-serve plan with an end date', async () => {
+      mockSubscription.value = {
+        tier: 'PRO',
+        isCancelled: true,
+        endDate: '2027-01-15T00:00:00Z'
+      }
+      const panel = await setup()
+      expect(panel.isInviteDisabled.value).toBe(true)
+      expect(panel.isSelfServeCancelled.value).toBe(true)
     })
 
     it('enables invite for a Team-plan owner over personal defaults', async () => {
