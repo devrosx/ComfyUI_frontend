@@ -26,7 +26,7 @@ import {
   useWidgetValueStore
 } from '@/stores/widgetValueStore'
 import {
-  createNodeExecutionId,
+  createLeafNodeExecutionId,
   createNodeLocatorId
 } from '@/types/nodeIdentification'
 import type { NodeExecutionId, NodeLocatorId } from '@/types/nodeIdentification'
@@ -489,7 +489,7 @@ export function computeProcessedWidgets({
   const nodeExecId =
     isGraphReady && rootGraph
       ? executionIdFromState(rootGraph, nodeData)
-      : createNodeExecutionId([nodeData.id])
+      : createLeafNodeExecutionId(nodeData.id)
   if (!nodeExecId) return []
 
   const hostNode = getHostNode(rootGraph, nodeData)
