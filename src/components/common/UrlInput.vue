@@ -1,29 +1,28 @@
 <template>
-  <SearchInput
-    :model-value="internalValue"
-    v-bind="$attrs"
-    :debounce-time="0"
-    :disabled
-    :invalid="validationState === ValidationState.INVALID"
-    @update:model-value="handleInput"
-    @blur="handleBlur"
-  >
-    <template #trailing="{ iconClass, positionClass }">
-      <Button
-        v-show="validationState !== ValidationState.IDLE"
-        type="button"
-        variant="muted-textonly"
+  <InputGroup>
+    <InputGroupInput
+      :model-value="internalValue"
+      v-bind="$attrs"
+      :disabled
+      :aria-invalid="validationState === ValidationState.INVALID"
+      @update:model-value="handleInput"
+      @blur="handleBlur"
+    />
+    <InputGroupAddon
+      v-show="validationState !== ValidationState.IDLE"
+      align="inline-end"
+    >
+      <InputGroupButton
         size="icon-sm"
-        :class="cn('absolute flex', positionClass)"
         :aria-label="$t('g.validate')"
         :disabled="disabled || validationState === ValidationState.LOADING"
         :data-validation-state="validationState"
         @click="validateUrl(modelValue)"
       >
-        <i :class="cn(validationIcon, iconClass)" />
-      </Button>
-    </template>
-  </SearchInput>
+        <i :class="cn(validationIcon, 'size-4')" />
+      </InputGroupButton>
+    </InputGroupAddon>
+  </InputGroup>
 </template>
 
 <script setup lang="ts">
@@ -31,8 +30,10 @@ import { computed, onMounted, ref, watch } from 'vue'
 
 import { cn } from '@comfyorg/tailwind-utils'
 
-import Button from '@/components/ui/button/Button.vue'
-import SearchInput from '@/components/ui/search-input/SearchInput.vue'
+import InputGroup from '@/components/ui/input-group/InputGroup.vue'
+import InputGroupAddon from '@/components/ui/input-group/InputGroupAddon.vue'
+import InputGroupButton from '@/components/ui/input-group/InputGroupButton.vue'
+import InputGroupInput from '@/components/ui/input-group/InputGroupInput.vue'
 import { isValidUrl } from '@/utils/formatUtil'
 import { checkUrlReachable } from '@/utils/networkUtil'
 import { ValidationState } from '@/utils/validationUtil'
@@ -90,8 +91,8 @@ onMounted(async () => {
   await validateUrl(modelValue)
 })
 
-const handleInput = (value: string) => {
-  const cleaned = cleanInput(value)
+const handleInput = (value: string | number | undefined) => {
+  const cleaned = cleanInput(String(value ?? ''))
   internalValue.value = cleaned
   validationState.value = ValidationState.IDLE
 }

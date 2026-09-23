@@ -32,7 +32,6 @@
           autocomplete="current-password"
           :placeholder="t('auth.login.passwordPlaceholder')"
           :class="CLOUD_AUTH_FIELD_CLASS"
-          toggle-class="text-primary-comfy-canvas/70"
           :aria-invalid="!!errors.length"
         />
         <FieldError v-if="errors.length" :errors />

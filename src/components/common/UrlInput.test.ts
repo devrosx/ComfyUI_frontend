@@ -40,7 +40,7 @@ describe('UrlInput', () => {
       disabled: true
     })
 
-    expect(screen.getByRole('combobox')).toBeDisabled()
+    expect(screen.getByRole('textbox')).toBeDisabled()
   })
 
   it('emits update:modelValue on blur', async () => {
@@ -51,7 +51,7 @@ describe('UrlInput', () => {
       'onUpdate:modelValue': onUpdate
     })
 
-    const input = screen.getByRole('combobox')
+    const input = screen.getByRole('textbox')
     await user.type(input, 'https://test.com/')
     expect(onUpdate).not.toHaveBeenCalled()
 
@@ -212,7 +212,7 @@ describe('UrlInput', () => {
         placeholder: 'Enter URL'
       })
 
-      const input = screen.getByRole('combobox')
+      const input = screen.getByRole('textbox')
 
       // The component strips whitespace on input via handleInput
       // We use fireEvent.input to simulate the input event handler directly
@@ -239,7 +239,7 @@ describe('UrlInput', () => {
         placeholder: 'Enter URL'
       })
 
-      const input = screen.getByRole('combobox')
+      const input = screen.getByRole('textbox')
 
       // Check initial value is trimmed
       expect(input).toHaveValue('https://initial-value.com')
