@@ -254,9 +254,9 @@ test.describe(
       await expect(topbar.getTab(1)).toHaveCount(0)
       await topbar.newWorkflowButton.click()
       await expect(topbar.getTab(1)).toHaveCount(1)
-      await expect(topbar.getTab(1)).toHaveClass(/p-togglebutton-checked/)
+      await expect(topbar.getTab(1).and(topbar.getActiveTab())).toBeVisible()
       await topbar.getTab(0).click()
-      await expect(topbar.getTab(0)).toHaveClass(/p-togglebutton-checked/)
+      await expect(topbar.getTab(0).and(topbar.getActiveTab())).toBeVisible()
       await expect
         .poll(() => agentConversation.subscribeCount())
         .toBe(subscribeCount + 1)
@@ -300,9 +300,9 @@ test.describe(
       await expect(topbar.getTab(1)).toHaveCount(0)
       await topbar.newWorkflowButton.click()
       await expect(topbar.getTab(1)).toHaveCount(1)
-      await expect(topbar.getTab(1)).toHaveClass(/p-togglebutton-checked/)
+      await expect(topbar.getTab(1).and(topbar.getActiveTab())).toBeVisible()
       await topbar.getTab(0).click()
-      await expect(topbar.getTab(0)).toHaveClass(/p-togglebutton-checked/)
+      await expect(topbar.getTab(0).and(topbar.getActiveTab())).toBeVisible()
       await expect
         .poll(() => agentConversation.subscribeCount())
         .toBe(subscribeCount + 1)
