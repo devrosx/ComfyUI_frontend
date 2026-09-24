@@ -23,6 +23,7 @@ import type {
   PostMessageInput
 } from '../../services/agent/agentRestClient'
 import { useAgentConversationStore } from '../../stores/agent/agentConversationStore'
+import { useAgentSendGateStore } from '../../stores/agent/agentSendGateStore'
 import { useAgentWorkflowTabBindingStore } from '../../stores/agent/agentWorkflowTabBindingStore'
 import type { WorkflowReference } from '../../types/workflowReference'
 import { serializeWorkflowReferences } from '../../utils/workflowReferenceText'
@@ -93,6 +94,13 @@ export interface AgentSessionDeps {
 const THREAD_STORAGE_KEY = 'Comfy.Agent.ThreadId'
 const PREPARE_TIMEOUT_MS = 3000
 
+/** Arrive once per streamed chunk, so a malformed one is reported once. */
+const THROTTLED_EVENT_TYPES = new Set([
+  'agent_message_delta',
+  'agent_message_draft',
+  'agent_thinking'
+])
+
 let sessionGeneration = 0
 
 /**
@@ -120,11 +128,17 @@ function disownsWorkflow(error: unknown): boolean {
   )
 }
 
+function isDeliberateRefusal(error: unknown): boolean {
+  if (disownsWorkflow(error)) return true
+  return error instanceof AgentApiError && error.status === 409
+}
+
 export function useAgentSession(deps: AgentSessionDeps) {
   const { rest, events, workflow } = deps
 
   const conversationStore = useAgentConversationStore()
   const bindingStore = useAgentWorkflowTabBindingStore()
+  const sendGateStore = useAgentSendGateStore()
   /**
    * The workflow the session is bound to (set on turn ack or an active-tab
    * switch, cleared by newChat/loadThread) - the CRDT follower's subscribe
@@ -147,6 +161,8 @@ export function useAgentSession(deps: AgentSessionDeps) {
   function nextLocalErrorId(): TurnId {
     return toTurnId(`local-error-${createUuidv4()}`)
   }
+
+  const reportedMalformedEventTypes = new Set<string>()
 
   let unsubscribe: (() => void) | null = null
   let unsubscribeStatus: (() => void) | null = null
@@ -449,6 +465,12 @@ export function useAgentSession(deps: AgentSessionDeps) {
       )
       return
     }
+    // What is left is a fault, and a chat notice alone kept it out of both
+    // consoles. The refusals the service issues on purpose are not: admission
+    // is handled above, 409 is a turn already running, and a disowned
+    // workflow is released and retryable (see releaseDisownedWorkflow).
+    if (!isDeliberateRefusal(error))
+      reportError(error, { errorType: 'agent_send_failed' })
     const message =
       error instanceof AgentApiError
         ? error.message
@@ -556,6 +578,10 @@ export function useAgentSession(deps: AgentSessionDeps) {
     promptEditState.value = { phase: 'idle' }
     sending.value = true
     stopRequestedWhileSending.value = false
+    // Held from here rather than around postTurn alone: the POST waits on
+    // prepareWorkflow() first, and a run mode written during THAT wait still
+    // reaches the server before the message it must not re-authorize.
+    sendGateStore.begin()
     try {
       return await performSend(
         text,
@@ -566,6 +592,7 @@ export function useAgentSession(deps: AgentSessionDeps) {
       )
     } finally {
       sending.value = false
+      sendGateStore.end()
     }
   }
 
@@ -680,7 +707,19 @@ export function useAgentSession(deps: AgentSessionDeps) {
           conversationStore.settleBackgroundTurn(messageId)
         }
       }
-      console.warn('[agent] dropping malformed agent event', parsed.error)
+      // A dropped agent_ask is a run-approval card the user never sees, so the
+      // turn stalls with nothing on screen to point at. Only the per-chunk
+      // types are throttled to one report each, since a shape regression in
+      // one of those would otherwise report hundreds of times; every other
+      // type reports each occurrence, ask included.
+      const throttled = THROTTLED_EVENT_TYPES.has(type)
+      if (!throttled || !reportedMalformedEventTypes.has(type)) {
+        if (throttled) reportedMalformedEventTypes.add(type)
+        reportError(parsed.error, {
+          errorType: 'agent_malformed_event_dropped',
+          tags: { eventType: type }
+        })
+      }
       return
     }
     const event = parsed.data

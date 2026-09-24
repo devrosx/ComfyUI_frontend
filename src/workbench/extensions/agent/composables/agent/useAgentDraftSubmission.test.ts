@@ -372,4 +372,16 @@ describe('Agent draft submission', () => {
       inputMethod: origin
     })
   })
+
+  // A submission left 'pending' forever is not just a stuck spinner:
+  // AgentPanelRoot folds that phase into isSending, which gates canSubmit, so
+  // the composer refuses every later message until a reload.
+  it('settles the submission even when the send throws', async () => {
+    const { composer, submit, send } = setup()
+    send.mockRejectedValue(new Error('send blew up'))
+
+    await expect(submit()).rejects.toThrow('send blew up')
+
+    expect(composer.submission?.phase).not.toBe('pending')
+  })
 })

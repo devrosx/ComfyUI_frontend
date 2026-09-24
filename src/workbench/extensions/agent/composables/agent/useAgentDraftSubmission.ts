@@ -106,13 +106,20 @@ export function useAgentDraftSubmission(
       target
     })
 
-    const sent = await options.send(
-      text,
-      sentAttachments,
-      nodes,
-      sentReferences,
-      { clientMessageId: uuidv4(), inputMethod }
-    )
+    // A send that rejects rather than returning false would leave the
+    // submission 'pending' for the page's lifetime, and AgentPanelRoot reads
+    // that phase into isSending, which gates canSubmit — so the composer
+    // would refuse every later message until a reload.
+    let sent: boolean
+    try {
+      sent = await options.send(text, sentAttachments, nodes, sentReferences, {
+        clientMessageId: uuidv4(),
+        inputMethod
+      })
+    } catch (error) {
+      composer.settleSubmission(submissionId, false)
+      throw error
+    }
     const stopRequested =
       composer.submission?.id === submissionId &&
       composer.submission.stopRequested
