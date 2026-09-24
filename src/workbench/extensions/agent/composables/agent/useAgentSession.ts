@@ -133,6 +133,17 @@ function isDeliberateRefusal(error: unknown): boolean {
   return error instanceof AgentApiError && error.status === 409
 }
 
+/**
+ * Whether a failed send is a FAULT rather than an answer the service gave on
+ * purpose: an admission denial is a billing outcome the paywall renders, a 409
+ * is a turn already running, and a disowned workflow is released and retried
+ * (see releaseDisownedWorkflow). A chat notice alone kept the rest out of both
+ * error consoles.
+ */
+function isReportableSendFault(error: unknown): boolean {
+  return parseAdmissionError(error) === undefined && !isDeliberateRefusal(error)
+}
+
 export function useAgentSession(deps: AgentSessionDeps) {
   const { rest, events, workflow } = deps
 
@@ -465,12 +476,6 @@ export function useAgentSession(deps: AgentSessionDeps) {
       )
       return
     }
-    // What is left is a fault, and a chat notice alone kept it out of both
-    // consoles. The refusals the service issues on purpose are not: admission
-    // is handled above, 409 is a turn already running, and a disowned
-    // workflow is released and retryable (see releaseDisownedWorkflow).
-    if (!isDeliberateRefusal(error))
-      reportError(error, { errorType: 'agent_send_failed' })
     const message =
       error instanceof AgentApiError
         ? error.message
@@ -546,6 +551,12 @@ export function useAgentSession(deps: AgentSessionDeps) {
       // persisted, so a refusal that lands after newChat()/loadThread() has
       // moved on still has to release, or the dead id survives the reload.
       releaseDisownedWorkflow(sentContext, error)
+      // Also before the guard, and for the same reason: the fault happened
+      // whether or not the user has since moved on, and newChat() is exactly
+      // when nobody is watching the chat. Only the NOTICE is generation-
+      // scoped, so it never lands in a conversation it did not come from.
+      if (isReportableSendFault(error))
+        reportError(error, { errorType: 'agent_send_failed' })
       if (generation !== loadGeneration) return false
       recordSendError(error, text)
       return false

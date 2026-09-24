@@ -223,8 +223,11 @@ test.describe('Agent run permissions popover', { tag: '@cloud' }, () => {
     })
     await page.route('**/api/agent/threads/*/messages', async (route) => {
       if (route.request().method() !== 'POST') return route.fallback()
-      reachedServer.push('message')
+      // Recorded where the POST is FORWARDED, not where it is intercepted.
+      // Recording on interception would let a PUT that overtook a still-held
+      // POST still read back as ['message', 'run-mode'] and pass.
       if (holdTheSend) await sendHeld
+      reachedServer.push('message')
       await route.fallback()
     })
     await page.route('**/api/agent/run-mode', async (route) => {
@@ -273,12 +276,13 @@ test.describe('Agent run permissions popover', { tag: '@cloud' }, () => {
       // A cheap sanity guard, not the regression detector: reachedServer is
       // pushed from a Node-side route handler, which the DOM assertion above
       // it does not order against. The detector is the final assertion.
+      // Nothing at all should have been forwarded while the send is held.
       await expect(
         page.getByRole('menuitemradio', {
           name: new RegExp(enMessages.agent.runModeAsk)
         })
       ).toHaveAttribute('aria-busy', 'true')
-      expect(reachedServer).not.toContain('run-mode')
+      expect(reachedServer).toEqual([])
 
       releaseTheSend()
       await expect(askTrigger).toBeVisible()

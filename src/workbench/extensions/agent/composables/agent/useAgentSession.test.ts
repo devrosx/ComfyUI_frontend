@@ -594,6 +594,40 @@ describe('useAgentSession (v1 composition root)', () => {
     })
   })
 
+  // The generation guard exists to keep a stale notice out of the conversation
+  // the user moved to. It should not also swallow the fault report — a send
+  // that broke still broke, and newChat is exactly when nobody is watching.
+  it('reports a send fault even when the chat moved on before it failed', async () => {
+    const failure = new Error('network down')
+    let rejectPost: (error: Error) => void = () => {}
+    const postMessage = vi
+      .fn<
+        (threadId: string, req: PostMessageInput) => Promise<AgentTurnAccepted>
+      >()
+      .mockImplementation(
+        () =>
+          new Promise<AgentTurnAccepted>((_resolve, reject) => {
+            rejectPost = reject
+          })
+      )
+    const session = useAgentSession({
+      rest: fakeRest({ postMessage }),
+      events: fakeEvents().source
+    })
+    session.start()
+
+    const sent = session.sendMessage('make a cat')
+    await vi.waitFor(() => expect(postMessage).toHaveBeenCalledOnce())
+    session.newChat()
+    rejectPost(failure)
+
+    expect(await sent).toBe(false)
+    expect(reportError).toHaveBeenCalledWith(failure, {
+      errorType: 'agent_send_failed'
+    })
+    expect(session.entries.value).toEqual([])
+  })
+
   // Each of these is a refusal the service issued on purpose and the UI
   // already explains, so none of them is a fault worth a telemetry report.
   it.for([
