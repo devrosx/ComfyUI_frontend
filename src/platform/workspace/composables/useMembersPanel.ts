@@ -8,7 +8,6 @@ import { useCurrentUser } from '@/composables/auth/useCurrentUser'
 import { useBillingContext } from '@/composables/billing/useBillingContext'
 import { useFeatureFlags } from '@/composables/useFeatureFlags'
 import { useSubscriptionDialog } from '@/platform/cloud/subscription/composables/useSubscriptionDialog'
-import { hasScheduledEnterpriseEnd } from '@/platform/cloud/subscription/constants/tierPricing'
 import { isCloud } from '@/platform/distribution/types'
 import type { WorkspaceRole } from '@/platform/workspace/api/workspaceApi'
 import { useBillingCapabilities } from '@/platform/workspace/composables/useBillingCapabilities'
@@ -124,29 +123,21 @@ export function useMembersPanel() {
     uiConfig: workspaceUiConfig,
     workspaceRole
   } = useWorkspaceUI()
-  const {
-    hasTeamPlan,
-    isOnTeamPlan,
-    isCancelled,
-    hasLapsedTeamPlan,
-    hasMemberSeats,
-    isPlanLoading
-  } = useTeamPlan()
+  const { hasTeamPlan, isOnTeamPlan, hasMemberSeats, isPlanLoading } =
+    useTeamPlan()
   const subscriptionDialog = useSubscriptionDialog()
-  const { maxSeats, occupiedSeats, subscription } = useBillingContext()
+  const { maxSeats, occupiedSeats, subscription, subscriptionStatus } =
+    useBillingContext()
   const { canChangeSeats, canInviteMembers } = useBillingCapabilities()
 
-  // An Enterprise cancel_at is an agreed end date, not a lapsed plan
-  // (FE-2035): the workspace runs until that date, so member management
-  // stays live — the same quiet path the subscription panel takes. Only a
-  // self-serve cancellation greys invites and offers the Team upsell.
-  const isSelfServeCancelled = computed(
-    () =>
-      isCancelled.value &&
-      !hasScheduledEnterpriseEnd(
-        subscription.value?.tier,
-        subscription.value?.endDate
-      )
+  // Ended (billing_status inactive) is the only member-management freeze.
+  // A cancel-scheduled subscription stays active until cancel_at and the
+  // backend permits seat adds the whole time — capability, invite endpoint,
+  // and Stripe write path all allow it (DES-1200; verified on cloud/main
+  // 2026-09-23) — so cancelled workspaces keep invites live.
+  const isPlanEnded = computed(() => subscriptionStatus.value === 'ended')
+  const isEnterprisePlan = computed(
+    () => subscription.value?.tier === 'ENTERPRISE'
   )
 
   const permissions = computed(() => {
@@ -161,7 +152,7 @@ export function useMembersPanel() {
       ...workspacePermissions.value,
       canViewOtherMembers: hasMemberSeats.value,
       canViewPendingInvites: canManageInvites,
-      canInviteMembers: canManageInvites && !isSelfServeCancelled.value,
+      canInviteMembers: canManageInvites,
       canManageInvites,
       canManageMembers
     }
@@ -223,8 +214,14 @@ export function useMembersPanel() {
       (hasMultipleMembers.value || pendingInvites.value.length > 0)
   )
 
+  // An ended plan resolves can_invite_members false, but hiding the control
+  // from the owner leaves no explanation — keep it visible and disabled, with
+  // the banner carrying the route back. Members stay hidden (role denial).
   const showInviteButton = computed(() =>
-    isCloud ? canInviteMembers.value : workspaceRole.value === 'owner'
+    isCloud
+      ? canInviteMembers.value ||
+        (isPlanEnded.value && permissions.value.canManageSubscription)
+      : workspaceRole.value === 'owner'
   )
 
   const isMemberLimitReached = computed(
@@ -239,7 +236,7 @@ export function useMembersPanel() {
     () =>
       isPlanLoading.value ||
       !permissions.value.canInviteMembers ||
-      isSelfServeCancelled.value ||
+      isPlanEnded.value ||
       maxSeats.value === null ||
       occupiedSeats.value === null ||
       !hasMemberSeats.value ||
@@ -266,7 +263,7 @@ export function useMembersPanel() {
       void showInviteMemberUpsellDialog()
       return
     }
-    if (isSelfServeCancelled.value || isMemberLimitReached.value) return
+    if (isPlanEnded.value || isMemberLimitReached.value) return
     void showInviteMemberDialog()
   }
 
@@ -427,8 +424,8 @@ export function useMembersPanel() {
     isInPersonalWorkspace,
     hasTeamPlan,
     isOnTeamPlan,
-    isSelfServeCancelled,
-    hasLapsedTeamPlan,
+    isPlanEnded,
+    isEnterprisePlan,
     hasMemberSeats,
     isPlanLoading,
     hasMultipleMembers,

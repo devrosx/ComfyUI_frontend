@@ -201,11 +201,19 @@
     <MemberUpsellBanner
       v-if="
         !isPlanLoading &&
-        ((isInPersonalWorkspace && maxSeats === 1) || isSelfServeCancelled) &&
+        ((isInPersonalWorkspace && maxSeats === 1) || isPlanEnded) &&
         permissions.canManageSubscription
       "
-      :reactivate="hasLapsedTeamPlan"
-      @show-plans="showTeamPlans()"
+      :variant="
+        isPlanEnded
+          ? isEnterprisePlan
+            ? 'contactSales'
+            : 'reactivate'
+          : 'upgrade'
+      "
+      @action="
+        isPlanEnded && isEnterprisePlan ? handleContactUs() : showTeamPlans()
+      "
     />
     <!-- Need More Members Footer -->
     <div v-if="hasMemberSeats" class="flex items-center pt-2">
@@ -242,9 +250,9 @@ const {
   activeView,
   maxSeats,
   isInPersonalWorkspace,
-  hasLapsedTeamPlan,
+  isPlanEnded,
+  isEnterprisePlan,
   hasMemberSeats,
-  isSelfServeCancelled,
   isPlanLoading,
   hasMultipleMembers,
   showSearch,

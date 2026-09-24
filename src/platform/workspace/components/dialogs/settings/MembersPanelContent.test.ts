@@ -39,7 +39,8 @@ const {
   mockActiveView,
   mockSearchQuery,
   mockPermissions,
-  mockIsSelfServeCancelled,
+  mockIsPlanEnded,
+  mockIsEnterprisePlan,
   mockUiConfig
 } = vi.hoisted(() => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/consistent-type-imports
@@ -54,7 +55,8 @@ const {
     mockShowViewTabs: ref(true),
     mockShowInviteButton: ref(true),
     mockIsInviteDisabled: ref(false),
-    mockIsSelfServeCancelled: ref(false),
+    mockIsPlanEnded: ref(false),
+    mockIsEnterprisePlan: ref(false),
     mockFilteredMembers: ref<WorkspaceMember[]>([]),
     mockFilteredPendingInvites: ref<WorkspacePendingInvite[]>([]),
     mockMaxSeats: ref<number | null>(20),
@@ -110,7 +112,8 @@ vi.mock<unknown>(
       showViewTabs: mockShowViewTabs,
       showInviteButton: mockShowInviteButton,
       isInviteDisabled: mockIsInviteDisabled,
-      isSelfServeCancelled: mockIsSelfServeCancelled,
+      isPlanEnded: mockIsPlanEnded,
+      isEnterprisePlan: mockIsEnterprisePlan,
       inviteTooltip: computed(() => null),
       handleInviteMember: mockHandleInviteMember,
       personalWorkspaceMember: computed(() => ({
@@ -231,7 +234,8 @@ describe('MembersPanelContent', () => {
     mockShowViewTabs.value = true
     mockShowInviteButton.value = true
     mockIsInviteDisabled.value = false
-    mockIsSelfServeCancelled.value = false
+    mockIsPlanEnded.value = false
+    mockIsEnterprisePlan.value = false
     mockActiveView.value = 'active'
     mockSearchQuery.value = ''
     mockPermissions.value = {
@@ -500,20 +504,37 @@ describe('MembersPanelContent', () => {
     expect(screen.queryByText('workspacePanel.members.upsellBanner')).toBeNull()
   })
 
-  describe('cancelled treatment gate (FE-2846)', () => {
-    it('shows the upsell banner for a self-serve cancellation', () => {
-      mockIsSelfServeCancelled.value = true
+  describe('ended treatment gate (DES-1200)', () => {
+    it('shows the resume banner once a team plan has ended', () => {
+      mockIsPlanEnded.value = true
       renderComponent()
       expect(
-        screen.getByText('workspacePanel.members.upsellBanner')
+        screen.getByText('workspacePanel.members.endedTeamTitle')
+      ).toBeTruthy()
+      expect(
+        screen.getByText('workspacePanel.members.upsellBannerReactivate')
       ).toBeTruthy()
     })
 
-    it('keeps the banner away when the cancellation is an agreed Enterprise end', () => {
-      mockIsSelfServeCancelled.value = false
+    it('routes an ended Enterprise plan to sales', () => {
+      mockIsPlanEnded.value = true
+      mockIsEnterprisePlan.value = true
       renderComponent()
       expect(
-        screen.queryByText('workspacePanel.members.upsellBanner')
+        screen.getByText('workspacePanel.members.endedEnterpriseTitle')
+      ).toBeTruthy()
+      expect(
+        screen.getByText('workspacePanel.members.upsellBannerEnterpriseEnded')
+      ).toBeTruthy()
+    })
+
+    it('shows no banner while a cancellation is merely scheduled', () => {
+      renderComponent()
+      expect(
+        screen.queryByText('workspacePanel.members.endedTeamTitle')
+      ).toBeNull()
+      expect(
+        screen.queryByText('workspacePanel.members.upsellBannerReactivate')
       ).toBeNull()
     })
   })
@@ -555,14 +576,14 @@ describe('MembersPanelContent', () => {
       expect(mockShowTeamPlans).toHaveBeenCalled()
     })
 
-    it('lets an owner reactivate a lapsed Team plan', async () => {
+    it('lets an owner resume an ended Team plan', async () => {
       mockHasTeamPlan.value = true
-      mockHasLapsedTeamPlan.value = true
+      mockIsPlanEnded.value = true
       renderComponent()
 
       await userEvent.click(
         screen.getByRole('button', {
-          name: /workspacePanel\.members\.reactivateTeam/
+          name: /workspacePanel\.billingStatus\.ending\.reactivate/
         })
       )
       expect(mockShowTeamPlans).toHaveBeenCalled()

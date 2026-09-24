@@ -1034,17 +1034,18 @@ describe('useMembersPanel', () => {
       expect(panel.isInviteDisabled.value).toBe(false)
     })
 
-    it('disables the invite button when the team plan is cancelled', async () => {
+    // DES-1200: a cancel-scheduled subscription stays active until cancel_at
+    // and the backend permits seat adds the whole time — cancelled never
+    // freezes member management, only ended does.
+    it('keeps invites live while a cancellation is scheduled', async () => {
       mockSubscription.value = { tier: 'PRO', isCancelled: true }
       const panel = await setup()
-      expect(panel.isInviteDisabled.value).toBe(true)
-      expect(panel.permissions.value.canInviteMembers).toBe(false)
+      expect(panel.isInviteDisabled.value).toBe(false)
+      expect(panel.permissions.value.canInviteMembers).toBe(true)
       panel.handleInviteMember()
-      expect(useDialogService().showInviteMemberDialog).not.toHaveBeenCalled()
+      expect(useDialogService().showInviteMemberDialog).toHaveBeenCalled()
     })
 
-    // FE-2846: an Enterprise cancel_at is an agreed end date (FE-2035) — the
-    // plan runs until then, so `canceled` must not read as a lapsed plan.
     it('keeps invites live for an end-dated Enterprise plan still running', async () => {
       mockSubscription.value = {
         tier: 'ENTERPRISE',
@@ -1054,27 +1055,37 @@ describe('useMembersPanel', () => {
       const panel = await setup()
       expect(panel.isInviteDisabled.value).toBe(false)
       expect(panel.permissions.value.canInviteMembers).toBe(true)
-      expect(panel.isSelfServeCancelled.value).toBe(false)
       panel.handleInviteMember()
       expect(useDialogService().showInviteMemberDialog).toHaveBeenCalled()
     })
 
-    it('keeps the stock cancelled treatment for Enterprise without an end date', async () => {
-      mockSubscription.value = { tier: 'ENTERPRISE', isCancelled: true }
+    it('freezes invites only once the plan has ended, visibly for owners', async () => {
+      mockSubscriptionStatus.value = 'ended'
+      useBillingCapabilities().canInviteMembers = computed(() => false)
       const panel = await setup()
+      expect(panel.isPlanEnded.value).toBe(true)
+      expect(panel.showInviteButton.value).toBe(true)
       expect(panel.isInviteDisabled.value).toBe(true)
-      expect(panel.isSelfServeCancelled.value).toBe(true)
+      panel.handleInviteMember()
+      expect(useDialogService().showInviteMemberDialog).not.toHaveBeenCalled()
     })
 
-    it('never lends the quiet path to a cancelled self-serve plan with an end date', async () => {
-      mockSubscription.value = {
-        tier: 'PRO',
-        isCancelled: true,
-        endDate: '2027-01-15T00:00:00Z'
+    it('keeps the ended invite button hidden from members', async () => {
+      mockSubscriptionStatus.value = 'ended'
+      useBillingCapabilities().canInviteMembers = computed(() => false)
+      mockPermissions.value = {
+        ...mockPermissions.value,
+        canManageSubscription: false
       }
       const panel = await setup()
-      expect(panel.isInviteDisabled.value).toBe(true)
-      expect(panel.isSelfServeCancelled.value).toBe(true)
+      expect(panel.showInviteButton.value).toBe(false)
+    })
+
+    it('names the Enterprise tier for the ended banner variant', async () => {
+      mockSubscriptionStatus.value = 'ended'
+      mockSubscription.value = { tier: 'ENTERPRISE', isCancelled: false }
+      const panel = await setup()
+      expect(panel.isEnterprisePlan.value).toBe(true)
     })
 
     it('enables invite for a Team-plan owner over personal defaults', async () => {
