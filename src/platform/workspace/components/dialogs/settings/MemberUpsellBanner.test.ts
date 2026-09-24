@@ -60,7 +60,7 @@ describe('MemberUpsellBanner', () => {
       screen.getByText('Your Enterprise plan has ended')
     ).toBeInTheDocument()
     expect(
-      screen.getByText('To add teammates, reach out to our sales team.')
+      screen.getByText('Contact sales to reactivate your Enterprise plan.')
     ).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: 'Contact sales' })
